@@ -1,0 +1,77 @@
+# ==============================
+# AURORA — Git Ignore
+# ==============================
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+
+.venv/
+venv/
+ENV/
+env/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ==============================
+# Node.js / Next.js
+# ==============================
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# ==============================
+# IDE
+# ==============================
+.vscode/
+.idea/
+
+# ==============================
+# Operating System
+# ==============================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==============================
+# Logs
+# ==============================
+*.log
+logs/
+
+# ==============================
+# Local databases / generated data
+# ==============================
+*.db
+*.sqlite
+*.sqlite3
+
+uploads/
+storage/
+data/
+
+# ==============================
+# Coverage
+# ==============================
+.coverage
+htmlcov/
+coverage.xml
+
+# ==============================
+# Secrets / credentials
+# ==============================
+*.pem
+*.key
+credentials.json
