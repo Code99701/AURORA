@@ -75,3 +75,4 @@ coverage.xml
 *.pem
 *.key
 credentials.json
+backend/aurora-env/
