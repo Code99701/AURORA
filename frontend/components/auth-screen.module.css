@@ -1,0 +1,49 @@
+.shell { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.16fr) minmax(420px, .84fr); }
+.story { position: relative; overflow: hidden; display: flex; flex-direction: column; min-height: 100vh; padding: 32px clamp(28px, 5vw, 76px); border-right: 1px solid var(--border); background: linear-gradient(150deg, color-mix(in srgb, var(--surface) 92%, transparent), color-mix(in srgb, var(--background-deep) 92%, transparent)); }
+.story::after { content: ""; position: absolute; width: 440px; height: 440px; right: -190px; bottom: 7%; border-radius: 50%; background: conic-gradient(from 210deg, color-mix(in srgb, var(--accent) 20%, transparent), color-mix(in srgb, var(--violet) 20%, transparent), transparent 65%); filter: blur(44px); pointer-events: none; }
+.storyTop { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
+.storyBody { width: min(680px, 100%); margin: auto 0; position: relative; z-index: 1; }
+.eyebrow { margin: 0 0 14px; color: var(--accent-strong); font-size: .76rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+.story h1 { max-width: 650px; margin: 0; font-family: var(--font-editorial); font-size: clamp(3.25rem, 6.4vw, 6.4rem); font-weight: 470; letter-spacing: -.055em; line-height: .93; }
+.lede { max-width: 590px; margin: 28px 0 40px; color: var(--foreground-soft); font-size: clamp(1.05rem, 1.4vw, 1.25rem); line-height: 1.65; }
+.principles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.principles article { min-height: 138px; border-top: 1px solid var(--border-strong); padding: 18px 4px 0; color: var(--accent); }
+.principles div { display: grid; gap: 5px; margin-top: 18px; }
+.principles strong { color: var(--foreground); font-size: .9rem; }
+.principles span { color: var(--muted); font-size: .78rem; line-height: 1.5; }
+.storyFooter { position: relative; z-index: 1; margin: 0; color: var(--muted); font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; }
+.formPanel { display: grid; place-items: center; padding: 40px clamp(28px, 5vw, 72px); background: var(--surface); }
+.formWrap { width: min(410px, 100%); }
+.formWrap h2 { margin: 0; font-family: var(--font-editorial); font-size: clamp(2rem, 4vw, 3rem); font-weight: 520; letter-spacing: -.035em; }
+.formIntro { margin: 12px 0 32px; color: var(--muted); }
+.googleButton { width: 100%; min-height: 46px; gap: 10px; border: 1px solid var(--border-strong); background: var(--surface-raised); color: var(--foreground); box-shadow: none; }
+.googleButton:hover:not(:disabled) { border-color: color-mix(in srgb, var(--accent) 48%, var(--border-strong)); background: color-mix(in srgb, var(--accent) 5%, var(--surface-raised)); }
+.providerNote { margin: 9px 0 0; color: var(--muted); font-size: .78rem; line-height: 1.45; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 22px 0; color: var(--muted); font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.divider span { white-space: nowrap; }
+.form { display: grid; gap: 18px; }
+.form > button { margin-top: 5px; }
+.modeSwitch { width: 100%; margin-top: 14px; font-size: .84rem; }
+
+:global(.brand) { display: inline-flex; align-items: center; gap: 10px; }
+:global(.brand-mark) { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border)); border-radius: 12px; color: var(--accent-strong); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+:global(.brand-word) { font-size: .9rem; font-weight: 800; letter-spacing: .18em; }
+
+@media (max-width: 960px) {
+  .shell { grid-template-columns: 1fr; }
+  .story { min-height: auto; padding-bottom: 54px; border-right: 0; border-bottom: 1px solid var(--border); }
+  .storyBody { margin: 72px 0 50px; }
+  .story h1 { font-size: clamp(3.2rem, 12vw, 5.4rem); }
+  .formPanel { min-height: 680px; }
+}
+
+@media (max-width: 620px) {
+  .story { padding: 22px 20px 38px; }
+  .storyBody { margin: 55px 0 38px; }
+  .story h1 { font-size: clamp(2.85rem, 15vw, 4.2rem); }
+  .principles { grid-template-columns: 1fr; }
+  .principles article { min-height: auto; display: grid; grid-template-columns: 28px 1fr; gap: 10px; }
+  .principles div { margin-top: 0; }
+  .formPanel { min-height: 620px; padding: 44px 20px; }
+}

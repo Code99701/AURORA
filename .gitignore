@@ -28,6 +28,9 @@ env/
 # ==============================
 node_modules/
 .next/
+*.tsbuildinfo
+.pnpm-store/
+.tmp/
 out/
 dist/
 build/
@@ -76,3 +79,4 @@ coverage.xml
 *.key
 credentials.json
 backend/aurora-env/
+backend/.runtime/

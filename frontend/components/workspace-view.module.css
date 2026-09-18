@@ -1,0 +1,19 @@
+.page { width: min(1180px, 100%); margin: 0 auto; }
+.back { display: inline-flex; align-items: center; gap: 7px; margin: 4px 0 30px; color: var(--muted); font-size: .78rem; font-weight: 620; }
+.back:hover { color: var(--foreground); }
+.header { max-width: 800px; }
+.eyebrow { margin: 0 0 11px; color: var(--accent-strong); font-size: .69rem; font-weight: 760; letter-spacing: .14em; text-transform: uppercase; }
+.header h1 { margin: 0; font-family: var(--font-editorial); font-size: clamp(2.8rem, 6vw, 5.8rem); font-weight: 470; letter-spacing: -.052em; line-height: .95; overflow-wrap: anywhere; }
+.header > p:last-child { max-width: 680px; margin: 18px 0 0; color: var(--muted); }
+.tabs { display: flex; gap: 4px; margin: 44px 0 22px; border-bottom: 1px solid var(--border); }
+.tabs button { min-height: 48px; display: inline-flex; align-items: center; gap: 9px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; padding: 0 17px; background: transparent; color: var(--muted); font-size: .84rem; font-weight: 680; transition: color 180ms ease, border-color 180ms ease; }
+.tabs button:hover { color: var(--foreground); }
+.tabs .active { border-bottom-color: var(--accent); color: var(--foreground); }
+.center { min-height: 60vh; display: grid; place-items: center; align-content: center; gap: 20px; }
+
+@media (max-width: 620px) {
+  .back { margin-top: 0; }
+  .header h1 { font-size: clamp(2.6rem, 15vw, 4.2rem); }
+  .tabs { margin-top: 34px; }
+  .tabs button { flex: 1; justify-content: center; }
+}

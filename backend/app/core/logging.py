@@ -1,6 +1,7 @@
 import logging
 import sys
 
+
 def setup_logging():
     """
     Configures basic logging for the backend application.
@@ -13,6 +14,11 @@ def setup_logging():
             logging.StreamHandler(sys.stdout)
         ]
     )
-    
-    # Example: silencing noisy third-party loggers if necessary
+
+    # httpx's INFO message includes the complete request URL. Some providers
+    # authenticate with a query parameter, so logging that URL can expose a
+    # credential even when application code never logs secrets directly.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+
+    # Example: silencing other noisy third-party loggers if necessary
     # logging.getLogger("uvicorn.access").setLevel(logging.WARNING)

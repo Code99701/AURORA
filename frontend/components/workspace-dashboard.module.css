@@ -1,0 +1,34 @@
+.page { width: min(1180px, 100%); margin: 0 auto; }
+.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin: 20px 0 46px; }
+.header > div { max-width: 780px; }
+.eyebrow, .kicker { margin: 0 0 11px; color: var(--accent-strong); font-size: .69rem; font-weight: 760; letter-spacing: .14em; text-transform: uppercase; }
+.header h1 { max-width: 760px; margin: 0; font-family: var(--font-editorial); font-size: clamp(2.6rem, 5vw, 5rem); font-weight: 470; letter-spacing: -.052em; line-height: .98; }
+.header > div > p:last-child { max-width: 650px; margin: 20px 0 0; color: var(--muted); font-size: 1rem; }
+.header > button { flex: 0 0 auto; }
+.index { overflow: hidden; }
+.indexHeader { min-height: 90px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 22px 28px; border-bottom: 1px solid var(--border); }
+.indexHeader h2 { margin: 0; font-size: 1.1rem; }
+.indexHeader > span { color: var(--muted); font-size: .75rem; }
+.kicker { margin-bottom: 4px; font-size: .61rem; }
+.list { display: grid; }
+.row { min-height: 112px; display: grid; grid-template-columns: 44px minmax(0, 1fr) 170px 24px; gap: 20px; align-items: center; padding: 22px 28px; border-bottom: 1px solid var(--border); transition: background 180ms ease; }
+.row:last-child { border-bottom: 0; }
+.row:hover { background: var(--surface-raised); }
+.ordinal { align-self: start; padding-top: 4px; color: var(--muted); font-family: var(--font-editorial); font-size: .8rem; }
+.rowMain { min-width: 0; display: grid; gap: 7px; }
+.rowMain strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1rem; }
+.rowMain span { overflow: hidden; color: var(--muted); font-size: .82rem; text-overflow: ellipsis; white-space: nowrap; }
+.date { color: var(--muted); font-size: .73rem; }
+.modalHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.form { display: grid; gap: 18px; }
+.optional { color: var(--muted); font-weight: 450; }
+
+@media (max-width: 720px) {
+  .header { align-items: stretch; flex-direction: column; margin-top: 4px; }
+  .header h1 { font-size: clamp(2.55rem, 13vw, 4rem); }
+  .header > button { align-self: flex-start; }
+  .indexHeader { padding: 18px 20px; }
+  .indexHeader > span { display: none; }
+  .row { grid-template-columns: 32px minmax(0, 1fr) 20px; gap: 12px; padding: 20px; }
+  .date { display: none; }
+}
