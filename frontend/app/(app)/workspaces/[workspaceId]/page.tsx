@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { WorkspaceView } from "@/components/workspace-view";
+import { WorkspaceView } from "@/components/features/workspace/workspace-view";
 
-export const metadata: Metadata = { title: "Research workspace" };
+export const metadata: Metadata = { title: "Research Workspace · AURORA" };
 
 export default async function WorkspacePage({
   params,
@@ -13,5 +13,16 @@ export default async function WorkspacePage({
   const { workspaceId } = await params;
   const query = await searchParams;
   const parsedPage = Number.parseInt(query.page || "1", 10);
-  return <WorkspaceView key={workspaceId} workspaceId={workspaceId} initialView={query.view === "research" ? "research" : "documents"} initialConversationId={query.conversation} initialDocumentId={query.document} initialPage={Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1} />;
+  const initialView = query.view === "documents" ? "documents" : "research";
+
+  return (
+    <WorkspaceView
+      key={workspaceId}
+      workspaceId={workspaceId}
+      initialView={initialView}
+      initialConversationId={query.conversation}
+      initialDocumentId={query.document}
+      initialPage={Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1}
+    />
+  );
 }
