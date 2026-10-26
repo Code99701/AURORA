@@ -487,6 +487,7 @@ export function WorkspaceDashboard() {
                   Workspace Title *
                 </label>
                 <input
+                  id="workspace-title-input"
                   type="text"
                   required
                   placeholder="e.g., Solid-State Electrolyte Lab"
@@ -509,6 +510,7 @@ export function WorkspaceDashboard() {
                   Research Scope / Description
                 </label>
                 <textarea
+                  id="workspace-desc-input"
                   rows={3}
                   placeholder="Specify primary research objectives and initial document types..."
                   value={newDesc}

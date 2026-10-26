@@ -80,3 +80,5 @@ coverage.xml
 credentials.json
 backend/aurora-env/
 backend/.runtime/
+test-results/
+playwright-report/
