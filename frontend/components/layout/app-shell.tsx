@@ -1,28 +1,39 @@
 "use client";
 
-import { BookOpen, LogOut, Menu, PanelsTopLeft, X } from "lucide-react";
+import { BookOpen, LogOut, Menu, PanelsTopLeft, Settings, LayoutDashboard, ExternalLink, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { api, ApiError } from "@/lib/api";
+import { api } from "@/lib/api";
 import type { User } from "@/lib/types";
-import { Brand } from "@/components/brand";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { PageSkeleton } from "@/components/skeleton";
+import { Brand } from "@/components/shared/brand";
+import { PageSkeleton } from "@/components/ui/skeleton";
 import styles from "./app-shell.module.css";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [authError, setAuthError] = useState("");
 
   useEffect(() => {
-    api.me().then(setUser).catch((error) => {
-      if (error instanceof ApiError && error.status === 401) router.replace("/login");
-      else setAuthError("AURORA could not verify your session. Try refreshing the page.");
-    });
+    let cancelled = false;
+    api.me()
+      .then((u) => {
+        if (!cancelled) {
+          setUser(u);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          router.replace("/login");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   async function logout() {
@@ -30,21 +41,102 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     router.replace("/login");
   }
 
-  if (authError) return <main id="main-content" className={styles.center}><div className="error-banner" role="alert">{authError}</div></main>;
-  if (!user) return <main id="main-content" className={styles.center}><PageSkeleton /></main>;
+  // Detect active workspace UUID in pathname if present
+  const workspaceIdMatch = pathname.match(/\/workspaces\/([0-9a-fA-F-]{36})/);
+  const activeWorkspaceId = workspaceIdMatch ? workspaceIdMatch[1] : null;
+
+  const researchHref = activeWorkspaceId ? `/workspaces/${activeWorkspaceId}` : "/workspaces";
+  const documentsHref = activeWorkspaceId ? `/workspaces/${activeWorkspaceId}/documents` : "/documents";
+
+  if (loading || !user) {
+    return <PageSkeleton />;
+  }
 
   const nav = (
     <>
-      <div className={styles.sidebarTop}><Brand /><button className="button button-ghost button-icon" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X size={20} /></button></div>
+      <div className={styles.sidebarTop}>
+        <Brand />
+        <button
+          className="button button-ghost button-icon"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close navigation"
+        >
+          <X size={20} />
+        </button>
+      </div>
+
       <nav className={styles.nav} aria-label="Primary navigation">
-        <Link className={pathname === "/workspaces" ? styles.active : ""} href="/workspaces" onClick={() => setMobileOpen(false)}><PanelsTopLeft size={18} />Workspaces</Link>
-        <span className={styles.navLabel}>Research</span>
-        <span className={styles.navHint}><BookOpen size={17} />Open a workspace to research its sources.</span>
+        <Link
+          className={pathname === "/workspaces" ? styles.active : ""}
+          href="/workspaces"
+          onClick={() => setMobileOpen(false)}
+        >
+          <PanelsTopLeft size={18} />
+          Workspaces
+        </Link>
+        <Link
+          className={pathname.includes("/workspaces/") && !pathname.includes("/documents") ? styles.active : ""}
+          href={researchHref}
+          onClick={() => setMobileOpen(false)}
+        >
+          <BookOpen size={18} />
+          Research Studio
+        </Link>
+        <Link
+          className={pathname.includes("/documents") ? styles.active : ""}
+          href={documentsHref}
+          onClick={() => setMobileOpen(false)}
+        >
+          <PanelsTopLeft size={18} />
+          Ingestion Pipeline
+        </Link>
+
+        <span className={styles.navLabel}>System & Settings</span>
+        <Link
+          className={pathname === "/dashboard" ? styles.active : ""}
+          href="/dashboard"
+          onClick={() => setMobileOpen(false)}
+        >
+          <LayoutDashboard size={18} />
+          System Dashboard
+        </Link>
+        <Link
+          className={pathname === "/settings" ? styles.active : ""}
+          href="/settings"
+          onClick={() => setMobileOpen(false)}
+        >
+          <Settings size={18} />
+          Settings
+        </Link>
+        <a
+          href="http://127.0.0.1:8000/docs"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setMobileOpen(false)}
+          style={{ display: "flex", alignItems: "center", gap: "9px" }}
+        >
+          <ExternalLink size={18} />
+          API Docs (FastAPI)
+        </a>
       </nav>
+
       <div className={styles.userBlock}>
-        <div className={styles.avatar} aria-hidden="true">{user.display_name.slice(0, 2).toUpperCase()}</div>
-        <div><strong>{user.display_name}</strong><span>{user.email}</span></div>
-        <button className="button button-ghost button-icon" type="button" onClick={logout} aria-label="Sign out" title="Sign out"><LogOut size={18} /></button>
+        <div className={styles.avatar} aria-hidden="true">
+          {(user.display_name || user.email).slice(0, 2).toUpperCase()}
+        </div>
+        <div>
+          <strong>{user.display_name || user.email}</strong>
+          <span>{user.email}</span>
+        </div>
+        <button
+          className="button button-ghost button-icon"
+          type="button"
+          onClick={logout}
+          aria-label="Sign out"
+          title="Sign out"
+        >
+          <LogOut size={18} />
+        </button>
       </div>
     </>
   );
@@ -52,11 +144,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>{nav}</aside>
-      {mobileOpen && <div className={styles.mobileOverlay} onClick={() => setMobileOpen(false)} aria-hidden="true" />}
-      <aside className={`${styles.mobileSidebar} ${mobileOpen ? styles.mobileSidebarOpen : ""}`}>{nav}</aside>
-      <header className={styles.mobileHeader}><button className="button button-ghost button-icon" type="button" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu size={21} /></button><Brand compact /><ThemeToggle /></header>
+      {mobileOpen && (
+        <div className={styles.mobileOverlay} onClick={() => setMobileOpen(false)} aria-hidden="true" />
+      )}
+      <aside className={`${styles.mobileSidebar} ${mobileOpen ? styles.mobileSidebarOpen : ""}`}>
+        {nav}
+      </aside>
+      <header className={styles.mobileHeader}>
+        <button
+          className="button button-ghost button-icon"
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open navigation"
+        >
+          <Menu size={21} />
+        </button>
+        <Brand compact />
+      </header>
       <div className={styles.content}>
-        <div className={styles.desktopTools}><ThemeToggle /></div>
         <main id="main-content">{children}</main>
       </div>
     </div>
