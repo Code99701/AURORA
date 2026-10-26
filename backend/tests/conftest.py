@@ -93,3 +93,12 @@ def disposable_database() -> str:
 @pytest.fixture
 def run_alembic():
     return _run_alembic
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limiter():
+    from app.core.rate_limit import auth_rate_limiter
+
+    auth_rate_limiter.reset()
+    yield
+    auth_rate_limiter.reset()

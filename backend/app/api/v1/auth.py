@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import logging
 import secrets
 
+from app.core.rate_limit import auth_rate_limiter
 from app.db.session import get_db
 from app.core.config import settings
 from app.core.security import (
@@ -168,10 +169,17 @@ def google_callback(
         return _oauth_redirect("oauth_provider_error")
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-def register(user_in: UserCreate, db: Session = Depends(get_db)):
+def register(request: Request, user_in: UserCreate, db: Session = Depends(get_db)):
     """
     Registers a new user.
     """
+    client_ip = request.client.host if request.client else "unknown"
+    auth_rate_limiter.check_rate_limit(
+        key=f"register:{client_ip}",
+        max_requests=10,
+        window_seconds=60,
+        error_message="Too many registration attempts. Please try again later.",
+    )
     email_norm = str(user_in.email).strip().casefold()
     
     # Reject duplicate email
@@ -203,10 +211,19 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=LoginResponse)
-def login(user_in: UserLogin, response: Response, db: Session = Depends(get_db)):
+def login(request: Request, user_in: UserLogin, response: Response, db: Session = Depends(get_db)):
     """
     Authenticates a user and sets a secure HttpOnly cookie.
     """
+    client_ip = request.client.host if request.client else "unknown"
+    email_norm = str(user_in.email).strip().casefold()
+    auth_rate_limiter.check_rate_limit(
+        key=f"login:{client_ip}:{email_norm}",
+        max_requests=10,
+        window_seconds=60,
+        error_message="Too many login attempts. Please try again later.",
+    )
+
     # Use generic failure response
     invalid_creds_exc = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
