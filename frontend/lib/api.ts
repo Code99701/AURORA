@@ -185,6 +185,7 @@ async function streamConversationMessage(
 }
 
 export const api = {
+  health: () => request<{ status: string; app_name: string; version: string }>("/health"),
   me: () => request<User>("/auth/me"),
   authProviders: () =>
     request<{ google: { enabled: boolean } }>("/auth/providers"),
