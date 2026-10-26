@@ -25,10 +25,10 @@ import {
   type DocumentSort,
 } from "@/lib/document-workspace";
 import type { Document } from "@/lib/types";
-import { ConfirmDialog } from "@/components/confirm-dialog";
-import { DocumentPreview } from "@/components/document-preview";
-import { EmptyState } from "@/components/empty-state";
-import { StatusBadge } from "@/components/status-badge";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { DocumentPreview } from "@/components/features/documents/document-preview";
+import { EmptyState } from "@/components/shared/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import styles from "./document-library.module.css";
 
 function formatBytes(bytes: number) {

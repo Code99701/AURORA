@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WorkspaceDashboard } from "@/components/workspace-dashboard";
+import { WorkspaceDashboard } from "@/components/features/workspace/workspace-dashboard";
 
 export const metadata: Metadata = { title: "Workspaces" };
 

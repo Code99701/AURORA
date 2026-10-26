@@ -1,0 +1,30 @@
+.header {
+  height: 60px;
+  background: var(--surface, #ffffff);
+  border-bottom: 1px solid var(--border, #E2E5F0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.title {
+  font-size: var(--text-base, 1rem);
+  font-weight: 600;
+  color: var(--foreground, #1A1D2E);
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}

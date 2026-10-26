@@ -7,8 +7,8 @@ import { api, ApiError } from "@/lib/api";
 import type { Conversation, ConversationMessage, RAGSource, StreamingPhase } from "@/lib/types";
 import { advanceStreamingState, canStartStreaming, isNearStreamBottom } from "@/lib/streaming-state";
 import { formatSourceLocation } from "@/lib/document-workspace";
-import { ConfirmDialog } from "@/components/confirm-dialog";
-import { EmptyState } from "@/components/empty-state";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { EmptyState } from "@/components/shared/empty-state";
 import styles from "./research-desk.module.css";
 
 const LANGUAGES = [

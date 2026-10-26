@@ -14,7 +14,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { clampDocumentPage, documentFormatName, documentIssueMessage, documentStructureSummary, partialProcessingMessage } from "@/lib/document-workspace";
 import type { Document } from "@/lib/types";
-import { StatusBadge } from "@/components/status-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import styles from "./document-preview.module.css";
 
 function formatBytes(bytes: number) {

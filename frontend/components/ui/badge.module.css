@@ -1,0 +1,71 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 700;
+  border-radius: var(--radius-full, 999px);
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.neutral {
+  background: var(--surface-raised, #F5F7FC);
+  color: var(--foreground-soft, #4A4F6A);
+  border: 1px solid var(--border, #E2E5F0);
+}
+
+.primary, .purple {
+  background: var(--accent-soft, #EDE9FE);
+  color: var(--accent, #6C5CE7);
+  border: 1px solid rgba(108, 92, 231, 0.2);
+}
+
+.coral {
+  background: var(--coral-soft, #FFF0F0);
+  color: var(--coral, #FF6B6B);
+  border: 1px solid rgba(255, 107, 107, 0.25);
+}
+
+.teal {
+  background: var(--teal-soft, #E0FAFA);
+  color: #00A8A9;
+  border: 1px solid rgba(0, 210, 211, 0.3);
+}
+
+.amber {
+  background: var(--amber-soft, #FFF9E6);
+  color: #B27B00;
+  border: 1px solid rgba(254, 202, 87, 0.35);
+}
+
+.pink {
+  background: var(--pink-soft, #FFF0FC);
+  color: #C0392B;
+  border: 1px solid rgba(255, 159, 243, 0.3);
+}
+
+.success {
+  background: rgba(0, 184, 148, 0.12);
+  color: var(--success, #00B894);
+  border: 1px solid rgba(0, 184, 148, 0.25);
+}
+
+.warning {
+  background: rgba(253, 203, 110, 0.18);
+  color: #9A6410;
+  border: 1px solid rgba(253, 203, 110, 0.3);
+}
+
+.danger {
+  background: rgba(225, 112, 85, 0.12);
+  color: var(--danger, #E17055);
+  border: 1px solid rgba(225, 112, 85, 0.25);
+}
+
+.info {
+  background: rgba(116, 185, 255, 0.15);
+  color: #0984E3;
+  border: 1px solid rgba(116, 185, 255, 0.3);
+}
