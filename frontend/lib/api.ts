@@ -35,6 +35,21 @@ function messageFromPayload(payload: unknown): string {
   }
   const detail = (payload as { detail: unknown }).detail;
   if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object" && "msg" in item && typeof (item as { msg: unknown }).msg === "string") {
+          const loc = (item as { loc?: unknown[] }).loc;
+          const field = Array.isArray(loc) && loc.length > 1 ? String(loc[loc.length - 1]) : "";
+          const msg = (item as { msg: string }).msg.replace(/^Value error,\s*/i, "");
+          return field ? `${field}: ${msg}` : msg;
+        }
+        return null;
+      })
+      .filter(Boolean);
+    if (messages.length > 0) return messages.join(". ");
+  }
   if (detail && typeof detail === "object" && "message" in detail) {
     if ("code" in detail && (detail as { code: unknown }).code === "RAG_RETRIEVAL_ERROR") {
       return "AURORA could not retrieve evidence. Confirm that this workspace has an indexed document, then try again.";

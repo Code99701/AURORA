@@ -1,138 +1,383 @@
 "use client";
 
-import { ArrowRight, BookOpenText, Languages, ShieldCheck } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Brand } from "@/components/shared/brand";
 import { api, ApiError } from "@/lib/api";
-import { oauthErrorMessage } from "@/lib/oauth-errors";
-import { Brand } from "@/components/brand";
-import { ThemeToggle } from "@/components/theme-toggle";
-import styles from "./auth-screen.module.css";
 
-export function AuthScreen() {
+export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | "register" } = {}) {
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [displayName, setDisplayName] = useState("");
+  const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [googleBusy, setGoogleBusy] = useState(false);
-  const [providerReady, setProviderReady] = useState(false);
   const [googleEnabled, setGoogleEnabled] = useState(false);
 
   useEffect(() => {
-    api.me().then(() => router.replace("/workspaces")).catch(() => undefined);
+    let cancelled = false;
     api.authProviders()
-      .then((providers) => setGoogleEnabled(providers.google.enabled))
-      .catch(() => setGoogleEnabled(false))
-      .finally(() => setProviderReady(true));
-
-    const url = new URL(window.location.href);
-    const oauthError = oauthErrorMessage(url.searchParams.get("oauth_error"));
-    const errorTimer = oauthError
-      ? window.setTimeout(() => {
-          setError(oauthError);
-          url.searchParams.delete("oauth_error");
-          window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
-        }, 0)
-      : undefined;
+      .then((data) => {
+        if (!cancelled) setGoogleEnabled(Boolean(data?.google?.enabled));
+      })
+      .catch(() => {
+        if (!cancelled) setGoogleEnabled(false);
+      });
     return () => {
-      if (errorTimer !== undefined) window.clearTimeout(errorTimer);
+      cancelled = true;
     };
-  }, [router]);
+  }, []);
 
-  function startGoogleSignIn() {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError("");
-    setGoogleBusy(true);
-    // OAuth requires a top-level document navigation so provider redirects and cookies work.
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    window.location.assign("/api/v1/auth/google/authorize");
-  }
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      if (mode === "register") {
-        await api.register(email, password, displayName);
-      }
-      await api.login(email, password);
-      router.replace("/workspaces");
-    } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : "AURORA could not sign you in.");
-    } finally {
-      setBusy(false);
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setError("Please enter your email address.");
+      return;
     }
-  }
+
+    if (mode === "register") {
+      const finalDisplayName = displayName.trim() || trimmedEmail.split("@")[0];
+      if (password.length < 8) {
+        setError("Password must be at least 8 characters long.");
+        return;
+      }
+
+      setBusy(true);
+      try {
+        await api.register(trimmedEmail, password, finalDisplayName);
+        // Automatically establish session cookie
+        await api.login(trimmedEmail, password);
+        router.push("/workspaces");
+      } catch (err) {
+        if (err instanceof ApiError) {
+          setError(err.message);
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Registration failed. Please check your inputs and try again.");
+        }
+      } finally {
+        setBusy(false);
+      }
+    } else {
+      setBusy(true);
+      try {
+        await api.login(trimmedEmail, password);
+        router.push("/workspaces");
+      } catch (err) {
+        if (err instanceof ApiError) {
+          setError(err.message);
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Sign in failed. Please check your email and password.");
+        }
+      } finally {
+        setBusy(false);
+      }
+    }
+  };
 
   return (
-    <main id="main-content" className={styles.shell}>
-      <section className={styles.story} aria-labelledby="aurora-intro">
-        <div className={styles.storyTop}><Brand /><ThemeToggle /></div>
-        <div className={styles.storyBody}>
-          <p className={styles.eyebrow}>Evidence-first research</p>
-          <h1 id="aurora-intro">Find what your documents actually say.</h1>
-          <p className={styles.lede}>
-            A calm multilingual workspace for asking precise questions, tracing every answer,
-            and returning to the source.
-          </p>
-          <div className={styles.principles}>
-            <article><BookOpenText /><div><strong>Grounded answers</strong><span>Research from your indexed knowledge, not generic recall.</span></div></article>
-            <article><ShieldCheck /><div><strong>Private by workspace</strong><span>Evidence is authorized before it reaches the research context.</span></div></article>
-            <article><Languages /><div><strong>Cross-language discovery</strong><span>Ask in English or Hindi while preserving the original source.</span></div></article>
-          </div>
-        </div>
-        <p className={styles.storyFooter}>AURORA · Multilingual RAG Platform</p>
-      </section>
-
-      <section className={styles.formPanel} aria-labelledby="auth-heading">
-        <div className={styles.formWrap}>
-          <p className={styles.eyebrow}>{mode === "login" ? "Welcome back" : "Create your research space"}</p>
-          <h2 id="auth-heading">{mode === "login" ? "Continue to AURORA" : "Begin with evidence"}</h2>
-          <p className={styles.formIntro}>
-            {mode === "login" ? "Sign in to your private workspaces and sources." : "Create an account, then build your first knowledge workspace."}
-          </p>
-          <button
-            className={`${styles.googleButton} button`}
-            type="button"
-            onClick={startGoogleSignIn}
-            disabled={!providerReady || !googleEnabled || googleBusy || busy}
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "2rem 1.5rem",
+        background: "var(--background, #FAFBFE)",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "420px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "1.5rem",
+        }}
+      >
+        {/* Header */}
+        <div style={{ textAlign: "center" }}>
+          <Link href="/" style={{ display: "inline-block", marginBottom: "1.5rem" }}>
+            <Brand />
+          </Link>
+          <h1
+            style={{
+              fontSize: "1.5rem",
+              fontWeight: 700,
+              margin: "0 0 0.35rem",
+              color: "var(--foreground, #1A1D2E)",
+            }}
           >
-            {googleBusy ? "Connecting to Google…" : "Continue with Google"}
-          </button>
-          {providerReady && !googleEnabled && (
-            <p className={styles.providerNote}>Google sign-in is not configured yet. Email access remains available.</p>
+            {mode === "login" ? "Welcome back" : "Create your account"}
+          </h1>
+          <p
+            style={{
+              fontSize: "0.88rem",
+              color: "var(--foreground-soft, #4A4F6A)",
+              margin: 0,
+            }}
+          >
+            {mode === "login"
+              ? "Sign in to access your research workspaces."
+              : "Get started with AURORA — it takes less than a minute."}
+          </p>
+        </div>
+
+        {/* Form Card */}
+        <div
+          style={{
+            background: "var(--surface, #FFFFFF)",
+            borderRadius: "var(--radius-xl, 24px)",
+            padding: "2rem",
+            border: "1px solid var(--border, #E2E5F0)",
+            boxShadow: "var(--shadow-sm)",
+          }}
+        >
+          {/* Mode Tabs */}
+          <div
+            style={{
+              display: "flex",
+              background: "var(--surface-raised, #F5F7FC)",
+              padding: "0.25rem",
+              borderRadius: "var(--radius-sm, 8px)",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => { setMode("login"); setError(""); }}
+              style={{
+                flex: 1,
+                border: "none",
+                padding: "0.45rem 0.75rem",
+                borderRadius: "6px",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                background: mode === "login" ? "#FFFFFF" : "transparent",
+                color: mode === "login" ? "var(--foreground, #1A1D2E)" : "var(--muted, #8E93B0)",
+                boxShadow: mode === "login" ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMode("register"); setError(""); }}
+              style={{
+                flex: 1,
+                border: "none",
+                padding: "0.45rem 0.75rem",
+                borderRadius: "6px",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                cursor: "pointer",
+                background: mode === "register" ? "#FFFFFF" : "transparent",
+                color: mode === "register" ? "var(--foreground, #1A1D2E)" : "var(--muted, #8E93B0)",
+                boxShadow: mode === "register" ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Create Account
+            </button>
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div
+              role="alert"
+              style={{
+                background: "var(--coral-soft, #FFF0F0)",
+                border: "1px solid color-mix(in srgb, var(--coral) 30%, transparent)",
+                borderRadius: "var(--radius-sm, 8px)",
+                padding: "0.65rem 0.85rem",
+                marginBottom: "1rem",
+                fontSize: "0.82rem",
+                color: "var(--coral, #FF6B6B)",
+              }}
+            >
+              {error}
+            </div>
           )}
-          <div className={styles.divider} aria-hidden="true"><span>or continue with email</span></div>
-          <form className={styles.form} onSubmit={submit}>
+
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {mode === "register" && (
-              <div className="field">
-                <label htmlFor="display-name">Display name</label>
-                <input className="input" id="display-name" value={displayName} onChange={(event) => setDisplayName(event.target.value)} minLength={1} maxLength={100} autoComplete="name" required />
+              <div>
+                <label
+                  htmlFor="displayName"
+                  style={{
+                    display: "block",
+                    fontSize: "0.82rem",
+                    fontWeight: 600,
+                    marginBottom: "0.35rem",
+                    color: "var(--foreground, #1A1D2E)",
+                  }}
+                >
+                  Display Name
+                </label>
+                <input
+                  id="displayName"
+                  type="text"
+                  required
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="e.g. Dr. Jane Smith"
+                  className="input"
+                  style={{ fontSize: "0.88rem" }}
+                />
               </div>
             )}
-            <div className="field">
-              <label htmlFor="email">Email address</label>
-              <input className="input" id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
+
+            <div>
+              <label
+                htmlFor="email"
+                style={{
+                  display: "block",
+                  fontSize: "0.82rem",
+                  fontWeight: 600,
+                  marginBottom: "0.35rem",
+                  color: "var(--foreground, #1A1D2E)",
+                }}
+              >
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="input"
+                style={{ fontSize: "0.88rem" }}
+              />
             </div>
-            <div className="field">
-              <label htmlFor="password">Password</label>
-              <input className="input" id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} minLength={12} maxLength={128} autoComplete={mode === "login" ? "current-password" : "new-password"} required />
-              {mode === "register" && <p className="helper">Use 12–128 characters.</p>}
+
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.35rem" }}>
+                <label
+                  htmlFor="password"
+                  style={{
+                    display: "block",
+                    fontSize: "0.82rem",
+                    fontWeight: 600,
+                    color: "var(--foreground, #1A1D2E)",
+                  }}
+                >
+                  Password
+                </label>
+                {mode === "register" && (
+                  <span style={{ fontSize: "0.74rem", color: "var(--muted, #8E93B0)" }}>
+                    Min. 8 characters
+                  </span>
+                )}
+              </div>
+              <input
+                id="password"
+                type="password"
+                required
+                minLength={mode === "register" ? 8 : undefined}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="input"
+                style={{ fontSize: "0.88rem" }}
+              />
             </div>
-            {error && <div className="error-banner" role="alert">{error}</div>}
-            <button className="button button-primary" type="submit" disabled={busy || googleBusy}>
-              {busy ? "Securing your session…" : mode === "login" ? "Sign in" : "Create account"}
-              {!busy && <ArrowRight size={18} aria-hidden="true" />}
-            </button>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              busy={busy}
+              rightIcon={<ArrowRight size={16} />}
+              style={{ marginTop: "0.25rem" }}
+            >
+              {mode === "login" ? "Sign In" : "Create Account"}
+            </Button>
           </form>
-          <button className={`${styles.modeSwitch} button button-ghost`} type="button" onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}>
-            {mode === "login" ? "New to AURORA? Create an account" : "Already have an account? Sign in"}
-          </button>
+
+          {googleEnabled && (
+            <>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  margin: "1.25rem 0",
+                  color: "var(--muted)",
+                  fontSize: "0.78rem",
+                }}
+              >
+                <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+                <span>or continue with</span>
+                <div style={{ flex: 1, height: "1px", background: "var(--border)" }} />
+              </div>
+              <a
+                href="/api/v1/auth/google/authorize"
+                className="button button-secondary"
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  textDecoration: "none",
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                Google
+              </a>
+            </>
+          )}
         </div>
-      </section>
+
+        {/* Back link */}
+        <div style={{ textAlign: "center" }}>
+          <Link
+            href="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.35rem",
+              fontSize: "0.82rem",
+              color: "var(--muted, #8E93B0)",
+              textDecoration: "none",
+            }}
+          >
+            <ArrowLeft size={14} />
+            Back to home
+          </Link>
+        </div>
+      </div>
     </main>
   );
 }
