@@ -1,20 +1,48 @@
 "use client";
 
-import { ArrowDown, BookOpenCheck, ExternalLink, FileSearch, LoaderCircle, Menu, Pencil, Plus, RefreshCw, Send, Trash2, X } from "lucide-react";
+import {
+  ArrowDown,
+  Bookmark,
+  Check,
+  ChevronDown,
+  Copy,
+  Download,
+  FileSearch,
+  Globe,
+  Layers,
+  LoaderCircle,
+  Paperclip,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Send,
+  Sparkles,
+  Square,
+  Trash2,
+} from "lucide-react";
+
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import type { Conversation, ConversationMessage, RAGSource, StreamingPhase } from "@/lib/types";
 import { advanceStreamingState, canStartStreaming, isNearStreamBottom } from "@/lib/streaming-state";
-import { formatSourceLocation } from "@/lib/document-workspace";
+import { formatSourceLocation, SUPPORTED_DOCUMENT_ACCEPT } from "@/lib/document-workspace";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ChatMarkdown } from "./chat-markdown";
+import { SourceViewerPanel } from "./source-viewer-panel";
 import styles from "./research-desk.module.css";
 
 const LANGUAGES = [
-  { value: "", label: "Match my question" },
+  { value: "", label: "Match question" },
   { value: "English", label: "English" },
   { value: "Hindi", label: "हिन्दी" },
+];
+
+const SUGGESTIONS = [
+  "Which skills appear most often?",
+  "Summarise the projects in 3 lines",
+  "Translate this answer to Hindi",
 ];
 
 function formatConversationDate(value: string) {
@@ -26,51 +54,133 @@ function confidence(similarity: number) {
 }
 
 function streamingStatus(state: "idle" | StreamingPhase | "error") {
-  if (state === "submitting") return "Opening the secure response stream";
-  if (state === "retrieving") return "Retrieving fresh authorized evidence";
-  if (state === "streaming") return "Grounded answer is arriving";
-  if (state === "finalizing") return "Saving the answer and authoritative citations";
+  if (state === "submitting") return "Connecting…";
+  if (state === "retrieving") return "Searching your documents…";
+  if (state === "streaming") return "Generating answer…";
+  if (state === "finalizing") return "Saving answer…";
   return "";
 }
 
 function Evidence({
   sources,
-  workspaceId,
   onOpenSource,
 }: {
   sources: RAGSource[];
-  workspaceId: string;
   onOpenSource: (source: RAGSource) => void;
 }) {
-  const [openingId, setOpeningId] = useState<string | null>(null);
-  const [error, setError] = useState("");
+  return (
+    <div className={styles.sourcesBar} aria-label="Evidence sources">
+      <span className={styles.sourcesLabel}>Sources</span>
+      <div className={styles.sourcePills}>
+        {sources.map((source) => (
+          <button
+            className={styles.sourcePill}
+            type="button"
+            key={source.citation_id || source.position}
+            onClick={() => onOpenSource(source)}
+            aria-label={`Open ${source.filename}, ${formatSourceLocation(source)}`}
+            title={`View evidence: ${source.filename} (${confidence(source.similarity)})`}
+          >
+            <span className={styles.sourcePillNum}>{source.position}</span>
+            <span className={styles.sourcePillText}>{source.filename}</span>
+            <span className={styles.sourcePillLoc}>· p. {source.page_number || 1}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  async function openSource(citationId: string) {
-    setOpeningId(citationId);
-    setError("");
+function TurnActions({
+  content,
+  onRegenerate,
+  onSave,
+  isSaved,
+  onExport,
+}: {
+  content: string;
+  onRegenerate: () => void;
+  onSave: () => void;
+  isSaved: boolean;
+  onExport: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
     try {
-      const authoritativeSource = await api.citationSource(workspaceId, citationId);
-      onOpenSource(authoritativeSource);
-    } catch (caught) {
-      setError(caught instanceof ApiError
-        ? caught.message
-        : "This evidence source is no longer available.");
-    } finally {
-      setOpeningId(null);
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
     }
-  }
+  };
 
   return (
-    <div className={styles.evidence} aria-label="Evidence sources">
-      <div className={styles.evidenceHeading}><BookOpenCheck size={16} /><strong>{sources.length} verified {sources.length === 1 ? "source" : "sources"}</strong><span>Open the cited location</span></div>
-      {sources.map((source) => (
-        <button className={styles.source} type="button" key={source.citation_id} onClick={() => void openSource(source.citation_id)} disabled={Boolean(openingId)} aria-label={`Open ${source.filename}, ${formatSourceLocation(source)}`}>
-          <span>[{source.position}]</span>
-          <div><strong>{source.filename}</strong><small>{formatSourceLocation(source)} · {confidence(source.similarity)}</small></div>
-          {openingId === source.citation_id ? <LoaderCircle className="spin" size={16} /> : <ExternalLink size={16} />}
+    <div className={styles.turnActions} aria-label="Answer actions">
+      <button
+        type="button"
+        className={styles.actionBtn}
+        onClick={handleCopy}
+        aria-label="Copy answer to clipboard"
+      >
+        {copied ? <Check size={13} className={styles.checkIcon} /> : <Copy size={13} />}
+        <span>{copied ? "Copied" : "Copy"}</span>
+      </button>
+
+      <button
+        type="button"
+        className={styles.actionBtn}
+        onClick={onRegenerate}
+        aria-label="Regenerate this response"
+      >
+        <RefreshCw size={13} />
+        <span>Regenerate</span>
+      </button>
+
+      <button
+        type="button"
+        className={`${styles.actionBtn} ${isSaved ? styles.savedAction : ""}`}
+        onClick={onSave}
+        aria-label="Save answer"
+      >
+        <Bookmark size={13} />
+        <span>{isSaved ? "Saved" : "Save"}</span>
+      </button>
+
+      <button
+        type="button"
+        className={styles.actionBtn}
+        onClick={onExport}
+        aria-label="Export response as Markdown"
+      >
+        <Download size={13} />
+        <span>Export</span>
+      </button>
+    </div>
+  );
+}
+
+function SuggestedQuestions({
+  onSelect,
+  disabled,
+}: {
+  onSelect: (question: string) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className={styles.suggestionsRow} aria-label="Suggested follow-up questions">
+      {SUGGESTIONS.map((item) => (
+        <button
+          key={item}
+          type="button"
+          className={styles.suggestionPill}
+          onClick={() => onSelect(item)}
+          disabled={disabled}
+        >
+          {item}
         </button>
       ))}
-      {error ? <div className={styles.evidenceError} role="alert">{error} Try another citation or refresh the conversation.</div> : null}
     </div>
   );
 }
@@ -90,10 +200,13 @@ export function ResearchDesk({
   const pathname = usePathname();
   const endRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const initialSelectionRef = useRef(initialConversationId);
   const activeRequestRef = useRef<AbortController | null>(null);
   const nearBottomRef = useRef(true);
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [listState, setListState] = useState<"loading" | "loaded" | "error">("loading");
   const [listError, setListError] = useState("");
@@ -116,6 +229,17 @@ export function ResearchDesk({
   const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [sourceSummary, setSourceSummary] = useState<{ total: number; indexed: number } | null>(null);
+  const [savedTurns, setSavedTurns] = useState<Set<string>>(new Set());
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  // Source Viewer Side Panel state
+  const [activeViewer, setActiveViewer] = useState<{
+    sources: RAGSource[];
+    index: number;
+    content?: string;
+  } | null>(null);
+
   const submitting = !["idle", "error"].includes(streamState);
   const hasNoReadySources = sourceSummary !== null && sourceSummary.indexed === 0;
 
@@ -148,31 +272,60 @@ export function ResearchDesk({
   }, [workspaceId]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => void loadConversations(initialSelectionRef.current), 0);
-    return () => window.clearTimeout(timer);
-  }, [loadConversations]);
-
-  useEffect(() => {
     let cancelled = false;
     api.documents(workspaceId)
-      .then(({ items }) => {
-        if (!cancelled) setSourceSummary({
-          total: items.length,
-          indexed: items.filter((item) => item.indexing_status === "INDEXED").length,
-        });
+      .then((data) => {
+        if (cancelled) return;
+        const total = data.total;
+        const indexed = data.items.filter((item) => item.indexing_status === "INDEXED").length;
+        setSourceSummary({ total, indexed });
       })
-      .catch(() => { if (!cancelled) setSourceSummary(null); });
-    return () => { cancelled = true; };
+      .catch(() => {
+        if (!cancelled) setSourceSummary(null);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [workspaceId]);
 
   useEffect(() => {
-    if (!selectedId) return;
+    loadConversations(initialSelectionRef.current);
+  }, [loadConversations]);
+
+  useEffect(() => {
+    if (!selectedId) {
+      queueMicrotask(() => {
+        setMessages([]);
+        setMessageState("idle");
+      });
+      return;
+    }
+
+    const targetConversationId = selectedId;
     let cancelled = false;
-    api.conversationMessages(workspaceId, selectedId)
-      .then(({ items }) => { if (!cancelled) { setMessages(items); setMessageState("loaded"); } })
-      .catch((caught) => { if (!cancelled) { setMessageError(caught instanceof ApiError ? caught.message : "Message history could not be loaded."); setMessageState("error"); } });
-    return () => { cancelled = true; };
-  }, [messageReloadToken, selectedId, workspaceId]);
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setMessageState("loading");
+        setMessageError("");
+      }
+    });
+    api.conversationMessages(workspaceId, targetConversationId)
+
+      .then((data) => {
+        if (cancelled) return;
+        setMessages(data.items);
+        setMessageState("loaded");
+        setShowLatest(false);
+      })
+      .catch((caught) => {
+        if (cancelled) return;
+        setMessageError(caught instanceof ApiError ? caught.message : "Could not load conversation history.");
+        setMessageState("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [workspaceId, selectedId, messageReloadToken]);
 
   useEffect(() => {
     if (messageState === "loaded") {
@@ -183,24 +336,23 @@ export function ResearchDesk({
 
   useEffect(() => () => activeRequestRef.current?.abort(), []);
 
-  useEffect(() => {
-    if (!drawerOpen) return;
-    drawerRef.current?.querySelector<HTMLButtonElement>('button[aria-label="Close conversations"]')?.focus();
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setDrawerOpen(false);
-    };
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, [drawerOpen]);
+  function adjustTextareaHeight(textarea: HTMLTextAreaElement) {
+    textarea.style.height = "auto";
+    const nextHeight = Math.min(textarea.scrollHeight, 180);
+    textarea.style.height = `${nextHeight}px`;
+  }
 
-  useEffect(() => {
-    if (!renameTarget) return;
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !renaming) setRenameTarget(null);
-    };
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, [renameTarget, renaming]);
+  function handleOpenSourceViewer(source: RAGSource, allSources: RAGSource[], turnContent?: string) {
+    const list = allSources.length > 0 ? allSources : [source];
+    const idx = list.findIndex(
+      (s) => s.citation_id === source.citation_id || s.position === source.position
+    );
+    setActiveViewer({
+      sources: list,
+      index: idx >= 0 ? idx : 0,
+      content: turnContent,
+    });
+  }
 
   function selectConversation(conversationId: string) {
     if (submitting) return;
@@ -210,6 +362,7 @@ export function ResearchDesk({
     setMessages([]);
     setSelectedId(conversationId);
     setDrawerOpen(false);
+    setActiveViewer(null);
     router.replace(`${pathname}?view=research&conversation=${conversationId}`, { scroll: false });
   }
 
@@ -244,10 +397,62 @@ export function ResearchDesk({
     setShowLatest(!nearBottom && (submitting || messages.length > 0));
   }
 
+  function stopStreaming() {
+    activeRequestRef.current?.abort();
+    activeRequestRef.current = null;
+    setStreamState("idle");
+  }
+
+  function toggleSaveTurn(turnId: string) {
+    setSavedTurns((prev) => {
+      const next = new Set(prev);
+      if (next.has(turnId)) next.delete(turnId);
+      else next.add(turnId);
+      return next;
+    });
+  }
+
+  function exportTurn(message: ConversationMessage) {
+    const selectedTitle = conversations.find((c) => c.id === selectedId)?.title || "AURORA Research";
+    const citationsList = message.sources.length > 0
+      ? `\n\n### Sources Cited\n` + message.sources.map((s) => `- **[${s.position}]** \`${s.filename}\` (${formatSourceLocation(s)})`).join("\n")
+      : "";
+    const markdown = `# ${selectedTitle}\n\n${message.content}${citationsList}\n\n---\n*Grounded research provided by AURORA*`;
+    const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${selectedTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}-answer.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleDirectFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingDoc(true);
+    try {
+      const doc = await api.uploadDocument(workspaceId, file);
+      await api.processDocument(workspaceId, doc.id);
+      await api.indexDocument(workspaceId, doc.id);
+      // Refresh source summary
+      const updatedDocs = await api.documents(workspaceId);
+      const total = updatedDocs.total;
+      const indexed = updatedDocs.items.filter((item) => item.indexing_status === "INDEXED").length;
+      setSourceSummary({ total, indexed });
+    } catch (caught) {
+      setMessageError(caught instanceof ApiError ? caught.message : "Failed to upload and index document.");
+    } finally {
+      setUploadingDoc(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   async function runStream(rawContent: string) {
     const content = rawContent.trim();
     if (!canStartStreaming(Boolean(activeRequestRef.current), selectedId, content)) return;
     if (!selectedId) return;
+
     const controller = new AbortController();
     activeRequestRef.current = controller;
     const requestConversationId = selectedId;
@@ -255,6 +460,7 @@ export function ResearchDesk({
     const requestId = crypto.randomUUID();
     const temporaryUserId = `optimistic-user-${requestId}`;
     const temporaryAssistantId = `streaming-assistant-${requestId}`;
+
     const optimisticUser: ConversationMessage = {
       id: temporaryUserId,
       conversation_id: requestConversationId,
@@ -267,12 +473,14 @@ export function ResearchDesk({
       model: null,
       latency_ms: null,
     };
+
     const streamingAssistant: ConversationMessage = {
       ...optimisticUser,
       id: temporaryAssistantId,
       role: "ASSISTANT",
       content: "",
     };
+
     let pendingText = "";
     let animationFrame = 0;
     const flushText = () => {
@@ -280,11 +488,13 @@ export function ResearchDesk({
       if (!pendingText) return;
       const delta = pendingText;
       pendingText = "";
-      setMessages((current) => current.map((message) =>
-        message.id === temporaryAssistantId
-          ? { ...message, content: message.content + delta }
-          : message,
-      ));
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === temporaryAssistantId
+            ? { ...message, content: message.content + delta }
+            : message
+        )
+      );
       window.requestAnimationFrame(() => {
         if (nearBottomRef.current) scrollToLatest("auto");
         else setShowLatest(true);
@@ -295,8 +505,10 @@ export function ResearchDesk({
     setRetryContent(content);
     setMessageError("");
     setQuery("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
     setMessages((current) => [...current, optimisticUser, streamingAssistant]);
     window.requestAnimationFrame(() => scrollToLatest("smooth"));
+
     try {
       const turn = await api.streamConversationMessage(
         workspaceId,
@@ -304,13 +516,15 @@ export function ResearchDesk({
         content,
         language || null,
         (event) => {
-          if (event.event === "state") setStreamState((current) => advanceStreamingState(current, { type: "phase", phase: event.phase }));
+          if (event.event === "state") {
+            setStreamState((current) => advanceStreamingState(current, { type: "phase", phase: event.phase }));
+          }
           if (event.event === "text_delta") {
             pendingText += event.text;
             if (!animationFrame) animationFrame = window.requestAnimationFrame(flushText);
           }
         },
-        controller.signal,
+        controller.signal
       );
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
       pendingText = "";
@@ -328,32 +542,39 @@ export function ResearchDesk({
       });
     } catch (caught) {
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
-      setMessages((current) => current.filter((message) => message.id !== temporaryUserId && message.id !== temporaryAssistantId));
-      if (caught instanceof DOMException && caught.name === "AbortError") {
+      pendingText = "";
+      if (controller.signal.aborted) {
         setStreamState("idle");
         return;
       }
-      setQuery(content);
+      setMessages((current) =>
+        current.filter((message) => message.id !== temporaryUserId && message.id !== temporaryAssistantId)
+      );
+      setMessageError(caught instanceof ApiError ? caught.message : "The stream encountered an unexpected network disruption.");
       setStreamState("error");
-      setMessageError(caught instanceof ApiError ? caught.message : "AURORA could not complete this streamed research turn. Your draft is ready to retry.");
     } finally {
-      if (activeRequestRef.current === controller) activeRequestRef.current = null;
+      activeRequestRef.current = null;
     }
   }
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  function submit(event: React.FormEvent) {
     event.preventDefault();
     void runStream(query);
   }
 
-  async function rename(event: React.FormEvent<HTMLFormElement>) {
+  async function rename(event: React.FormEvent) {
     event.preventDefault();
-    if (!renameTarget) return;
+    if (!renameTarget || renaming) return;
+    const title = renameTitle.trim();
+    if (!title) {
+      setRenameError("The title must not be blank.");
+      return;
+    }
     setRenaming(true);
     setRenameError("");
     try {
-      const updated = await api.renameConversation(workspaceId, renameTarget.id, renameTitle);
-      setConversations((current) => current.map((item) => item.id === updated.id ? updated : item));
+      const updated = await api.renameConversation(workspaceId, renameTarget.id, title);
+      setConversations((current) => current.map((item) => (item.id === updated.id ? updated : item)));
       setRenameTarget(null);
     } catch (caught) {
       setRenameError(caught instanceof ApiError ? caught.message : "The conversation could not be renamed.");
@@ -363,19 +584,23 @@ export function ResearchDesk({
   }
 
   async function remove() {
-    if (!deleteTarget) return;
+    if (!deleteTarget || deleting) return;
     setDeleting(true);
+    setListError("");
     try {
       await api.deleteConversation(workspaceId, deleteTarget.id);
       const remaining = conversations.filter((item) => item.id !== deleteTarget.id);
       setConversations(remaining);
+      const nextSelection = remaining[0]?.id || null;
       setDeleteTarget(null);
       if (selectedId === deleteTarget.id) {
-        const nextId = remaining[0]?.id || null;
-        setMessageState(nextId ? "loading" : "idle");
-        setMessages([]);
-        setSelectedId(nextId);
-        router.replace(nextId ? `${pathname}?view=research&conversation=${nextId}` : `${pathname}?view=research`, { scroll: false });
+        if (nextSelection) selectConversation(nextSelection);
+        else {
+          setSelectedId(null);
+          setMessages([]);
+          setMessageState("idle");
+          router.replace(`${pathname}?view=research`, { scroll: false });
+        }
       }
     } catch (caught) {
       setListError(caught instanceof ApiError ? caught.message : "The conversation could not be deleted.");
@@ -385,92 +610,479 @@ export function ResearchDesk({
   }
 
   const selected = conversations.find((item) => item.id === selectedId) || null;
+
   const conversationPanel = (
     <aside className={styles.conversationPanel} aria-label="Research conversations">
       <div className={styles.panelTop}>
-        <div><p className={styles.kicker}>Research record</p><h2>Conversations</h2></div>
-        <button className={`${styles.mobileClose} button button-ghost button-icon`} type="button" onClick={() => setDrawerOpen(false)} aria-label="Close conversations"><X size={18} /></button>
+        <span className={styles.kicker}>CONVERSATIONS</span>
+        <button
+          className={styles.newChatBtn}
+          type="button"
+          onClick={() => void createConversation()}
+          disabled={creating || submitting}
+          aria-label="New conversation"
+          title="New conversation"
+        >
+          {creating ? <LoaderCircle className="spin" size={15} /> : <Plus size={15} />}
+        </button>
       </div>
-      <button className="button button-primary" type="button" onClick={() => void createConversation()} disabled={creating || submitting}>{creating ? <LoaderCircle className="spin" size={17} /> : <Plus size={17} />}{creating ? "Creating…" : "New conversation"}</button>
+
       {listError && <div className="error-banner" role="alert">{listError}</div>}
+
       <div className={styles.conversationList}>
-        {listState === "loading" ? <div className={styles.listLoading} role="status"><LoaderCircle className="spin" size={18} />Loading recent conversations…</div> : null}
-        {listState === "error" ? <button className="button button-secondary" type="button" onClick={() => void loadConversations(selectedId || undefined)}><RefreshCw size={16} />Retry list</button> : null}
-        {listState === "loaded" && conversations.length === 0 ? <div className={styles.listEmpty}><strong>No conversations yet</strong><span>Start a research thread to preserve questions, grounded answers, and evidence.</span></div> : null}
+        {listState === "loading" ? (
+          <div className={styles.listLoading} role="status">
+            <LoaderCircle className="spin" size={16} />
+            <span>Loading threads…</span>
+          </div>
+        ) : null}
+        {listState === "error" ? (
+          <button className="button button-secondary" type="button" onClick={() => void loadConversations(selectedId || undefined)}>
+            <RefreshCw size={15} /> Retry list
+          </button>
+        ) : null}
+        {listState === "loaded" && conversations.length === 0 ? (
+          <div className={styles.listEmpty}>
+            <strong>No conversations yet</strong>
+            <span>Click + above to start a thread with grounded citations.</span>
+          </div>
+        ) : null}
+
         {conversations.map((conversation) => (
-          <div className={`${styles.conversationRow} ${conversation.id === selectedId ? styles.activeConversation : ""}`} key={conversation.id}>
-            <button className={styles.conversationSelect} type="button" onClick={() => selectConversation(conversation.id)} disabled={submitting} aria-current={conversation.id === selectedId ? "true" : undefined}><strong>{conversation.title}</strong><span>{formatConversationDate(conversation.updated_at)}</span></button>
+          <div
+            className={`${styles.conversationRow} ${conversation.id === selectedId ? styles.activeConversation : ""}`}
+            key={conversation.id}
+          >
+            <button
+              className={styles.conversationSelect}
+              type="button"
+              onClick={() => selectConversation(conversation.id)}
+              disabled={submitting}
+              aria-current={conversation.id === selectedId ? "true" : undefined}
+            >
+              <strong className={styles.convTitle}>{conversation.title}</strong>
+              <span className={styles.convMeta}>
+                {formatConversationDate(conversation.updated_at)}
+                {sourceSummary && sourceSummary.indexed > 0 ? ` · ${sourceSummary.indexed} sources` : ""}
+              </span>
+            </button>
             <div className={styles.rowTools}>
-              <button type="button" disabled={submitting} onClick={() => { setRenameTarget(conversation); setRenameTitle(conversation.title); setRenameError(""); }} aria-label={`Rename ${conversation.title}`} title="Rename"><Pencil size={14} /></button>
-              <button type="button" disabled={submitting} onClick={() => setDeleteTarget(conversation)} aria-label={`Delete ${conversation.title}`} title="Delete"><Trash2 size={14} /></button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => {
+                  setRenameTarget(conversation);
+                  setRenameTitle(conversation.title);
+                  setRenameError("");
+                }}
+                aria-label={`Rename ${conversation.title}`}
+                title="Rename"
+              >
+                <Pencil size={13} />
+              </button>
+              <button
+                type="button"
+                disabled={submitting}
+                onClick={() => setDeleteTarget(conversation)}
+                aria-label={`Delete ${conversation.title}`}
+                title="Delete"
+              >
+                <Trash2 size={13} />
+              </button>
             </div>
           </div>
         ))}
       </div>
-      <p className={styles.listLimit}>Showing up to 50 recent conversations</p>
     </aside>
   );
 
   return (
-    <div className={styles.desk}>
-      {drawerOpen && <button className={styles.drawerBackdrop} type="button" onClick={() => setDrawerOpen(false)} aria-label="Close conversations" />}
-      <div ref={drawerRef} className={`${styles.mobileDrawer} ${drawerOpen ? styles.drawerOpen : ""}`} aria-hidden={!drawerOpen} inert={!drawerOpen}>{conversationPanel}</div>
+    <div className={`${styles.desk} ${activeViewer ? styles.deskWithViewer : ""}`}>
+      {drawerOpen && (
+        <button
+          className={styles.drawerBackdrop}
+          type="button"
+          onClick={() => setDrawerOpen(false)}
+          aria-label="Close conversations"
+        />
+      )}
+      <div
+        ref={drawerRef}
+        className={`${styles.mobileDrawer} ${drawerOpen ? styles.drawerOpen : ""}`}
+        aria-hidden={!drawerOpen}
+      >
+        {conversationPanel}
+      </div>
       <div className={styles.desktopPanel}>{conversationPanel}</div>
 
-      <section className={`surface ${styles.chat}`} aria-label="Persistent research conversation">
-        <header className={styles.chatHeader}>
-          <button className={`${styles.drawerButton} button button-secondary`} type="button" onClick={() => setDrawerOpen(true)}><Menu size={17} />Conversations</button>
-          <div><p className={styles.kicker}>Authorized research conversation</p><h2>{selected?.title || "Start a research conversation"}</h2></div>
-          {selected && <span>{sourceSummary ? `${sourceSummary.indexed} ready ${sourceSummary.indexed === 1 ? "source" : "sources"}` : `${messages.filter((message) => message.role === "ASSISTANT" && !message.id.startsWith("streaming-assistant-")).length} grounded answers`}</span>}
-        </header>
+      {/* Main Chat Center Area */}
+      <section
+        className={styles.chat}
+        aria-label="Research chat"
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragOver(true);
+        }}
+        onDragLeave={() => setIsDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragOver(false);
+          const file = e.dataTransfer.files?.[0];
+          if (file) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            if (fileInputRef.current) {
+              fileInputRef.current.files = dataTransfer.files;
+              fileInputRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+          }
+        }}
+      >
+        {isDragOver && (
+          <div className={styles.dragOverlay}>
+            <Paperclip size={24} />
+            <strong>Drop document here to index & research</strong>
+          </div>
+        )}
 
         <div className={styles.messageViewport} ref={viewportRef} onScroll={trackScroll} aria-busy={messageState === "loading" || submitting}>
           {submitting ? <div className="sr-only" role="status" aria-live="polite">{streamingStatus(streamState)}</div> : null}
-          {!selected && listState === "loaded" ? <EmptyState icon={FileSearch} title="Begin a persistent inquiry" description="Create a conversation to keep follow-up questions, grounded answers, and their evidence together across sessions." action={<button className="button button-secondary" type="button" onClick={() => void createConversation()}><Plus size={17} />New conversation</button>} /> : null}
-          {selected && messageState === "loading" ? <div className={styles.messageLoading} role="status"><LoaderCircle className="spin" size={20} /><span>Loading the persistent research record…</span></div> : null}
-          {selected && messageState === "error" ? <div className={styles.historyError}><div className="error-banner" role="alert">{messageError}</div><button className="button button-secondary" type="button" onClick={() => { setMessageState("loading"); setMessageReloadToken((value) => value + 1); }}><RefreshCw size={16} />Retry history</button></div> : null}
-          {selected && messageState === "loaded" && messages.length === 0 ? <EmptyState icon={FileSearch} title="Ask the first question" description="AURORA will retrieve fresh authorized evidence, compose a grounded answer, and preserve both for follow-up research." /> : null}
+
+          {!selected && listState === "loaded" ? (
+            <EmptyState
+              icon={FileSearch}
+              title="No conversation selected"
+              description="Select an existing thread or start a new conversation to ask questions about your documents."
+              action={
+                <button className="button button-primary" type="button" onClick={() => void createConversation()}>
+                  <Plus size={16} /> New conversation
+                </button>
+              }
+            />
+          ) : null}
+
+          {selected && messageState === "loading" ? (
+            <div className={styles.messageLoading} role="status">
+              <LoaderCircle className="spin" size={20} />
+              <span>Loading conversation…</span>
+            </div>
+          ) : null}
+
+          {selected && messageState === "error" ? (
+            <div className={styles.historyError}>
+              <div className="error-banner" role="alert">{messageError}</div>
+              <button
+                className="button button-secondary"
+                type="button"
+                onClick={() => {
+                  setMessageState("loading");
+                  setMessageReloadToken((val) => val + 1);
+                }}
+              >
+                <RefreshCw size={15} /> Retry
+              </button>
+            </div>
+          ) : null}
+
+          {selected && messageState === "loaded" && messages.length === 0 ? (
+            <EmptyState
+              icon={FileSearch}
+              title="Ask your first question"
+              description="Type a question below. AURORA will find relevant evidence from your documents and provide cited answers."
+            />
+          ) : null}
+
           {messages.length > 0 ? (
             <ol className={styles.messages} aria-label="Conversation messages">
-              {messages.map((message) => {
+              {messages.map((message, index) => {
                 const streaming = message.id.startsWith("streaming-assistant-");
+                const isLastAssistant = message.role === "ASSISTANT" && index === messages.length - 1;
+
+                if (message.role === "USER") {
+                  return (
+                    <li className={styles.userTurn} key={message.id}>
+                      <article aria-label="Your question" className={styles.userArticle}>
+                        <div className={styles.userBubble}>{message.content}</div>
+                      </article>
+                    </li>
+                  );
+                }
+
+                const prevUser = index > 0 ? messages[index - 1] : null;
+
                 return (
-                  <li className={`${message.role === "USER" ? styles.userTurn : styles.assistantTurn} ${streaming ? styles.streamingTurn : ""}`} key={message.id}>
-                    <article aria-label={message.role === "USER" ? "Your research question" : streaming ? "AURORA answer in progress" : "AURORA grounded answer"}>
-                      <div className={styles.messageMeta}><span>{message.role === "USER" ? "Your question" : streaming ? "Grounded answer · live" : "Grounded answer"}</span><time dateTime={message.created_at}>{formatConversationDate(message.created_at)}</time></div>
-                      {message.insufficient_evidence && <div className={styles.insufficient}><FileSearch size={17} /><div><strong>Evidence is limited</strong><span>This answer is intentionally constrained because no source met the evidence threshold.</span></div></div>}
-                      {streaming && !message.content ? <div className={styles.streamPlaceholder} aria-hidden="true"><span /><div><strong>{streamingStatus(streamState)}</strong><small>Only completed responses are saved.</small></div></div> : null}
-                      {message.content ? <div className={styles.messageContent}>{message.content.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div> : null}
+                  <li className={`${styles.assistantTurn} ${streaming ? styles.streamingTurn : ""}`} key={message.id}>
+                    <article aria-label={streaming ? "Answer in progress" : "Grounded answer"}>
+                      <div className={styles.assistantMeta}>
+                        <span className={styles.auroraAvatar} aria-hidden="true">
+                          <Sparkles size={13} />
+                        </span>
+                        <strong className={styles.auroraName}>AURORA</strong>
+                        <span className={styles.auroraGroundedBadge}>
+                          {streaming
+                            ? "Typing…"
+                            : message.sources.length > 0
+                            ? `Grounded in ${message.sources.length} ${message.sources.length === 1 ? "source" : "sources"}`
+                            : "Grounded answer"}
+                        </span>
+                      </div>
+
+                      {message.insufficient_evidence && (
+                        <div className={styles.insufficient}>
+                          <FileSearch size={16} />
+                          <div>
+                            <strong>Evidence is limited</strong>
+                            <span>This answer is constrained because no uploaded source met the confidence threshold.</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {streaming && !message.content ? (
+                        <div className={styles.streamPlaceholder} aria-hidden="true">
+                          <span />
+                          <div>
+                            <strong>{streamingStatus(streamState)}</strong>
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {message.content ? (
+                        <div className={styles.messageContent}>
+                          <ChatMarkdown
+                            content={message.content}
+                            sources={message.sources}
+                            onOpenSource={(src) => handleOpenSourceViewer(src, message.sources, message.content)}
+                          />
+                        </div>
+                      ) : null}
+
                       {streaming && message.content ? <span className={styles.streamCursor} aria-hidden="true" /> : null}
-                      {message.role === "ASSISTANT" && message.sources.length > 0 ? <Evidence sources={message.sources} workspaceId={workspaceId} onOpenSource={onOpenSource} /> : null}
-                      {message.role === "ASSISTANT" && !streaming && <footer>{message.response_id ? `Response ${message.response_id.slice(0, 8)}` : "Historical response"}{message.latency_ms !== null ? ` · ${(message.latency_ms / 1000).toFixed(1)}s` : ""}</footer>}
+
+                      {message.sources.length > 0 && (
+                        <Evidence
+                          sources={message.sources}
+                          onOpenSource={(src) => handleOpenSourceViewer(src, message.sources, message.content)}
+                        />
+                      )}
+
+                      {!streaming && message.content && (
+                        <>
+                          <TurnActions
+                            content={message.content}
+                            onRegenerate={() => prevUser && void runStream(prevUser.content)}
+                            onSave={() => toggleSaveTurn(message.id)}
+                            isSaved={savedTurns.has(message.id)}
+                            onExport={() => exportTurn(message)}
+                          />
+
+                          {isLastAssistant && (
+                            <div className={styles.suggestionsWrapper}>
+                              <SuggestedQuestions
+                                onSelect={(q) => void runStream(q)}
+                                disabled={submitting}
+                              />
+                            </div>
+                          )}
+                        </>
+                      )}
                     </article>
                   </li>
                 );
               })}
             </ol>
           ) : null}
+
           <div ref={endRef} />
-          {showLatest ? <button className={styles.jumpLatest} type="button" onClick={() => scrollToLatest("smooth")}><ArrowDown size={16} />Latest response</button> : null}
+          {showLatest && (
+            <button className={styles.jumpLatest} type="button" onClick={() => scrollToLatest("smooth")}>
+              <ArrowDown size={15} /> Latest response
+            </button>
+          )}
         </div>
 
-        <div className={styles.composerWrap}>
-          {hasNoReadySources ? <div className={styles.sourceNotice} role="status"><div><strong>No research-ready sources</strong><span>{sourceSummary.total ? "Process and index the uploaded document before asking a grounded question." : "Add a supported source before asking a grounded question."}</span></div><button className="button button-secondary" type="button" onClick={onOpenDocuments}>Review sources</button></div> : null}
-          {messageError && messageState !== "error" ? <div className={`${styles.streamError} error-banner`} role="alert"><span>{messageError}</span>{streamState === "error" && retryContent ? <button className="button button-secondary" type="button" onClick={() => void runStream(retryContent)}><RefreshCw size={16} />Retry last question</button> : null}</div> : null}
-          <form className={styles.composer} onSubmit={submit}>
-            <label className="field-label" htmlFor="conversation-query">Research question</label>
-            <textarea className="textarea" id="conversation-query" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} maxLength={4000} placeholder={hasNoReadySources ? "Type your question, then review and index a source to research it" : selected ? "Ask across every indexed source in this workspace…" : "Create a conversation before asking a question"} disabled={!selected || submitting} required />
-            <div className={styles.composerFooter}>
-              <div><label htmlFor="conversation-language">Answer language</label><select className="select" id="conversation-language" value={language} onChange={(event) => setLanguage(event.target.value)} disabled={!selected || submitting}>{LANGUAGES.map((item) => <option value={item.value} key={item.label}>{item.label}</option>)}</select></div>
-              <span>Enter to send · Shift+Enter for a new line</span>
-              <button className="button button-primary" type="submit" disabled={!selected || submitting || !query.trim()}>{submitting ? <LoaderCircle className="spin" size={17} /> : <Send size={17} />}{streamState === "finalizing" ? "Saving…" : submitting ? "Answering…" : "Send"}</button>
+        {/* Compact Floating Composer Card */}
+        <div className={styles.composerCardWrap}>
+          {hasNoReadySources && (
+            <div className={styles.sourceNotice} role="status">
+              <div>
+                <strong>No ready documents</strong>
+                <span>
+                  {sourceSummary.total
+                    ? "Process and index your uploaded documents before asking questions."
+                    : "Upload documents to start researching."}
+                </span>
+              </div>
+              <button className="button button-secondary" type="button" onClick={onOpenDocuments}>
+                Go to Documents
+              </button>
+            </div>
+          )}
+
+          {messageError && messageState !== "error" && (
+            <div className={`${styles.streamError} error-banner`} role="alert">
+              <span>{messageError}</span>
+              {streamState === "error" && retryContent && (
+                <button className="button button-secondary" type="button" onClick={() => void runStream(retryContent)}>
+                  <RefreshCw size={13} /> Retry last question
+                </button>
+              )}
+            </div>
+          )}
+
+          <form className={styles.composerCard} onSubmit={submit}>
+            <textarea
+              ref={textareaRef}
+              className={styles.composerInput}
+              id="conversation-query"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                adjustTextareaHeight(e.target);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
+                  event.preventDefault();
+                  event.currentTarget.form?.requestSubmit();
+                }
+              }}
+              maxLength={4000}
+              placeholder={
+                hasNoReadySources
+                  ? "Upload and index documents to start researching…"
+                  : selected
+                  ? "Ask a question about your documents…"
+                  : "Create a conversation to ask a question"
+              }
+              disabled={!selected || submitting}
+              rows={1}
+              required
+            />
+
+            <div className={styles.composerCardBottom}>
+              <div className={styles.composerPills}>
+                <button
+                  type="button"
+                  className={styles.composerIconBtn}
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload document"
+                  disabled={uploadingDoc}
+                  aria-label="Upload document"
+                >
+                  {uploadingDoc ? <LoaderCircle className="spin" size={15} /> : <Paperclip size={15} />}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={SUPPORTED_DOCUMENT_ACCEPT}
+                  style={{ display: "none" }}
+                  onChange={(e) => void handleDirectFileUpload(e)}
+                />
+
+                <div className={styles.pillDropdown} title="Document scope">
+                  <Layers size={13} className={styles.pillIcon} />
+                  <span>All documents</span>
+                  <ChevronDown size={11} className={styles.pillChevron} />
+                </div>
+
+                <div className={styles.pillSelectWrap}>
+                  <Globe size={13} className={styles.pillIcon} />
+                  <select
+                    className={styles.pillSelect}
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    disabled={!selected || submitting}
+                    aria-label="Answer language preference"
+                  >
+                    {LANGUAGES.map((item) => (
+                      <option value={item.value} key={item.label}>
+                        Answer in: {item.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={11} className={styles.pillChevron} />
+                </div>
+              </div>
+
+              <div className={styles.composerRight}>
+                <span className={styles.composerHint}>Enter to send · Shift+Enter for new line</span>
+                {submitting ? (
+                  <button
+                    type="button"
+                    className={styles.stopButton}
+                    onClick={stopStreaming}
+                    title="Stop generation"
+                  >
+                    <Square size={13} />
+                    <span>Stop</span>
+                  </button>
+                ) : (
+                  <button
+                    className={styles.sendButton}
+                    type="submit"
+                    disabled={!selected || submitting || !query.trim()}
+                  >
+                    <span>Send</span>
+                    <Send size={14} />
+                  </button>
+                )}
+              </div>
             </div>
           </form>
         </div>
       </section>
 
-      {renameTarget && <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && !renaming && setRenameTarget(null)}><form className="modal" role="dialog" aria-modal="true" aria-labelledby="rename-conversation-title" aria-describedby="rename-conversation-description" onSubmit={rename}><h2 id="rename-conversation-title">Rename conversation</h2><p id="rename-conversation-description">Use a short title that makes this research thread easy to find later.</p><div className="field"><label htmlFor="conversation-title">Conversation title</label><input className="input" id="conversation-title" value={renameTitle} onChange={(event) => setRenameTitle(event.target.value)} maxLength={120} autoFocus required /></div>{renameError && <div className="error-banner" role="alert">{renameError}</div>}<div className="modal-actions"><button className="button button-ghost" type="button" onClick={() => setRenameTarget(null)} disabled={renaming}>Cancel</button><button className="button button-primary" type="submit" disabled={renaming || !renameTitle.trim()}>{renaming ? "Saving…" : "Save title"}</button></div></form></div>}
-      <ConfirmDialog open={Boolean(deleteTarget)} title="Delete this conversation?" description={deleteTarget ? `${deleteTarget.title}, its messages, and linked response citations will be permanently removed. Workspace documents will not be affected.` : ""} confirmLabel="Delete conversation" busy={deleting} onCancel={() => setDeleteTarget(null)} onConfirm={() => void remove()} />
+      {/* Pane 3: Source Viewer Panel */}
+      {activeViewer && (
+        <SourceViewerPanel
+          sources={activeViewer.sources}
+          activeSourceIndex={activeViewer.index}
+          onSelectSourceIndex={(idx) =>
+            setActiveViewer((prev) => (prev ? { ...prev, index: idx } : null))
+          }
+          onClose={() => setActiveViewer(null)}
+          onOpenDocument={(docId, page) =>
+            onOpenSource({ document_id: docId, page_number: page } as RAGSource)
+          }
+          associatedContent={activeViewer.content}
+        />
+      )}
+
+      {renameTarget && (
+        <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && !renaming && setRenameTarget(null)}>
+          <form className="modal" role="dialog" aria-modal="true" onSubmit={rename}>
+            <h2>Rename conversation</h2>
+            <div className="field">
+              <label htmlFor="conversation-title">Conversation title</label>
+              <input
+                className="input"
+                id="conversation-title"
+                value={renameTitle}
+                onChange={(e) => setRenameTitle(e.target.value)}
+                maxLength={120}
+                autoFocus
+                required
+              />
+            </div>
+            {renameError && <div className="error-banner" role="alert">{renameError}</div>}
+            <div className="modal-actions">
+              <button className="button button-ghost" type="button" onClick={() => setRenameTarget(null)} disabled={renaming}>Cancel</button>
+              <button className="button button-primary" type="submit" disabled={renaming || !renameTitle.trim()}>
+                {renaming ? "Saving…" : "Save title"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete this conversation?"
+        description={deleteTarget ? `${deleteTarget.title} and its history will be permanently deleted.` : ""}
+        confirmLabel="Delete conversation"
+        busy={deleting}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => void remove()}
+      />
     </div>
   );
 }

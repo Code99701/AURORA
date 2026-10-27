@@ -135,43 +135,60 @@ if not "!MIGRATION_RESULT!"=="0" (
 )
 
 echo [6/6] Starting application servers...
+if /I not "%~1"=="--keep" (
+    echo Stopping any existing servers on ports 8000 and 3000 to ensure fresh launch...
+    call :kill_port 8000
+    call :kill_port 3000
+    timeout /t 1 /nobreak >nul
+)
+
 call :port_open 8000
 if errorlevel 1 (
+    echo Starting AURORA backend on http://127.0.0.1:8000 ...
     start "AURORA Backend" "%ComSpec%" /k call "%~f0" __backend
 ) else (
-    echo [INFO] Port 8000 is already active; the existing backend was left running.
+    echo [INFO] Port 8000 is active; existing backend was kept.
 )
 
 call :port_open 3000
 if errorlevel 1 (
+    echo Starting AURORA frontend on http://localhost:3000 ...
     start "AURORA Frontend" "%ComSpec%" /k call "%~f0" __frontend
 ) else (
-    echo [INFO] Port 3000 is already active; the existing frontend was left running.
+    echo [INFO] Port 3000 is active; existing frontend was kept.
 )
 
 echo.
-echo Waiting for the frontend at http://localhost:3000 ...
+echo Waiting for backend at http://127.0.0.1:8000 ...
+for /L %%I in (1,1,30) do (
+    call :port_open 8000
+    if not errorlevel 1 goto backend_ready
+    timeout /t 1 /nobreak >nul
+)
+echo [WARNING] Backend is taking longer than expected to start.
+:backend_ready
+
+echo Waiting for frontend at http://localhost:3000 ...
 for /L %%I in (1,1,45) do (
     call :port_open 3000
     if not errorlevel 1 goto frontend_ready
     timeout /t 1 /nobreak >nul
 )
-
 echo [WARNING] The frontend is still starting. Check the AURORA Frontend window.
 goto launch_complete
 
 :frontend_ready
-echo [READY] AURORA is running.
-start "" "http://localhost:3000"
+echo [READY] AURORA is running. Opening Research Desk...
+start "" "http://localhost:3000/workspaces"
 
 :launch_complete
 echo.
 echo Backend:  http://127.0.0.1:8000
-echo Frontend: http://localhost:3000
-echo API docs: http://127.0.0.1:8000/docs
+echo Frontend: http://localhost:3000/workspaces
 echo.
 echo Keep the Backend and Frontend windows open while using AURORA.
 echo Closing this launcher window will not stop those servers or PostgreSQL.
+echo To restart servers cleanly with new code, run start-aurora.bat again.
 echo.
 pause
 exit /b 0
@@ -194,6 +211,10 @@ if not errorlevel 1 (
 )
 popd
 exit /b 1
+
+:kill_port
+powershell.exe -NoLogo -NoProfile -NonInteractive -Command "$p = (Get-NetTCPConnection -LocalPort %~1 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique); foreach ($id in $p) { if ($id -and $id -gt 4) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue } }" >nul 2>&1
+exit /b 0
 
 :port_open
 powershell.exe -NoLogo -NoProfile -NonInteractive -Command "$client = [Net.Sockets.TcpClient]::new(); try { $client.Connect('127.0.0.1', %~1); exit 0 } catch { exit 1 } finally { $client.Dispose() }" >nul 2>&1
@@ -222,7 +243,7 @@ echo AURORA launcher
 echo.
 echo Double-click start-aurora.bat or run it without arguments.
 echo It starts PostgreSQL, applies migrations, launches the backend and frontend,
-echo waits for port 3000, and opens http://localhost:3000.
+echo waits for port 3000, and opens http://localhost:3000/workspaces.
 exit /b 0
 
 :launch_failed

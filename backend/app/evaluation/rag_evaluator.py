@@ -16,6 +16,7 @@ import json
 import re
 import time
 from typing import Any, Mapping
+import uuid
 from uuid import UUID
 
 from sqlalchemy import delete, select
@@ -197,7 +198,7 @@ def seed_eval_workspace(db: Session, workspace: Workspace, user: User, provider:
             uploaded_by=user.id,
             original_filename=fix_doc.filename,
             storage_provider="local",
-            storage_key=f"eval/{fix_doc.filename}",
+            storage_key=f"eval/{workspace.id}/{fix_doc.filename}",
             content_type=fix_doc.content_type,
             file_size=sum(len(p.text) for p in fix_doc.pages),
             checksum=hashlib.sha256(fix_doc.filename.encode()).hexdigest(),
@@ -225,6 +226,64 @@ def seed_eval_workspace(db: Session, workspace: Workspace, user: User, provider:
     return created_docs
 
 
+def seed_real_docs_workspace(db: Session, target_workspace: Workspace, user: User) -> list[Document]:
+    """Clone real documents from DB (ANN PPT, Resume, ML Book) into target_workspace."""
+    filenames = [
+        "ANN PPT UNIT 2.pdf",
+        "Arnav_Mahajan_Resume.pdf",
+        "the-hundred-page-machine-learning-book_compress.pdf",
+    ]
+    cloned_docs: list[Document] = []
+    for fn in filenames:
+        source_doc = db.query(Document).filter(
+            Document.original_filename == fn,
+            Document.indexing_status == "INDEXED"
+        ).first()
+        if not source_doc:
+            source_doc = db.query(Document).filter(Document.original_filename == fn).first()
+        if not source_doc:
+            continue
+
+        cloned = Document(
+            workspace_id=target_workspace.id,
+            uploaded_by=user.id,
+            original_filename=source_doc.original_filename,
+            storage_provider=source_doc.storage_provider,
+            storage_key=f"eval/{target_workspace.id}/docs/{uuid.uuid4().hex}/original",
+            content_type=source_doc.content_type,
+            file_size=source_doc.file_size,
+            checksum=source_doc.checksum,
+            status=source_doc.status,
+            page_count=source_doc.page_count,
+            indexing_status="INDEXED",
+            embedding_model=source_doc.embedding_model,
+            embedding_dimension=source_doc.embedding_dimension,
+            indexing_fingerprint=source_doc.indexing_fingerprint,
+        )
+        db.add(cloned)
+        db.flush()
+
+        source_chunks = db.query(DocumentChunk).filter(DocumentChunk.document_id == source_doc.id).all()
+        for sc in source_chunks:
+            nc = DocumentChunk(
+                document_id=cloned.id,
+                page_number=sc.page_number,
+                chunk_index=sc.chunk_index,
+                page_chunk_index=sc.page_chunk_index,
+                text=sc.text,
+                character_count=sc.character_count,
+                approximate_token_count=sc.approximate_token_count,
+                embedding=sc.embedding,
+                embedding_model=sc.embedding_model,
+            )
+            db.add(nc)
+        db.flush()
+        cloned_docs.append(cloned)
+
+    db.commit()
+    return cloned_docs
+
+
 def run_evaluation(
     db: Session,
     workspace: Workspace,
@@ -233,10 +292,16 @@ def run_evaluation(
     embedding_provider: Any = None,
     llm_provider: Any = None,
     top_k: int = 5,
+    subset_limit: int | None = None,
+    delay_between_calls: float = 0.0,
 ) -> tuple[list[EvalResult], list[CategorySummary]]:
-    """Execute the full evaluation benchmark and return detailed metrics."""
+    """Execute the evaluation benchmark and return detailed metrics."""
     with open(dataset_path, "r", encoding="utf-8") as f:
         data = json.load(f)
+
+    raw_cases = data["cases"]
+    if subset_limit and subset_limit > 0:
+        raw_cases = raw_cases[:subset_limit]
 
     cases = [
         EvalCase(
@@ -250,7 +315,7 @@ def run_evaluation(
             history=c.get("history", []),
             answer_language=c.get("answer_language"),
         )
-        for c in data["cases"]
+        for c in raw_cases
     ]
 
     emb_provider = embedding_provider or EvalDeterministicEmbeddingProvider()
@@ -290,7 +355,12 @@ def run_evaluation(
             else:
                 for src in rag_res.sources:
                     for doc_key, exp_pages in case.expected_pages.items():
-                        if src.page_number in exp_pages:
+                        doc_matches = (
+                            not doc_key
+                            or doc_key.lower() in (src.filename or "").lower()
+                            or (src.filename or "").lower() in doc_key.lower()
+                        )
+                        if doc_matches and src.page_number in exp_pages:
                             retrieval_hit = True
                             break
                     if retrieval_hit:
@@ -319,7 +389,13 @@ def run_evaluation(
                 valid_citations = 0
                 for src in rag_res.sources:
                     page_matches = any(
-                        src.page_number in pages for pages in case.expected_pages.values()
+                        (
+                            not doc_key
+                            or doc_key.lower() in (src.filename or "").lower()
+                            or (src.filename or "").lower() in doc_key.lower()
+                        )
+                        and src.page_number in pages
+                        for doc_key, pages in case.expected_pages.items()
                     ) if case.expected_pages else True
                     if page_matches:
                         valid_citations += 1
@@ -349,6 +425,7 @@ def run_evaluation(
                 )
             )
         except Exception as exc:
+            print(f"[EVAL-CASE-ERROR] {case.id}: {type(exc).__name__}: {exc}")
             latency = (time.perf_counter() - start_time) * 1000.0
             results.append(
                 EvalResult(
@@ -365,6 +442,9 @@ def run_evaluation(
                     error=str(exc),
                 )
             )
+
+        if delay_between_calls > 0:
+            time.sleep(delay_between_calls)
 
     # Compute category summaries
     by_category: dict[str, list[EvalResult]] = defaultdict(list)

@@ -12,20 +12,21 @@ import {
   ArrowRight,
   X,
   FileText,
-  Network,
-  Cpu,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { ApiError } from "@/lib/api";
+import type { Workspace } from "@/lib/types";
 
 const TAG_COLORS = ["purple", "teal", "coral", "amber"] as const;
 
 export function WorkspaceDashboard() {
   const router = useRouter();
-  const { workspaces, loading, error, createWorkspace } = useWorkspaces();
+  const { workspaces, loading, error, createWorkspace, deleteWorkspace } = useWorkspaces();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,6 +34,8 @@ export function WorkspaceDashboard() {
   const [newDesc, setNewDesc] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [workspaceToDelete, setWorkspaceToDelete] = useState<Workspace | null>(null);
+  const [deletingWorkspace, setDeletingWorkspace] = useState(false);
 
   const filteredWorkspaces = useMemo(() => {
     return workspaces.filter((ws) => {
@@ -69,33 +72,34 @@ export function WorkspaceDashboard() {
     }
   };
 
+  const handleDeleteWorkspace = async () => {
+    if (!workspaceToDelete) return;
+    setDeletingWorkspace(true);
+    try {
+      await deleteWorkspace(workspaceToDelete.id);
+      setWorkspaceToDelete(null);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to delete workspace");
+    } finally {
+      setDeletingWorkspace(false);
+    }
+  };
+
   if (loading) {
     return <PageSkeleton />;
   }
 
   return (
     <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "1.5rem 1.5rem 5rem" }}>
-      {/* Top Telemetry / Status Line */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.2rem 0.65rem", borderRadius: "999px", background: "rgba(108, 92, 231, 0.1)", color: "var(--accent, #6C5CE7)", fontFamily: "var(--font-mono)", fontSize: "0.75rem", fontWeight: 700 }}>
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent, #6C5CE7)" }} />
-            Hybrid RAG Pipeline · pgvector
-          </span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", color: "var(--muted, #8E93B0)" }}>
-            PostgreSQL 16 + pgvector 768-d
-          </span>
-        </div>
-      </div>
 
       {/* Main Header & Actions */}
       <section style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "1.5rem", marginBottom: "2rem" }}>
         <div>
-          <h1 style={{ fontSize: "2.4rem", fontWeight: 800, margin: "0 0 0.5rem", letterSpacing: "-0.02em", color: "var(--foreground, #1A1D2E)" }}>
-            Research Workspaces
+          <h1 style={{ fontSize: "2rem", fontWeight: 800, margin: "0 0 0.4rem", letterSpacing: "-0.02em", color: "var(--foreground, #1A1D2E)" }}>
+            Workspaces
           </h1>
-          <p style={{ fontSize: "1.05rem", color: "var(--foreground-soft, #4A4F6A)", margin: 0, maxWidth: "680px" }}>
-            Organize, ingest, and interrogate domain corpora with citation grounding across academic and institutional literature.
+          <p style={{ fontSize: "0.95rem", color: "var(--foreground-soft, #4A4F6A)", margin: 0, maxWidth: "580px" }}>
+            Create workspaces to organise documents, upload files, and ask questions with cited answers.
           </p>
         </div>
 
@@ -112,89 +116,35 @@ export function WorkspaceDashboard() {
               boxShadow: "0 4px 16px rgba(108, 92, 231, 0.28)",
             }}
           >
-            Create New Workspace
+            New Workspace
           </Button>
         </div>
       </section>
 
-      {/* Real Metric Ribbon */}
-      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
-        {/* Metric 1 */}
-        <div style={{ background: "var(--surface, #FFFFFF)", padding: "1.5rem", borderRadius: "var(--radius-xl, 24px)", boxShadow: "0 4px 20px rgba(108, 92, 231, 0.05)", border: "1px solid var(--border, #E2E5F0)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-            <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--muted, #8E93B0)" }}>
-              Active Workspaces
-            </span>
-            <div style={{ width: 32, height: 32, borderRadius: "8px", background: "var(--accent-soft, #EDE9FE)", color: "var(--accent, #6C5CE7)", display: "grid", placeItems: "center" }}>
-              <FolderKanban size={16} />
+      {/* Quick Stats */}
+      <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+        <div style={{ background: "var(--surface, #FFFFFF)", padding: "1.25rem", borderRadius: "var(--radius-lg, 18px)", border: "1px solid var(--border, #E2E5F0)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}>
+            <div style={{ width: 28, height: 28, borderRadius: "7px", background: "var(--accent-soft, #EDE9FE)", color: "var(--accent, #6C5CE7)", display: "grid", placeItems: "center" }}>
+              <FolderKanban size={14} />
             </div>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--muted, #8E93B0)" }}>
+              Workspaces
+            </span>
           </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
-            <span style={{ fontSize: "2rem", fontWeight: 800, color: "var(--foreground, #1A1D2E)" }}>{workspaces.length}</span>
-          </div>
-          <p style={{ fontSize: "0.8rem", color: "var(--muted, #8E93B0)", margin: "0.35rem 0 0" }}>
-            Private research collections
-          </p>
+          <span style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--foreground, #1A1D2E)" }}>{workspaces.length}</span>
         </div>
 
-        {/* Metric 2 */}
-        <div style={{ background: "var(--surface, #FFFFFF)", padding: "1.5rem", borderRadius: "var(--radius-xl, 24px)", boxShadow: "0 4px 20px rgba(108, 92, 231, 0.05)", border: "1px solid var(--border, #E2E5F0)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-            <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--muted, #8E93B0)" }}>
-              Vector Store
-            </span>
-            <div style={{ width: 32, height: 32, borderRadius: "8px", background: "var(--teal-soft, #E0FAFA)", color: "var(--teal, #00D2D3)", display: "grid", placeItems: "center" }}>
-              <Network size={16} />
+        <div style={{ background: "var(--surface, #FFFFFF)", padding: "1.25rem", borderRadius: "var(--radius-lg, 18px)", border: "1px solid var(--border, #E2E5F0)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}>
+            <div style={{ width: 28, height: 28, borderRadius: "7px", background: "var(--teal-soft, #E0FAFA)", color: "var(--teal, #00D2D3)", display: "grid", placeItems: "center" }}>
+              <FileText size={14} />
             </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
-            <span style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--foreground, #1A1D2E)" }}>768-dim</span>
-            <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-mono)", background: "var(--surface-raised, #F5F7FC)", padding: "0.15rem 0.5rem", borderRadius: "999px", color: "var(--foreground-soft, #4A4F6A)" }}>
-              Cosine
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--muted, #8E93B0)" }}>
+              Formats
             </span>
           </div>
-          <p style={{ fontSize: "0.8rem", color: "var(--muted, #8E93B0)", margin: "0.35rem 0 0" }}>
-            pgvector exact vector search
-          </p>
-        </div>
-
-        {/* Metric 3 */}
-        <div style={{ background: "var(--surface, #FFFFFF)", padding: "1.5rem", borderRadius: "var(--radius-xl, 24px)", boxShadow: "0 4px 20px rgba(108, 92, 231, 0.05)", border: "1px solid var(--border, #E2E5F0)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-            <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--muted, #8E93B0)" }}>
-              OCR Engine
-            </span>
-            <div style={{ width: 32, height: 32, borderRadius: "8px", background: "var(--coral-soft, #FFF0F0)", color: "var(--coral, #FF6B6B)", display: "grid", placeItems: "center" }}>
-              <Cpu size={16} />
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
-            <span style={{ fontSize: "1.35rem", fontWeight: 800, color: "var(--foreground, #1A1D2E)" }}>Tesseract 5</span>
-            <span style={{ fontSize: "0.75rem", fontFamily: "var(--font-mono)", color: "var(--accent, #6C5CE7)", fontWeight: 700 }}>
-              eng + hin
-            </span>
-          </div>
-          <p style={{ fontSize: "0.8rem", color: "var(--muted, #8E93B0)", margin: "0.35rem 0 0" }}>
-            English & Hindi OCR extraction
-          </p>
-        </div>
-
-        {/* Metric 4 */}
-        <div style={{ background: "var(--surface, #FFFFFF)", padding: "1.5rem", borderRadius: "var(--radius-xl, 24px)", boxShadow: "0 4px 20px rgba(108, 92, 231, 0.05)", border: "1px solid var(--border, #E2E5F0)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-            <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--muted, #8E93B0)" }}>
-              Supported Formats
-            </span>
-            <div style={{ width: 32, height: 32, borderRadius: "8px", background: "var(--teal-soft, #E0FAFA)", color: "var(--teal, #00D2D3)", display: "grid", placeItems: "center" }}>
-              <FileText size={16} />
-            </div>
-          </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
-            <span style={{ fontSize: "1.2rem", fontWeight: 800, color: "var(--teal, #00D2D3)" }}>PDF · TXT · DOCX</span>
-          </div>
-          <p style={{ fontSize: "0.8rem", color: "var(--muted, #8E93B0)", margin: "0.35rem 0 0" }}>
-            + XLSX, PPTX, MD, CSV, TSV
-          </p>
+          <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--foreground, #1A1D2E)" }}>PDF, DOCX, XLSX, PPTX, TXT, MD, CSV</span>
         </div>
       </section>
 
@@ -350,47 +300,44 @@ export function WorkspaceDashboard() {
                 />
 
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.85rem" }}>
-                    <span
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "0.35rem",
-                        fontSize: "0.78rem",
-                        fontWeight: 600,
-                        padding: "0.25rem 0.65rem",
-                        borderRadius: "999px",
-                        background: "var(--surface-raised, #F5F7FC)",
-                        color: "var(--foreground, #1A1D2E)",
-                        border: "1px solid var(--border, #E2E5F0)",
-                      }}
-                    >
-                      <span>📁</span> Workspace
-                    </span>
-                    <span style={{ fontSize: "0.72rem", color: "var(--muted, #8E93B0)", fontFamily: "var(--font-mono)" }}>
-                      {new Date(ws.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  <h3 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 0.5rem", color: "var(--foreground, #1A1D2E)" }}>
+                  <h3 style={{ fontSize: "1.15rem", fontWeight: 700, margin: "0 0 0.4rem", color: "var(--foreground, #1A1D2E)" }}>
                     {ws.name}
                   </h3>
-                  <p style={{ fontSize: "0.88rem", color: "var(--foreground-soft, #4A4F6A)", margin: "0 0 1.25rem", lineHeight: 1.55 }}>
-                    {ws.description || "A private source collection for grounded research."}
+                  <p style={{ fontSize: "0.85rem", color: "var(--foreground-soft, #4A4F6A)", margin: "0 0 1rem", lineHeight: 1.5 }}>
+                    {ws.description || "Upload documents and ask questions with cited answers."}
                   </p>
                 </div>
 
-                {/* Bottom Row */}
-                <div style={{ borderTop: "1px solid var(--border, #E2E5F0)", paddingTop: "0.85rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "0.75rem", color: "var(--muted, #8E93B0)" }}>
-                    ID: {ws.id.slice(0, 8)}...
+                <div style={{ borderTop: "1px solid var(--border, #E2E5F0)", paddingTop: "0.75rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.72rem", color: "var(--muted, #8E93B0)" }}>
+                    Created {new Date(ws.created_at).toLocaleDateString()}
                   </span>
 
-                  <Link href={`/workspaces/${ws.id}`}>
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "var(--accent, #6C5CE7)", fontSize: "0.85rem", fontWeight: 700 }}>
-                      Open Desk <ArrowRight size={14} />
-                    </span>
-                  </Link>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <button
+                      type="button"
+                      onClick={() => setWorkspaceToDelete(ws)}
+                      aria-label={`Delete ${ws.name}`}
+                      title="Delete workspace"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--muted, #8E93B0)",
+                        cursor: "pointer",
+                        padding: "4px",
+                        borderRadius: "6px",
+                        display: "grid",
+                        placeItems: "center",
+                      }}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                    <Link href={`/workspaces/${ws.id}`} style={{ textDecoration: "none" }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "var(--accent, #6C5CE7)", fontSize: "0.84rem", fontWeight: 700 }}>
+                        Open <ArrowRight size={14} />
+                      </span>
+                    </Link>
+                  </div>
                 </div>
               </article>
             );
@@ -415,15 +362,33 @@ export function WorkspaceDashboard() {
                     <div style={{ fontWeight: 700, color: "var(--foreground, #1A1D2E)" }}>{ws.name}</div>
                   </td>
                   <td style={{ padding: "1rem", color: "var(--foreground-soft, #4A4F6A)", fontSize: "0.82rem", maxWidth: "380px" }}>
-                    {ws.description || "A private source collection for grounded research."}
+                    {ws.description || "Upload documents and ask questions with cited answers."}
                   </td>
                   <td style={{ padding: "1rem", fontSize: "0.78rem", color: "var(--muted, #8E93B0)", fontFamily: "var(--font-mono)" }}>
                     {new Date(ws.created_at).toLocaleDateString()}
                   </td>
                   <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
-                    <Link href={`/workspaces/${ws.id}`} className="button button-secondary button-sm">
-                      Open Desk <ArrowRight size={14} />
-                    </Link>
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+                      <button
+                        type="button"
+                        onClick={() => setWorkspaceToDelete(ws)}
+                        aria-label={`Delete ${ws.name}`}
+                        title="Delete workspace"
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "var(--muted, #8E93B0)",
+                          cursor: "pointer",
+                          padding: "6px",
+                          borderRadius: "6px",
+                        }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                      <Link href={`/workspaces/${ws.id}`} className="button button-secondary button-sm">
+                        Open <ArrowRight size={14} />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -464,7 +429,7 @@ export function WorkspaceDashboard() {
                 <div style={{ width: 36, height: 36, borderRadius: "10px", background: "var(--accent-soft, #EDE9FE)", color: "var(--accent, #6C5CE7)", display: "grid", placeItems: "center" }}>
                   <Plus size={20} />
                 </div>
-                <h2 style={{ fontSize: "1.35rem", fontWeight: 800, margin: 0 }}>Create Research Workspace</h2>
+                <h2 style={{ fontSize: "1.35rem", fontWeight: 800, margin: 0 }}>Create Workspace</h2>
               </div>
               <button
                 type="button"
@@ -540,6 +505,20 @@ export function WorkspaceDashboard() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={Boolean(workspaceToDelete)}
+        title="Delete workspace?"
+        description={
+          workspaceToDelete
+            ? `Are you sure you want to delete "${workspaceToDelete.name}"? All documents, indexed vector embeddings, and conversations in this workspace will be permanently removed.`
+            : ""
+        }
+        confirmLabel="Delete Workspace"
+        busy={deletingWorkspace}
+        onCancel={() => setWorkspaceToDelete(null)}
+        onConfirm={() => void handleDeleteWorkspace()}
+      />
     </div>
   );
 }

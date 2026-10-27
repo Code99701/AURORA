@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
@@ -26,7 +27,7 @@ class Document(Base):
             name="ck_documents_status",
         ),
         CheckConstraint(
-            "indexing_status IN ('NOT_INDEXED', 'INDEXING', 'INDEXED', 'FAILED')",
+            "indexing_status IN ('NOT_INDEXED', 'INDEXING', 'INDEXED', 'PARTIAL', 'FAILED')",
             name="ck_documents_indexing_status",
         ),
         CheckConstraint("file_size > 0", name="ck_documents_file_size_positive"),
@@ -51,6 +52,9 @@ class Document(Base):
     content_type: Mapped[str] = mapped_column(String(100), nullable=False)
     file_size: Mapped[int] = mapped_column(BigInteger, nullable=False)
     checksum: Mapped[str] = mapped_column(String(64), nullable=False)
+    content_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    outline: Mapped[Optional[dict | list]] = mapped_column(JSONB, nullable=True)
     status: Mapped[str] = mapped_column(
         String(30), default="UPLOADED", server_default="UPLOADED", nullable=False
     )

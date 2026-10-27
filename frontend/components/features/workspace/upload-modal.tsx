@@ -33,6 +33,8 @@ export function UploadModal({
 
   if (!isOpen) return null;
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -47,7 +49,13 @@ export function UploadModal({
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      setSelectedFile(e.dataTransfer.files[0]);
+      const file = e.dataTransfer.files[0];
+      if (file.size > MAX_FILE_SIZE) {
+        setErrorMessage("File exceeds the 10 MB limit. Please select a smaller document.");
+        setSelectedFile(null);
+        return;
+      }
+      setSelectedFile(file);
       setErrorMessage("");
       setStatus("idle");
     }
@@ -55,7 +63,13 @@ export function UploadModal({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      if (file.size > MAX_FILE_SIZE) {
+        setErrorMessage("File exceeds the 10 MB limit. Please select a smaller document.");
+        setSelectedFile(null);
+        return;
+      }
+      setSelectedFile(file);
       setErrorMessage("");
       setStatus("idle");
     }
@@ -160,10 +174,10 @@ export function UploadModal({
             </div>
             <div>
               <h2 style={{ fontSize: "1.25rem", fontWeight: 700, margin: 0, color: "var(--foreground, #1A1D2E)" }}>
-                Upload & Ingest Document
+                Upload Document
               </h2>
               <p style={{ fontSize: "0.82rem", color: "var(--muted, #8E93B0)", margin: 0 }}>
-                PDF, TXT, DOCX, XLSX, PPTX, CSV, TSV up to 50 MB
+                PDF, DOCX, XLSX, PPTX, TXT, MD up to 10 MB
               </p>
             </div>
           </div>
@@ -232,7 +246,7 @@ export function UploadModal({
             {selectedFile ? selectedFile.name : "Choose a file or drag & drop it here"}
           </p>
           <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--muted, #8E93B0)" }}>
-            {selectedFile ? `${formatFileSize(selectedFile.size)} · Click to change` : "Parses pages, OCRs scanned text, and creates pgvector embeddings"}
+            {selectedFile ? `${formatFileSize(selectedFile.size)} · Click to change` : "Extracts text, preserves tables, and prepares citations"}
           </p>
         </div>
 
@@ -242,9 +256,9 @@ export function UploadModal({
             <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.85rem", color: "var(--foreground, #1A1D2E)" }}>
               <Loader2 size={16} className="animate-spin" color="var(--accent, #6C5CE7)" />
               <span>
-                {status === "uploading" && "Uploading document to secure storage..."}
-                {status === "processing" && "Extracting text and running OCR pipeline..."}
-                {status === "indexing" && "Computing 768-dim embeddings with pgvector..."}
+                {status === "uploading" && "Uploading document…"}
+                {status === "processing" && "Extracting text and tables…"}
+                {status === "indexing" && "Indexing document for search…"}
               </span>
             </div>
             <div style={{ height: "4px", background: "var(--surface-raised, #F5F7FC)", borderRadius: "2px", overflow: "hidden" }}>
@@ -263,7 +277,7 @@ export function UploadModal({
         {status === "done" && (
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--teal, #00D2D3)", fontSize: "0.88rem", fontWeight: 600 }}>
             <CheckCircle2 size={18} />
-            <span>Document successfully indexed into workspace!</span>
+            <span>Document ready for research!</span>
           </div>
         )}
 
@@ -279,7 +293,7 @@ export function UploadModal({
             disabled={!selectedFile || isBusy || status === "done"}
             busy={isBusy}
           >
-            {isBusy ? "Processing..." : "Ingest & Index"}
+            {isBusy ? "Processing..." : "Upload Document"}
           </Button>
         </div>
       </div>

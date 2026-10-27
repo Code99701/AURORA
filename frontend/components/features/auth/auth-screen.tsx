@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Brand } from "@/components/shared/brand";
 import { api, ApiError } from "@/lib/api";
@@ -15,11 +15,26 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
+  const [infoMessage, setInfoMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showResetHint, setShowResetHint] = useState(false);
   const [googleEnabled, setGoogleEnabled] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+
+    // Check if user already has an active session to prevent screen flash
+    api.me()
+      .then((user) => {
+        if (!cancelled && user) {
+          router.replace("/workspaces");
+        }
+      })
+      .catch(() => {
+        // Not authenticated, stay on login page
+      });
+
     api.authProviders()
       .then((data) => {
         if (!cancelled) setGoogleEnabled(Boolean(data?.google?.enabled));
@@ -30,11 +45,12 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setInfoMessage("");
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
@@ -53,8 +69,14 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
       try {
         await api.register(trimmedEmail, password, finalDisplayName);
         // Automatically establish session cookie
-        await api.login(trimmedEmail, password);
-        router.push("/workspaces");
+        try {
+          await api.login(trimmedEmail, password);
+          router.push("/workspaces");
+        } catch {
+          // If auto-login fails, smoothly transition to login tab with confirmation
+          setMode("login");
+          setInfoMessage("Account created successfully! Please sign in with your password.");
+        }
       } catch (err) {
         if (err instanceof ApiError) {
           setError(err.message);
@@ -155,7 +177,7 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
           >
             <button
               type="button"
-              onClick={() => { setMode("login"); setError(""); }}
+              onClick={() => { setMode("login"); setError(""); setInfoMessage(""); }}
               style={{
                 flex: 1,
                 border: "none",
@@ -164,7 +186,7 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                 fontSize: "0.85rem",
                 fontWeight: 600,
                 cursor: "pointer",
-                background: mode === "login" ? "#FFFFFF" : "transparent",
+                background: mode === "login" ? "var(--surface, #FFFFFF)" : "transparent",
                 color: mode === "login" ? "var(--foreground, #1A1D2E)" : "var(--muted, #8E93B0)",
                 boxShadow: mode === "login" ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
                 transition: "all 0.15s ease",
@@ -174,7 +196,7 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
             </button>
             <button
               type="button"
-              onClick={() => { setMode("register"); setError(""); }}
+              onClick={() => { setMode("register"); setError(""); setInfoMessage(""); }}
               style={{
                 flex: 1,
                 border: "none",
@@ -183,7 +205,7 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                 fontSize: "0.85rem",
                 fontWeight: 600,
                 cursor: "pointer",
-                background: mode === "register" ? "#FFFFFF" : "transparent",
+                background: mode === "register" ? "var(--surface, #FFFFFF)" : "transparent",
                 color: mode === "register" ? "var(--foreground, #1A1D2E)" : "var(--muted, #8E93B0)",
                 boxShadow: mode === "register" ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
                 transition: "all 0.15s ease",
@@ -192,6 +214,24 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
               Create Account
             </button>
           </div>
+
+          {/* Info Banner */}
+          {infoMessage && (
+            <div
+              role="status"
+              style={{
+                background: "var(--teal-soft, #E0FAFA)",
+                border: "1px solid color-mix(in srgb, var(--teal) 30%, transparent)",
+                borderRadius: "var(--radius-sm, 8px)",
+                padding: "0.65rem 0.85rem",
+                marginBottom: "1rem",
+                fontSize: "0.82rem",
+                color: "var(--teal, #00B894)",
+              }}
+            >
+              {infoMessage}
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -277,23 +317,76 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                 >
                   Password
                 </label>
-                {mode === "register" && (
+                {mode === "register" ? (
                   <span style={{ fontSize: "0.74rem", color: "var(--muted, #8E93B0)" }}>
                     Min. 8 characters
                   </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowResetHint(!showResetHint)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      fontSize: "0.75rem",
+                      color: "var(--accent, #6C5CE7)",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                    }}
+                  >
+                    Forgot password?
+                  </button>
                 )}
               </div>
-              <input
-                id="password"
-                type="password"
-                required
-                minLength={mode === "register" ? 8 : undefined}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="input"
-                style={{ fontSize: "0.88rem" }}
-              />
+              <div style={{ position: "relative" }}>
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={mode === "register" ? 8 : undefined}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="input"
+                  style={{ fontSize: "0.88rem", paddingRight: "2.5rem" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  style={{
+                    position: "absolute",
+                    right: "0.75rem",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--muted, #8E93B0)",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: 0,
+                  }}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {showResetHint && mode === "login" && (
+                <p
+                  style={{
+                    margin: "0.5rem 0 0",
+                    fontSize: "0.78rem",
+                    color: "var(--foreground-soft, #4A4F6A)",
+                    background: "var(--surface-raised, #F5F7FC)",
+                    padding: "0.5rem 0.75rem",
+                    borderRadius: "6px",
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  Contact your workspace administrator to reset your password.
+                </p>
+              )}
             </div>
 
             <Button

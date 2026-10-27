@@ -110,6 +110,9 @@ export default function DashboardPage() {
           <div style={{ fontSize: "1.25rem", fontWeight: 700, color: isHealthy ? "var(--success, #00B894)" : "var(--coral, #FF6B6B)", marginTop: "0.4rem" }}>
             {platformStatus}
           </div>
+          <div style={{ fontSize: "0.75rem", color: "var(--muted, #8E93B0)", marginTop: "0.25rem" }}>
+            Checked just now
+          </div>
         </Card>
 
         <Card>
@@ -129,11 +132,14 @@ export default function DashboardPage() {
               <MessageSquare size={18} />
             </div>
             <span style={{ fontSize: "var(--text-sm, 0.875rem)", fontWeight: 600, color: "var(--foreground-soft, #4A4F6A)" }}>
-              Supported Modes
+              Supported Formats
             </span>
           </div>
           <div style={{ fontSize: "1.25rem", fontWeight: 700, marginTop: "0.4rem" }}>
-            English & हिन्दी
+            PDF · DOCX · TXT
+          </div>
+          <div style={{ fontSize: "0.75rem", color: "var(--muted, #8E93B0)", marginTop: "0.25rem" }}>
+            English & हिन्दी supported
           </div>
         </Card>
       </section>
@@ -169,7 +175,7 @@ export default function DashboardPage() {
                 <Card interactive>
                   <h3 style={{ fontSize: "1.05rem", fontWeight: 700, margin: "0 0 0.4rem" }}>{ws.name}</h3>
                   <p style={{ fontSize: "0.85rem", color: "var(--foreground-soft, #4A4F6A)", margin: "0 0 0.85rem", minHeight: "2.4em" }}>
-                    {ws.description || "Evidence workspace with uploaded knowledge sources."}
+                    {ws.description || "Upload documents and ask questions with cited answers."}
                   </p>
                   <div style={{ fontSize: "0.75rem", color: "var(--muted, #8E93B0)" }}>
                     Updated {formatDate(ws.updated_at)}

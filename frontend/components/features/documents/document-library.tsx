@@ -185,11 +185,11 @@ export function DocumentLibrary({
   return (
     <div className={styles.library}>
       <header className={styles.toolbar}>
-        <div><p className={styles.kicker}>Source library</p><h2>{loading ? "Loading sources…" : `${documents.length} ${documents.length === 1 ? "document" : "documents"}`}</h2><span>{indexedCount} ready across this workspace</span></div>
+        <div><p className={styles.kicker}>Documents</p><h2>{loading ? "Loading documents…" : `${documents.length} ${documents.length === 1 ? "document" : "documents"}`}</h2><span>{indexedCount} ready for search</span></div>
         <div className={styles.actions}>
           <button className="button button-ghost button-icon" type="button" onClick={() => void load()} aria-label="Refresh documents" title="Refresh documents" disabled={loading}><RefreshCw className={loading ? "spin" : undefined} size={18} /></button>
           <input ref={inputRef} className={styles.fileInput} id="source-upload" type="file" accept={SUPPORTED_DOCUMENT_ACCEPT} onChange={(event) => void upload(event.target.files?.[0])} disabled={uploading} />
-          <label className="button button-primary" htmlFor="source-upload" aria-disabled={uploading}>{uploading ? <LoaderCircle className="spin" size={18} /> : <Plus size={18} />}{uploading ? (pipelineStage === "uploading" ? "Uploading…" : pipelineStage === "processing" ? "Processing…" : "Indexing…") : "Add source"}</label>
+          <label className="button button-primary" htmlFor="source-upload" aria-disabled={uploading}>{uploading ? <LoaderCircle className="spin" size={18} /> : <Plus size={18} />}{uploading ? (pipelineStage === "uploading" ? "Uploading…" : pipelineStage === "processing" ? "Processing…" : "Indexing…") : "Upload Document"}</label>
         </div>
       </header>
 
@@ -210,9 +210,9 @@ export function DocumentLibrary({
       <div className={`${styles.workspaceGrid} ${selectedDocumentId ? styles.withInspector : ""}`}>
         <section className={`surface ${styles.table}`} aria-label="Workspace documents" aria-busy={loading || uploading}>
           {loading ? (
-            <div className={styles.loading}><LoaderCircle className="spin" size={21} /><span>Reading the document register…</span></div>
+            <div className={styles.loading}><LoaderCircle className="spin" size={21} /><span>Loading documents…</span></div>
           ) : documents.length === 0 ? (
-            <EmptyState icon={UploadCloud} title="No source documents yet" description="Upload PDF, TXT, Markdown, CSV, TSV, DOCX, XLSX, or PPTX. AURORA will automatically process and index usable evidence." action={<label className="button button-secondary" htmlFor="source-upload"><Plus size={17} />Choose source</label>} />
+            <EmptyState icon={UploadCloud} title="No documents uploaded yet" description="Upload PDF, DOCX, XLSX, TXT, or Markdown files (up to 10 MB). AURORA will automatically process and index them for citations." action={<label className="button button-primary" htmlFor="source-upload"><Plus size={17} />Upload Document</label>} />
           ) : visibleDocuments.length === 0 ? (
             <EmptyState icon={Search} title="No matching sources" description="Adjust the filename search or lifecycle filter to return to the document register." action={<button className="button button-secondary" type="button" onClick={() => { setQuery(""); setFilter("all"); }}>Clear filters</button>} />
           ) : (
@@ -234,7 +234,7 @@ export function DocumentLibrary({
                     </div>
                     <div className={styles.statuses}><StatusBadge value={document.status} /><StatusBadge value={document.indexing_status} /></div>
                     <div className={styles.rowActions}>
-                      <button className="button button-ghost" type="button" onClick={() => onInspectDocument(document.id, 1)} aria-label={`Inspect ${document.original_filename}`}><Eye size={16} />Inspect</button>
+                      <button className="button button-ghost" type="button" onClick={() => onInspectDocument(document.id, 1)} aria-label={`Preview ${document.original_filename}`}><Eye size={16} />Preview</button>
                       {action && <button className="button button-secondary" type="button" onClick={() => void advance(document)} disabled={busy}>{busy ? <LoaderCircle className="spin" size={16} /> : null}{busy ? (action === "process" ? "Processing…" : "Indexing…") : (action === "process" ? "Process" : "Index")}</button>}
                       {document.indexing_status === "INDEXED" && <span className={styles.ready}>Research ready</span>}
                       <a className="button button-ghost button-icon" href={`/api/v1/workspaces/${workspaceId}/documents/${document.id}/download`} aria-label={`Download ${document.original_filename}`} title="Download"><Download size={17} /></a>

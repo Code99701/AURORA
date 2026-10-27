@@ -57,11 +57,17 @@ export function useWorkspaces() {
     return newWs;
   };
 
+  const deleteWorkspace = async (workspaceId: string) => {
+    await api.deleteWorkspace(workspaceId);
+    setWorkspaces((prev) => prev.filter((ws) => ws.id !== workspaceId));
+  };
+
   return {
     workspaces,
     loading,
     error,
     refetch: fetchWorkspaces,
     createWorkspace,
+    deleteWorkspace,
   };
 }

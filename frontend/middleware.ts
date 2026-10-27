@@ -22,11 +22,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/workspaces", request.url));
   }
 
+  // Redirect root / to /workspaces so users always land directly in the workspace
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/workspaces", request.url));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
+    "/",
     "/workspaces/:path*",
     "/documents/:path*",
     "/dashboard/:path*",

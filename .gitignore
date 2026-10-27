@@ -82,3 +82,6 @@ backend/aurora-env/
 backend/.runtime/
 test-results/
 playwright-report/
+output/
+.agents/
+

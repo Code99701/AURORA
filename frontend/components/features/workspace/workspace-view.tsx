@@ -1,14 +1,16 @@
 "use client";
 
-import { ArrowLeft, BookOpenText, Files } from "lucide-react";
+import { ChevronDown, FolderKanban, Upload } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import type { RAGSource, Workspace } from "@/lib/types";
 import { DocumentLibrary } from "@/components/features/documents/document-library";
 import { ResearchDesk } from "@/components/features/chat/research-desk";
 import { PageSkeleton } from "@/components/ui/skeleton";
+import { ErrorBoundary } from "@/components/shared/error-boundary";
+import { UploadModal } from "@/components/features/workspace/upload-modal";
 import styles from "./workspace-view.module.css";
 
 export function WorkspaceView({
@@ -30,9 +32,11 @@ export function WorkspaceView({
   const [view, setView] = useState<"documents" | "research">(initialView);
   const [selectedDocumentId, setSelectedDocumentId] = useState(initialDocumentId);
   const [requestedPage, setRequestedPage] = useState(initialPage);
+  const [sourceCount, setSourceCount] = useState<number>(0);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const loadWorkspaceMeta = useCallback(() => {
     let cancelled = false;
     api.workspace(workspaceId)
       .then((data) => {
@@ -47,10 +51,25 @@ export function WorkspaceView({
           );
         }
       });
+
+    api.documents(workspaceId)
+      .then((docs) => {
+        if (!cancelled) {
+          const ready = docs.items.filter((d) => d.indexing_status === "INDEXED").length;
+          setSourceCount(ready);
+        }
+      })
+      .catch(() => undefined);
+
     return () => {
       cancelled = true;
     };
   }, [workspaceId]);
+
+  useEffect(() => {
+    return loadWorkspaceMeta();
+  }, [loadWorkspaceMeta]);
+
 
   function selectView(next: "documents" | "research") {
     setView(next);
@@ -91,14 +110,31 @@ export function WorkspaceView({
   }
 
   if (error) {
+    const isNotFound = error.toLowerCase().includes("not found") || error.includes("404");
     return (
-      <div className={styles.center}>
-        <div className="error-banner" role="alert">
-          {error}
+      <div className={styles.center} style={{ padding: "4rem 1.5rem", textAlign: "center", maxWidth: "500px", margin: "0 auto" }}>
+        <div style={{
+          width: 56,
+          height: 56,
+          borderRadius: "16px",
+          background: "var(--coral-soft, #FFF0F0)",
+          color: "var(--coral, #FF6B6B)",
+          display: "grid",
+          placeItems: "center",
+          margin: "0 auto 1.25rem",
+        }}>
+          <FolderKanban size={26} />
         </div>
-        <Link className="button button-secondary" href="/workspaces">
-          <ArrowLeft size={17} />
-          Back to workspaces
+        <h2 style={{ fontSize: "1.4rem", fontWeight: 800, margin: "0 0 0.5rem" }}>
+          {isNotFound ? "Workspace Not Found" : "Could not open workspace"}
+        </h2>
+        <p style={{ color: "var(--foreground-soft)", fontSize: "0.95rem", lineHeight: 1.5, margin: "0 0 1.5rem" }}>
+          {isNotFound
+            ? "This workspace may have been deleted, or you don't have access to view it."
+            : error}
+        </p>
+        <Link href="/workspaces" className="button button-primary" style={{ display: "inline-flex", gap: "0.5rem", alignItems: "center" }}>
+          Back to all workspaces
         </Link>
       </div>
     );
@@ -106,60 +142,91 @@ export function WorkspaceView({
 
   if (!workspace) return <PageSkeleton />;
 
+  const sectionName = view === "research" ? "Research Desk" : "Documents";
+
   return (
-    <div className={styles.page}>
-      <Link className={styles.back} href="/workspaces">
-        <ArrowLeft size={15} />
-        Workspace index
-      </Link>
-      <header className={styles.header}>
-        <p className={styles.eyebrow}>Research workspace</p>
-        <h1>{workspace.name}</h1>
-        <p>{workspace.description || "A private source collection for grounded research."}</p>
+    <div className={styles.workspaceContainer}>
+      {/* Slim Sticky Workspace Header matching mockup */}
+      <header className={styles.stickyHeader}>
+        <div className={styles.breadcrumbs}>
+          <span className={styles.breadWorkspace}>{workspace.name}</span>
+          <span className={styles.breadDivider}>/</span>
+          <span className={styles.breadSection}>{sectionName}</span>
+        </div>
+
+        <div className={styles.headerControls}>
+          {/* Segmented Pill Tabs */}
+          <div className={styles.segmentedTabs} role="tablist" aria-label="Workspace view modes">
+            <button
+              id="research-tab"
+              aria-controls="research-panel"
+              className={`${styles.segmentBtn} ${view === "research" ? styles.segmentActive : ""}`}
+              role="tab"
+              aria-selected={view === "research"}
+              type="button"
+              onClick={() => selectView("research")}
+            >
+              Chat
+            </button>
+            <button
+              id="documents-tab"
+              aria-controls="documents-panel"
+              className={`${styles.segmentBtn} ${view === "documents" ? styles.segmentActive : ""}`}
+              role="tab"
+              aria-selected={view === "documents"}
+              type="button"
+              onClick={() => selectView("documents")}
+            >
+              Documents
+            </button>
+          </div>
+
+          {/* Document Scope Pill */}
+          <div className={styles.scopePill} title="Sources ready for retrieval in this workspace">
+            <span>{sourceCount} {sourceCount === 1 ? "source" : "sources"} in scope</span>
+            <ChevronDown size={12} className={styles.scopeChevron} />
+          </div>
+
+          {/* Quick Upload Button */}
+          <button
+            type="button"
+            className={styles.uploadIconBtn}
+            onClick={() => setUploadOpen(true)}
+            aria-label="Upload document"
+            title="Upload document"
+          >
+            <Upload size={14} />
+          </button>
+        </div>
       </header>
-      <div className={styles.tabs} role="tablist" aria-label="Workspace views">
-        <button
-          id="research-tab"
-          aria-controls="research-panel"
-          className={view === "research" ? styles.active : ""}
-          role="tab"
-          aria-selected={view === "research"}
-          type="button"
-          onClick={() => selectView("research")}
-        >
-          <BookOpenText size={18} />
-          Research Desk
-        </button>
-        <button
-          id="documents-tab"
-          aria-controls="documents-panel"
-          className={view === "documents" ? styles.active : ""}
-          role="tab"
-          aria-selected={view === "documents"}
-          type="button"
-          onClick={() => selectView("documents")}
-        >
-          <Files size={18} />
-          Document Pipeline
-        </button>
-      </div>
-      <section id={`${view}-panel`} role="tabpanel" aria-labelledby={`${view}-tab`}>
-        {view === "documents" ? (
-          <DocumentLibrary
-            workspaceId={workspaceId}
-            selectedDocumentId={selectedDocumentId}
-            requestedPage={requestedPage}
-            onInspectDocument={inspectDocument}
-          />
-        ) : (
-          <ResearchDesk
-            workspaceId={workspaceId}
-            initialConversationId={initialConversationId}
-            onOpenSource={openSource}
-            onOpenDocuments={() => selectView("documents")}
-          />
-        )}
-      </section>
+
+      {/* Workspace Body: Research Desk or Document Library */}
+      <main className={styles.mainContent} id={`${view}-panel`} role="tabpanel" aria-labelledby={`${view}-tab`}>
+        <ErrorBoundary fallbackTitle="Could not load view" fallbackMessage="An unexpected error occurred in this view. Click below to try again.">
+          {view === "documents" ? (
+            <DocumentLibrary
+              workspaceId={workspaceId}
+              selectedDocumentId={selectedDocumentId}
+              requestedPage={requestedPage}
+              onInspectDocument={inspectDocument}
+            />
+          ) : (
+            <ResearchDesk
+              workspaceId={workspaceId}
+              initialConversationId={initialConversationId}
+              onOpenSource={openSource}
+              onOpenDocuments={() => selectView("documents")}
+            />
+          )}
+        </ErrorBoundary>
+      </main>
+
+      <UploadModal
+        isOpen={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        workspaceId={workspaceId}
+        onUploadSuccess={() => loadWorkspaceMeta()}
+      />
     </div>
   );
 }

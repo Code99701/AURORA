@@ -207,6 +207,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ name, description: description || null }),
     }),
+  deleteWorkspace: (workspaceId: string) =>
+    request<void>(`/workspaces/${workspaceId}`, {
+      method: "DELETE",
+    }),
   documents: (workspaceId: string) =>
     request<{ items: Document[]; total: number }>(`/workspaces/${workspaceId}/documents`),
   document: (workspaceId: string, documentId: string) =>

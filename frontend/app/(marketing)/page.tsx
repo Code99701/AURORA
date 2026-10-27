@@ -104,7 +104,7 @@ export default function LandingPage() {
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
             <Languages size={16} color="var(--accent, #6C5CE7)" />
-            English &amp; Hindi
+            English & Hindi
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
             <Lock size={16} color="var(--coral, #FF6B6B)" />
@@ -305,7 +305,7 @@ export default function LandingPage() {
             </p>
             <div style={{ display: "flex", gap: "0.35rem" }}>
               <Badge variant="coral">Source Tracing</Badge>
-              <Badge variant="neutral">Page &amp; Section</Badge>
+              <Badge variant="neutral">Page & Section</Badge>
             </div>
           </Card>
 
@@ -352,10 +352,10 @@ export default function LandingPage() {
               <ShieldCheck size={20} />
             </div>
             <h3 style={{ fontSize: "1.1rem", fontWeight: 700, margin: "0 0 0.4rem" }}>
-              No Hallucinations
+              Grounded Answers
             </h3>
             <p style={{ color: "var(--foreground-soft, #4A4F6A)", margin: "0 0 0.75rem", lineHeight: 1.55, fontSize: "0.88rem" }}>
-              Answers are grounded strictly in your uploaded documents. Claims without evidence are flagged, not fabricated.
+              Answers are tied directly to your uploaded documents. Claims without supporting evidence are flagged, not fabricated.
             </p>
             <div style={{ display: "flex", gap: "0.35rem" }}>
               <Badge variant="pink">Grounded</Badge>
@@ -382,11 +382,11 @@ export default function LandingPage() {
               Private Workspaces
             </h3>
             <p style={{ color: "var(--foreground-soft, #4A4F6A)", margin: "0 0 0.75rem", lineHeight: 1.55, fontSize: "0.88rem" }}>
-              Your documents stay in isolated workspaces. Role-based access control keeps sensitive research secure.
+              Your documents stay in isolated workspaces. Built-in access control keeps sensitive research secure.
             </p>
             <div style={{ display: "flex", gap: "0.35rem" }}>
               <Badge variant="neutral">Workspace Isolation</Badge>
-              <Badge variant="purple">RBAC</Badge>
+              <Badge variant="purple">Access Control</Badge>
             </div>
           </Card>
         </div>

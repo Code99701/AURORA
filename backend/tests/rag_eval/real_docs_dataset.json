@@ -1,0 +1,96 @@
+{
+  "version": "1.0",
+  "description": "AURORA real_docs evaluation set over actual user files in the workspace",
+  "cases": [
+    {
+      "id": "REAL-01",
+      "category": "PAGE_RANGE",
+      "question": "give the explanation of first 5 pages of the pdf",
+      "target_documents": ["ANN PPT UNIT 2.pdf"],
+      "expected_pages": {"ANN PPT UNIT 2.pdf": [1, 2, 3, 4, 5]},
+      "expected_key_facts": ["Artificial Neural Networks", "biological", "brain", "pattern"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-02",
+      "category": "DOC_OVERVIEW",
+      "question": "summarise this document",
+      "target_documents": ["ANN PPT UNIT 2.pdf"],
+      "expected_pages": {"ANN PPT UNIT 2.pdf": [1, 2, 3, 5, 8]},
+      "expected_key_facts": ["Artificial Neural Network", "biological", "neuron"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-03",
+      "category": "AGGREGATION",
+      "question": "which skills appear most often?",
+      "target_documents": ["Arnav_Mahajan_Resume.pdf"],
+      "expected_pages": {"Arnav_Mahajan_Resume.pdf": [1]},
+      "expected_key_facts": ["Python"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-04",
+      "category": "FACT",
+      "question": "What is the author's CGPA and college degree on the resume?",
+      "target_documents": ["Arnav_Mahajan_Resume.pdf"],
+      "expected_pages": {"Arnav_Mahajan_Resume.pdf": [1]},
+      "expected_key_facts": ["7.3", "Mathematics and Computing", "MITS"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-05",
+      "category": "SECTION_SUMMARY",
+      "question": "What are the three projects detailed on the resume?",
+      "target_documents": ["Arnav_Mahajan_Resume.pdf"],
+      "expected_pages": {"Arnav_Mahajan_Resume.pdf": [1]},
+      "expected_key_facts": ["AURORA", "Student Performance Predictor", "Interactive Crossword Puzzle"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-06",
+      "category": "FACT",
+      "question": "What is the chunk size and embedding dimension used in the AURORA project according to the resume?",
+      "target_documents": ["Arnav_Mahajan_Resume.pdf"],
+      "expected_pages": {"Arnav_Mahajan_Resume.pdf": [1]},
+      "expected_key_facts": ["1,000", "768", "Gemini", "pgvector"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-07",
+      "category": "FACT",
+      "question": "Who coined the term machine learning in 1959 according to the ML book?",
+      "target_documents": ["the-hundred-page-machine-learning-book_compress.pdf"],
+      "expected_pages": {"the-hundred-page-machine-learning-book_compress.pdf": [2]},
+      "expected_key_facts": ["Arthur Samuel", "IBM", "1959"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-08",
+      "category": "COMPARISON",
+      "question": "Explain the difference between supervised and unsupervised learning from Chapter 1 of the ML book",
+      "target_documents": ["the-hundred-page-machine-learning-book_compress.pdf"],
+      "expected_pages": {"the-hundred-page-machine-learning-book_compress.pdf": [3, 4]},
+      "expected_key_facts": ["labeled", "unlabeled", "feature vector"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-09",
+      "category": "SECTION_SUMMARY",
+      "question": "Summarise the biological neuron parts mentioned on slide 8 of the ANN presentation",
+      "target_documents": ["ANN PPT UNIT 2.pdf"],
+      "expected_pages": {"ANN PPT UNIT 2.pdf": [8]},
+      "expected_key_facts": ["Soma", "cell body", "Dendrites", "Axon"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-10",
+      "category": "FACT",
+      "question": "What machine learning competition did the candidate participate in?",
+      "target_documents": ["Arnav_Mahajan_Resume.pdf"],
+      "expected_pages": {"Arnav_Mahajan_Resume.pdf": [1]},
+      "expected_key_facts": ["Amazon ML Challenge 2026", "Business Entity Resolution"],
+      "should_refuse": false
+    }
+  ]
+}

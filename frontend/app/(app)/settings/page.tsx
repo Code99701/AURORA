@@ -41,12 +41,12 @@ export default function SettingsPage() {
 
         {/* Appearance Settings */}
         <Card>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
             {theme === "dark" ? <Moon size={20} color="var(--accent, #6C5CE7)" /> : <Sun size={20} color="var(--amber, #FECA57)" />}
             <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>Appearance</h2>
           </div>
           <p style={{ color: "var(--foreground-soft, #4A4F6A)", fontSize: "0.9rem", margin: "0 0 1rem" }}>
-            Choose between light and dark visual themes.
+            Currently using <strong>{theme === "dark" ? "Dark" : "Light"}</strong> mode.
           </p>
           <Button
             variant="secondary"
@@ -58,26 +58,29 @@ export default function SettingsPage() {
           </Button>
         </Card>
 
-        {/* Security & Sessions */}
+        {/* Security & Storage */}
         <Card>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
             <Shield size={20} color="var(--teal, #00D2D3)" />
-            <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>Security & Storage</h2>
+            <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>Security & Privacy</h2>
           </div>
           <p style={{ color: "var(--foreground-soft, #4A4F6A)", fontSize: "0.9rem", margin: 0, lineHeight: 1.6 }}>
-            Your session is secured with an HttpOnly cookie and argon2id password hashing. Documents are stored in private workspace storage and parsed locally with Tesseract 5 OCR and PyMuPDF.
+            Your account is secured with encrypted HTTP-only session cookies and modern password hashing. Uploaded documents are stored in private workspace storage and never shared across accounts.
           </p>
         </Card>
 
         {/* System Information */}
         <Card>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
             <Info size={20} color="var(--coral, #FF6B6B)" />
             <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>System Version</h2>
           </div>
-          <div style={{ fontSize: "0.85rem", color: "var(--foreground-soft, #4A4F6A)", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-            <span>AURORA Web Platform · Version 1.0.0</span>
-            <span>Next.js 16.3.0 · React 19.2.8 · PostgreSQL 16 pgvector</span>
+          <div style={{ fontSize: "0.85rem", color: "var(--foreground-soft, #4A4F6A)", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+            <span style={{ fontWeight: 600 }}>AURORA Platform · v1.0.0</span>
+            <span style={{ color: "var(--success, #00B894)", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "currentColor", display: "inline-block" }} />
+              All systems operational
+            </span>
           </div>
         </Card>
       </div>

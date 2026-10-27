@@ -34,6 +34,13 @@ class DocumentPersistenceError(Exception):
     pass
 
 
+class DocumentConflictError(Exception):
+    def __init__(self, message: str, existing_document: Document):
+        super().__init__(message)
+        self.message = message
+        self.existing_document = existing_document
+
+
 @dataclass(frozen=True)
 class ValidatedUpload:
     filename: str
@@ -113,6 +120,20 @@ def create_document(
     maximum_size: int,
 ) -> Document:
     metadata = validate_upload(upload, maximum_size)
+
+    # Content-hash dedup: reject identical file in the same workspace
+    existing_doc = db.scalar(
+        select(Document).where(
+            Document.workspace_id == workspace.id,
+            (Document.content_hash == metadata.checksum) | (Document.checksum == metadata.checksum),
+        )
+    )
+    if existing_doc:
+        raise DocumentConflictError(
+            f"An identical document already exists in this workspace: '{existing_doc.original_filename}' (id: {existing_doc.id})",
+            existing_doc,
+        )
+
     document_id = uuid.uuid4()
     storage_key = build_storage_key(workspace.id, document_id)
 
@@ -131,6 +152,7 @@ def create_document(
         content_type=metadata.content_type,
         file_size=metadata.file_size,
         checksum=metadata.checksum,
+        content_hash=metadata.checksum,
         status="UPLOADED",
     )
     try:

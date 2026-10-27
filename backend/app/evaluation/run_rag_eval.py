@@ -95,25 +95,36 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="AURORA RAG Pipeline Evaluation Harness")
     parser.add_argument("--live", action="store_true", help="Use real Gemini embedding and LLM providers")
     parser.add_argument("--json", action="store_true", help="Output summary in JSON format")
+    parser.add_argument("--real-docs", action="store_true", help="Evaluate against real workspace documents (ANN PPT, Resume, ML Book)")
+    parser.add_argument("--subset", type=int, default=None, help="Limit evaluation to first N cases (e.g. 10)")
     parser.add_argument(
         "--dataset",
         type=str,
-        default=str(backend_dir / "tests" / "rag_eval" / "golden_dataset.json"),
+        default=None,
         help="Path to golden evaluation dataset JSON",
     )
     args = parser.parse_args()
 
+    default_dataset = (
+        str(backend_dir / "tests" / "rag_eval" / "real_docs_dataset.json")
+        if args.real_docs
+        else str(backend_dir / "tests" / "rag_eval" / "golden_dataset.json")
+    )
+    dataset_path = args.dataset or default_dataset
+
     embedding_provider = None
     llm_provider = None
+    delay = 0.0
 
     if args.live:
-        from app.embeddings.gemini import GeminiEmbeddingProvider
-        from app.llm.gemini import GeminiLLMProvider
+        from app.embeddings.deps import get_embedding_provider
+        from app.llm.deps import get_llm_provider
         if not settings.GEMINI_API_KEY:
             print("[ERROR] GEMINI_API_KEY must be configured in .env for --live evaluation", file=sys.stderr)
             return 1
-        embedding_provider = GeminiEmbeddingProvider()
-        llm_provider = GeminiLLMProvider()
+        embedding_provider = get_embedding_provider()
+        llm_provider = get_llm_provider()
+        delay = 3.5  # Safe pace to respect 15 RPM free quota
     else:
         embedding_provider = EvalDeterministicEmbeddingProvider()
         llm_provider = EvalDeterministicLLMProvider()
@@ -123,7 +134,6 @@ def main() -> int:
     eval_user = None
 
     try:
-        # Find or create evaluation user & isolated evaluation workspace
         eval_user = db.scalar(select(User).order_by(User.id).limit(1))
         if not eval_user:
             eval_user = User(
@@ -146,18 +156,26 @@ def main() -> int:
         db.refresh(eval_workspace)
 
         print(f"[EVAL] Setting up evaluation workspace '{eval_workspace.name}'...")
-        print("[EVAL] Ingesting and indexing 4 fixture documents (slides, handbook, quiz CSV, resume)...")
-        seed_eval_workspace(db, eval_workspace, eval_user, embedding_provider)
+        if args.real_docs:
+            print("[EVAL] Cloning real documents from database (ANN PPT, Resume, ML Book)...")
+            from app.evaluation.rag_evaluator import seed_real_docs_workspace
+            docs = seed_real_docs_workspace(db, eval_workspace, eval_user)
+            print(f"[EVAL] Successfully cloned {len(docs)} documents into evaluation workspace.")
+        else:
+            print("[EVAL] Ingesting and indexing 4 fixture documents (slides, handbook, quiz CSV, resume)...")
+            seed_eval_workspace(db, eval_workspace, eval_user, embedding_provider)
 
-        print(f"[EVAL] Running 40 evaluation cases against dataset: {args.dataset}...")
+        print(f"[EVAL] Running evaluation against dataset: {dataset_path}...")
         results, summaries = run_evaluation(
             db=db,
             workspace=eval_workspace,
             user=eval_user,
-            dataset_path=args.dataset,
+            dataset_path=dataset_path,
             embedding_provider=embedding_provider,
             llm_provider=llm_provider,
             top_k=5,
+            subset_limit=args.subset,
+            delay_between_calls=delay,
         )
 
         if args.json:

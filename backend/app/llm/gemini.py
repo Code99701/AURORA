@@ -1,6 +1,8 @@
 import asyncio
 import json
 import logging
+import re
+import time
 
 import httpx
 
@@ -16,6 +18,35 @@ from app.llm.base import (
 logger = logging.getLogger(__name__)
 TRANSIENT_PROVIDER_STATUSES = {408, 429, 500, 502, 503, 504}
 STREAM_MAX_ATTEMPTS = 2
+GEMINI_MAX_RETRY_DELAY_SECONDS = 65.0
+
+
+def _retry_delay_seconds(response: httpx.Response, attempt: int) -> float:
+    retry_after = response.headers.get("retry-after")
+    if retry_after:
+        try:
+            return min(
+                GEMINI_MAX_RETRY_DELAY_SECONDS,
+                max(0.0, float(retry_after)),
+            )
+        except ValueError:
+            pass
+    message = ""
+    try:
+        message = str(response.json().get("error", {}).get("message", ""))
+    except (ValueError, AttributeError):
+        pass
+    if "per day limit exceeded" in message.lower() or "requests per day" in message.lower():
+        logger.error("Gemini daily quota exceeded: %s", message)
+        return -1.0
+    match = re.search(r"Please retry in ([0-9]+(?:\.[0-9]+)?)s", message)
+    if match:
+        return min(
+            GEMINI_MAX_RETRY_DELAY_SECONDS,
+            max(1.0, float(match.group(1)) + 1.0),
+        )
+    # If Gemini free tier rate limit, wait at least 5s * attempt so 15 RPM recovers
+    return min(GEMINI_MAX_RETRY_DELAY_SECONDS, max(5.0 * attempt, float(2 ** (attempt - 1))))
 
 
 class GeminiLLMProvider:
@@ -46,19 +77,32 @@ class GeminiLLMProvider:
 
     def generate(self, system_instruction: str, user_prompt: str) -> GenerationResult:
         try:
-            response = httpx.post(
-                "https://generativelanguage.googleapis.com/"
-                f"v1beta/models/{self.model_name}:generateContent",
-                headers={"x-goog-api-key": self._api_key},
-                json=self._request_body(system_instruction, user_prompt),
-                timeout=60.0,
-            )
-            if response.status_code == 429:
-                logger.warning(
-                    "Gemini generation request rate limited (status=%s)",
-                    response.status_code,
+            response: httpx.Response | None = None
+            for attempt in range(1, 7):
+                response = httpx.post(
+                    "https://generativelanguage.googleapis.com/"
+                    f"v1beta/models/{self.model_name}:generateContent",
+                    headers={"x-goog-api-key": self._api_key},
+                    json=self._request_body(system_instruction, user_prompt),
+                    timeout=60.0,
                 )
-                raise LLMRateLimitError("Generation provider rate limit reached")
+                if response.status_code != 429:
+                    break
+                delay = _retry_delay_seconds(response, attempt)
+                if delay < 0.0 or attempt == 6:
+                    logger.warning(
+                        "Gemini generation request rate limited (status=%s)",
+                        response.status_code,
+                    )
+                    raise LLMRateLimitError("Generation provider rate limit reached")
+                logger.warning(
+                    "Gemini generation quota reached; retrying (attempt=%s, delay=%.2fs)",
+                    attempt,
+                    delay,
+                )
+                time.sleep(delay)
+
+            assert response is not None
             response.raise_for_status()
             payload = response.json()
             candidates = payload.get("candidates") or []

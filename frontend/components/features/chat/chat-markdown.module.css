@@ -1,0 +1,334 @@
+.markdownBody {
+  font-family: var(--font-inter);
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.68;
+  color: var(--foreground);
+  overflow-wrap: break-word;
+}
+
+/* Paragraphs */
+.paragraph {
+  margin: 0 0 0.85em 0;
+  line-height: 1.68;
+}
+
+.paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Headings */
+.heading1, .heading2, .heading3, .heading4 {
+  font-family: var(--font-inter);
+  color: var(--foreground);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 1.25em 0 0.5em 0;
+}
+
+.heading1 {
+  font-size: 1.18rem;
+}
+
+.heading2 {
+  font-size: 1.08rem;
+}
+
+.heading3 {
+  font-size: 1rem;
+}
+
+.heading4 {
+  font-size: 0.92rem;
+}
+
+/* Lists */
+.unorderedList {
+  margin: 0.5em 0 0.9em 0;
+  padding-left: 1.35em;
+  list-style-type: disc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+}
+
+.orderedList {
+  margin: 0.5em 0 0.9em 0;
+  padding-left: 1.35em;
+  list-style-type: decimal;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+}
+
+.listItem {
+  line-height: 1.6;
+  color: var(--foreground);
+}
+
+.listItem::marker {
+  color: var(--accent);
+}
+
+/* Text formatting */
+.strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.em {
+  font-style: italic;
+}
+
+/* Blockquotes */
+.blockquote {
+  margin: 0.85em 0;
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--foreground-soft);
+  font-size: 0.9em;
+}
+
+.blockquote p {
+  margin: 0;
+}
+
+/* Tables */
+.tableWrapper {
+  overflow-x: auto;
+  margin: 1em 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  text-align: left;
+}
+
+.tableHeaderCell {
+  padding: 9px 13px;
+  background: var(--surface-raised);
+  font-weight: 600;
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+}
+
+.tableCell {
+  padding: 9px 13px;
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.table tr:last-child .tableCell {
+  border-bottom: none;
+}
+
+/* Horizontal rule */
+.hr {
+  margin: 1.25em 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+/* Inline Code */
+.inlineCode {
+  font-family: var(--font-mono);
+  font-size: 0.84em;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  color: var(--foreground);
+}
+
+/* Code Block */
+.codeBlockWrapper {
+  position: relative;
+  margin: 1em 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+
+.codeLanguage {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding: 6px 14px 0;
+}
+
+.pre {
+  margin: 0;
+  padding: 12px 14px;
+  overflow-x: auto;
+}
+
+.codeBlock {
+  font-family: var(--font-mono);
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--foreground);
+}
+
+/* External Link */
+.externalLink {
+  display: inline-inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: color 140ms ease;
+}
+
+.externalLink:hover {
+  color: var(--accent-strong);
+}
+
+.linkIcon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Citation Chip */
+.chipContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  vertical-align: baseline;
+  margin: 0 2px;
+}
+
+.citationChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: var(--font-inter);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(108, 92, 231, 0.25);
+  transition: transform 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+  vertical-align: middle;
+}
+
+.citationChip:hover,
+.citationChip:focus-visible {
+  background: var(--accent-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 7px rgba(108, 92, 231, 0.4);
+  outline: 2px solid var(--accent-soft);
+}
+
+/* Tooltip Popover */
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: max-content;
+  min-width: 200px;
+  max-width: 280px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-float);
+  pointer-events: none;
+  animation: tooltipFadeIn 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--surface) transparent transparent transparent;
+}
+
+.tooltipTop {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tooltipIcon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.tooltipFilename {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tooltipDetails {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.69rem;
+}
+
+.tooltipLocation {
+  color: var(--muted);
+}
+
+.tooltipConfidence {
+  color: var(--accent-strong);
+  font-weight: 600;
+  background: var(--accent-soft);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.tooltipAction {
+  font-size: 0.66rem;
+  color: var(--accent);
+  font-weight: 500;
+  border-top: 1px solid var(--border);
+  padding-top: 5px;
+  margin-top: 2px;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
