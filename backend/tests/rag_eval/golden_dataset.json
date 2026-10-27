@@ -1,0 +1,396 @@
+{
+  "version": "2.0",
+  "description": "AURORA RAG Golden Evaluation Dataset covering 10 intent categories across 4 fixture documents",
+  "cases": [
+    {
+      "id": "FACT-01",
+      "category": "FACT",
+      "question": "What CGPA did Arnav Mahajan achieve in his Bachelor of Technology degree?",
+      "target_documents": ["resume"],
+      "expected_pages": {"resume": [1]},
+      "expected_key_facts": ["8.85"],
+      "should_refuse": false
+    },
+    {
+      "id": "FACT-02",
+      "category": "FACT",
+      "question": "What is the mathematical formula for the logistic sigmoid activation function?",
+      "target_documents": ["slides"],
+      "expected_pages": {"slides": [8, 18, 28, 38, 48, 58, 68, 78, 88, 98, 108, 118]},
+      "expected_key_facts": ["1 / (1 + exp(-z))", "sigmoid"],
+      "should_refuse": false
+    },
+    {
+      "id": "FACT-03",
+      "category": "FACT",
+      "question": "What score did Diya Sen get on the department quiz?",
+      "target_documents": ["quiz_csv"],
+      "expected_pages": {"quiz_csv": [2]},
+      "expected_key_facts": ["96"],
+      "should_refuse": false
+    },
+    {
+      "id": "FACT-04",
+      "category": "FACT",
+      "question": "Which algorithm maintains per-parameter second moment estimates according to the handbook?",
+      "target_documents": ["handbook"],
+      "expected_pages": {"handbook": [8]},
+      "expected_key_facts": ["Adam", "RMSProp"],
+      "should_refuse": false
+    },
+
+    {
+      "id": "PAGE_RANGE-01",
+      "category": "PAGE_RANGE",
+      "question": "Give the explanation of first 5 pages of the ANN slides",
+      "target_documents": ["slides"],
+      "expected_pages": {"slides": [1, 2, 3, 4, 5]},
+      "expected_key_facts": ["biological", "McCulloch-Pitts", "Perceptron", "Learning Rule"],
+      "should_refuse": false
+    },
+    {
+      "id": "PAGE_RANGE-02",
+      "category": "PAGE_RANGE",
+      "question": "What topics are covered on pages 11 to 13 of the deep learning handbook?",
+      "target_documents": ["handbook"],
+      "expected_pages": {"handbook": [11, 12, 13]},
+      "expected_key_facts": ["Convolution", "Pooling", "Residual"],
+      "should_refuse": false
+    },
+    {
+      "id": "PAGE_RANGE-03",
+      "category": "PAGE_RANGE",
+      "question": "Explain the contents on page 1 of the candidate resume",
+      "target_documents": ["resume"],
+      "expected_pages": {"resume": [1]},
+      "expected_key_facts": ["Student Performance Predictor", "Crossword Puzzle", "MITS"],
+      "should_refuse": false
+    },
+    {
+      "id": "PAGE_RANGE-04",
+      "category": "PAGE_RANGE",
+      "question": "Summarise the student quiz results on page 2 of the department records",
+      "target_documents": ["quiz_csv"],
+      "expected_pages": {"quiz_csv": [2]},
+      "expected_key_facts": ["STU011", "Diya Sen", "Pooja Bansal"],
+      "should_refuse": false
+    },
+
+    {
+      "id": "DOC_OVERVIEW-01",
+      "category": "DOC_OVERVIEW",
+      "question": "Provide a comprehensive summary of the candidate resume",
+      "target_documents": ["resume"],
+      "expected_pages": {"resume": [1, 2]},
+      "expected_key_facts": ["Computer Science", "Predictor", "Amazon ML Challenge", "Python"],
+      "should_refuse": false
+    },
+    {
+      "id": "DOC_OVERVIEW-02",
+      "category": "DOC_OVERVIEW",
+      "question": "Summarise the entire deep learning handbook across all chapters",
+      "target_documents": ["handbook"],
+      "expected_pages": {"handbook": [1, 6, 11, 16, 21]},
+      "expected_key_facts": ["Mathematical Foundations", "Optimization", "Convolutional", "Attention", "Regularization"],
+      "should_refuse": false
+    },
+    {
+      "id": "DOC_OVERVIEW-03",
+      "category": "DOC_OVERVIEW",
+      "question": "Give an overview of what is present in the ANN lecture slides",
+      "target_documents": ["slides"],
+      "expected_pages": {"slides": [1, 4, 7, 8, 10]},
+      "expected_key_facts": ["Neural Networks", "Perceptron", "Activation", "ReLU", "MLP"],
+      "should_refuse": false
+    },
+    {
+      "id": "DOC_OVERVIEW-04",
+      "category": "DOC_OVERVIEW",
+      "question": "What is the scope and content of the department quiz records dataset?",
+      "target_documents": ["quiz_csv"],
+      "expected_pages": {"quiz_csv": [1, 2]},
+      "expected_key_facts": ["StudentID", "Department", "Score", "Skills"],
+      "should_refuse": false
+    },
+
+    {
+      "id": "SECTION_SUMMARY-01",
+      "category": "SECTION_SUMMARY",
+      "question": "Summarise Chapter 3 on Convolutional Architectures from the deep learning handbook",
+      "target_documents": ["handbook"],
+      "expected_pages": {"handbook": [11, 12, 13, 14, 15]},
+      "expected_key_facts": ["translation invariance", "ResNet", "skip pathways", "pyramid"],
+      "should_refuse": false
+    },
+    {
+      "id": "SECTION_SUMMARY-02",
+      "category": "SECTION_SUMMARY",
+      "question": "What are the project details listed in the projects section of the resume?",
+      "target_documents": ["resume"],
+      "expected_pages": {"resume": [1]},
+      "expected_key_facts": ["Student Performance Predictor", "math", "Interactive Crossword Puzzle", "JavaScript"],
+      "should_refuse": false
+    },
+    {
+      "id": "SECTION_SUMMARY-03",
+      "category": "SECTION_SUMMARY",
+      "question": "Summarise Chapter 5 on Regularization and Generalization in the handbook",
+      "target_documents": ["handbook"],
+      "expected_pages": {"handbook": [21, 22, 23, 24, 25]},
+      "expected_key_facts": ["Weight decay", "Dropout", "Early stopping"],
+      "should_refuse": false
+    },
+    {
+      "id": "SECTION_SUMMARY-04",
+      "category": "SECTION_SUMMARY",
+      "question": "Summarise the activation functions section from the lecture slides",
+      "target_documents": ["slides"],
+      "expected_pages": {"slides": [8, 9, 10]},
+      "expected_key_facts": ["Sigmoid", "Tanh", "ReLU"],
+      "should_refuse": false
+    },
+
+    {
+      "id": "AGGREGATION-01",
+      "category": "AGGREGATION",
+      "question": "Which primary skill appears most often in the department quiz records?",
+      "target_documents": ["quiz_csv"],
+      "expected_pages": {"quiz_csv": [1, 2]},
+      "expected_key_facts": ["Python"],
+      "should_refuse": false
+    },
+    {
+      "id": "AGGREGATION-02",
+      "category": "AGGREGATION",
+      "question": "How many students failed the department quiz?",
+      "target_documents": ["quiz_csv"],
+      "expected_pages": {"quiz_csv": [1, 2]},
+      "expected_key_facts": ["4"],
+      "should_refuse": false
+    },
+    {
+      "id": "AGGREGATION-03",
+      "category": "AGGREGATION",
+      "question": "List all machine learning and data science skills mentioned in the resume",
+      "target_documents": ["resume"],
+      "expected_pages": {"resume": [2]},
+      "expected_key_facts": ["PyTorch", "scikit-learn", "Pandas", "NumPy", "pgvector"],
+      "should_refuse": false
+    },
+    {
+      "id": "AGGREGATION-04",
+      "category": "AGGREGATION",
+      "question": "How many total students are recorded across both quiz batches?",
+      "target_documents": ["quiz_csv"],
+      "expected_pages": {"quiz_csv": [1, 2]},
+      "expected_key_facts": ["20"],
+      "should_refuse": false
+    },
+
+    {
+      "id": "COMPARISON-01",
+      "category": "COMPARISON",
+      "question": "Compare the technical skills on the resume with the skills tested in the department quiz records",
+      "target_documents": ["resume", "quiz_csv"],
+      "expected_pages": {"resume": [2], "quiz_csv": [1, 2]},
+      "expected_key_facts": ["Python", "PyTorch", "SQL"],
+      "should_refuse": false
+    },
+    {
+      "id": "COMPARISON-02",
+      "category": "COMPARISON",
+      "question": "Compare the neural network foundations in the slides with the deep sequence models in the handbook",
+      "target_documents": ["slides", "handbook"],
+      "expected_pages": {"slides": [3, 4, 7], "handbook": [16, 17, 18]},
+      "expected_key_facts": ["Perceptron", "attention", "LSTM"],
+      "should_refuse": false
+    },
+    {
+      "id": "COMPARISON-03",
+      "category": "COMPARISON",
+      "question": "Does the candidate resume list tools mentioned in the handbook's regularization chapter?",
+      "target_documents": ["resume", "handbook"],
+      "expected_pages": {"resume": [2], "handbook": [21, 22]},
+      "expected_key_facts": ["PyTorch", "Dropout"],
+      "should_refuse": false
+    },
+    {
+      "id": "COMPARISON-04",
+      "category": "COMPARISON",
+      "question": "Compare Aarav Sharma's primary skill with the candidate resume's primary programming language",
+      "target_documents": ["quiz_csv", "resume"],
+      "expected_pages": {"quiz_csv": [1], "resume": [2]},
+      "expected_key_facts": ["Python"],
+      "should_refuse": false
+    },
+
+    {
+      "id": "MULTI_HOP-01",
+      "category": "MULTI_HOP",
+      "question": "What framework was used in the project that predicts math scores, and what university did the author attend?",
+      "target_documents": ["resume"],
+      "expected_pages": {"resume": [1]},
+      "expected_key_facts": ["Flask", "scikit-learn", "Madhav Institute of Technology and Science"],
+      "should_refuse": false
+    },
+    {
+      "id": "MULTI_HOP-02",
+      "category": "MULTI_HOP",
+      "question": "Which student achieved the highest quiz score in Data Science and what is their primary skill?",
+      "target_documents": ["quiz_csv"],
+      "expected_pages": {"quiz_csv": [2]},
+      "expected_key_facts": ["Diya Sen", "96", "Python"],
+      "should_refuse": false
+    },
+    {
+      "id": "MULTI_HOP-03",
+      "category": "MULTI_HOP",
+      "question": "What achievement does the candidate have in machine learning competitions, and what model architecture was fine-tuned?",
+      "target_documents": ["resume"],
+      "expected_pages": {"resume": [2]},
+      "expected_key_facts": ["Amazon ML Challenge 2026", "transformer"],
+      "should_refuse": false
+    },
+    {
+      "id": "MULTI_HOP-04",
+      "category": "MULTI_HOP",
+      "question": "In the handbook, what chapter discusses skip connections, and what benchmark accuracy is reported?",
+      "target_documents": ["handbook"],
+      "expected_pages": {"handbook": [13]},
+      "expected_key_facts": ["Chapter 3", "ResNet", "84.6%"],
+      "should_refuse": false
+    },
+
+    {
+      "id": "FOLLOWUP-01",
+      "category": "FOLLOWUP",
+      "question": "Tell me more about the second one",
+      "target_documents": ["resume"],
+      "history": [
+        ["user", "What projects are listed on Arnav Mahajan's resume?"],
+        ["assistant", "The resume lists two projects: 1. Student Performance Predictor and 2. Interactive Crossword Puzzle."]
+      ],
+      "expected_pages": {"resume": [1]},
+      "expected_key_facts": ["Interactive Crossword Puzzle", "JavaScript", "HTML", "CSS"],
+      "should_refuse": false
+    },
+    {
+      "id": "FOLLOWUP-02",
+      "category": "FOLLOWUP",
+      "question": "What does eta represent in that equation?",
+      "target_documents": ["slides"],
+      "history": [
+        ["user", "What is the perceptron learning rule?"],
+        ["assistant", "The weight update equation is w_new = w_old + eta * (target - output) * input."]
+      ],
+      "expected_pages": {"slides": [5]},
+      "expected_key_facts": ["learning rate", "step size"],
+      "should_refuse": false
+    },
+    {
+      "id": "FOLLOWUP-03",
+      "category": "FOLLOWUP",
+      "question": "Which department are they from and what was their score?",
+      "target_documents": ["quiz_csv"],
+      "history": [
+        ["user", "Who scored the highest in the quiz?"],
+        ["assistant", "Diya Sen scored highest on the quiz."]
+      ],
+      "expected_pages": {"quiz_csv": [2]},
+      "expected_key_facts": ["Data Science", "96"],
+      "should_refuse": false
+    },
+    {
+      "id": "FOLLOWUP-04",
+      "category": "FOLLOWUP",
+      "question": "Translate this answer to Hindi",
+      "target_documents": ["resume"],
+      "answer_language": "Hindi",
+      "history": [
+        ["user", "Where did the candidate complete their bachelor degree?"],
+        ["assistant", "Madhav Institute of Technology and Science (MITS) in Gwalior."]
+      ],
+      "expected_pages": {"resume": [1]},
+      "expected_key_facts": ["माधव", "ग्वालियर", "एमआईटीएस"],
+      "should_refuse": false
+    },
+
+    {
+      "id": "HINDI-01",
+      "category": "HINDI",
+      "question": "उम्मीदवार अर्नव महाजन के रेज़्यूमे में कौन से मुख्य प्रोजेक्ट शामिल हैं?",
+      "target_documents": ["resume"],
+      "answer_language": "Hindi",
+      "expected_pages": {"resume": [1]},
+      "expected_key_facts": ["प्रोजेक्ट", "स्टूडेंट", "क्रॉसवर्ड"],
+      "should_refuse": false
+    },
+    {
+      "id": "HINDI-02",
+      "category": "HINDI",
+      "question": "डीप लर्निंग हैंडबुक के अध्याय 3 में किस मुख्य आर्किटेक्चर की चर्चा की गई है?",
+      "target_documents": ["handbook"],
+      "answer_language": "Hindi",
+      "expected_pages": {"handbook": [11, 12, 13]},
+      "expected_key_facts": ["कन्वोल्यूशनल", "ResNet"],
+      "should_refuse": false
+    },
+    {
+      "id": "HINDI-03",
+      "category": "HINDI",
+      "question": "क्विज़ में किस छात्र ने सबसे अधिक अंक प्राप्त किए और उनके अंक क्या हैं?",
+      "target_documents": ["quiz_csv"],
+      "answer_language": "Hindi",
+      "expected_pages": {"quiz_csv": [2]},
+      "expected_key_facts": ["दीया सेन", "96"],
+      "should_refuse": false
+    },
+    {
+      "id": "HINDI-04",
+      "category": "HINDI",
+      "question": "तंत्रिका नेटवर्क व्याख्यान में रिले (ReLU) सक्रियण फ़ंक्शन क्या करता है?",
+      "target_documents": ["slides"],
+      "answer_language": "Hindi",
+      "expected_pages": {"slides": [10]},
+      "expected_key_facts": ["max(0, z)", "सक्रियण"],
+      "should_refuse": false
+    },
+
+    {
+      "id": "UNANSWERABLE-01",
+      "category": "UNANSWERABLE",
+      "question": "What is the secret administrator password and master cryptographic key?",
+      "target_documents": ["resume", "handbook", "quiz_csv", "slides"],
+      "expected_pages": {},
+      "expected_key_facts": [],
+      "should_refuse": true
+    },
+    {
+      "id": "UNANSWERABLE-02",
+      "category": "UNANSWERABLE",
+      "question": "Who won the 1990 FIFA World Cup final according to the handbook?",
+      "target_documents": ["handbook"],
+      "expected_pages": {},
+      "expected_key_facts": [],
+      "should_refuse": true
+    },
+    {
+      "id": "UNANSWERABLE-03",
+      "category": "UNANSWERABLE",
+      "question": "What is the personal residential home address and blood group of student Rohan Verma?",
+      "target_documents": ["quiz_csv"],
+      "expected_pages": {},
+      "expected_key_facts": [],
+      "should_refuse": true
+    },
+    {
+      "id": "UNANSWERABLE-04",
+      "category": "UNANSWERABLE",
+      "question": "What interest rate is charged on the student loan mentioned on slide 45?",
+      "target_documents": ["slides"],
+      "expected_pages": {},
+      "expected_key_facts": [],
+      "should_refuse": true
+    }
+  ]
+}
