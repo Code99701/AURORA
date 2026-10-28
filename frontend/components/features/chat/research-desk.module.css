@@ -240,17 +240,19 @@
 }
 
 .userBubble {
-  background: var(--accent);
-  color: #ffffff;
-  border-radius: 18px 18px 4px 18px;
-  padding: 11px 18px;
+  background: var(--accent-soft);
+  color: var(--foreground);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-radius: 12px;
+  padding: 10px 14px;
   font-family: var(--font-inter);
-  font-size: 0.92rem;
-  line-height: 1.5;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.55;
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.25);
+  box-shadow: none;
   word-break: break-word;
   white-space: pre-wrap;
+  max-width: 75%;
 }
 
 /* Assistant turn */
@@ -307,14 +309,7 @@
   gap: 10px;
   color: var(--foreground-soft);
   margin: 8px 0;
-}
-
-.streamPlaceholder > span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: streamPulse 1.2s ease-in-out infinite;
+  font-size: 0.82rem;
 }
 
 .streamCursor {
@@ -327,88 +322,151 @@
   animation: streamBlink 900ms steps(2, start) infinite;
 }
 
-.insufficient {
+/* Refusal card */
+.refusalCard {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 14px;
-  border: 1px solid color-mix(in srgb, var(--warning) 34%, transparent);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  color: var(--warning);
-  background: color-mix(in srgb, var(--warning) 8%, transparent);
-  font-size: 0.78rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warning);
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 16px;
+  background: var(--surface-raised);
 }
 
-.sourcesBar {
+.refusalIcon {
+  color: var(--warning);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.refusalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.refusalTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.refusalText {
+  font-size: 0.8125rem;
+  color: var(--foreground-soft);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.refusalHint {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Grouped Sources */
+.sourcesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.sourcesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sourcesLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.toggleSourcesBtn {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-family: var(--font-inter);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.toggleSourcesBtn:hover {
+  text-decoration: underline;
+}
+
+.groupedSourcesList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.docSourceRow {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 14px;
-  padding-top: 12px;
 }
 
-.sourcesLabel {
-  font-size: 0.74rem;
-  font-weight: 600;
+.docSourceFilename {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--foreground-soft);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.docSourceIcon {
   color: var(--muted);
-  margin-right: 2px;
+  flex-shrink: 0;
 }
 
-.sourcePills {
+.pageChipsWrap {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
 }
 
-.sourcePill {
+.pageChip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 26px;
+  gap: 4px;
+  height: 24px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 2px 9px;
+  padding: 0 7px;
   background: var(--surface);
-  color: var(--foreground);
+  color: var(--foreground-soft);
   font-family: var(--font-inter);
-  font-size: 0.73rem;
+  font-size: 0.72rem;
   cursor: pointer;
   transition: all 140ms ease;
 }
 
-.sourcePill:hover {
+.pageChip:hover {
   border-color: var(--accent);
   background: var(--accent-soft);
-  color: var(--accent-strong);
+  color: var(--accent);
 }
 
-.sourcePillNum {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 15px;
-  height: 15px;
-  border-radius: 3px;
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.sourcePillText {
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 500;
-}
-
-.sourcePillLoc {
-  color: var(--muted);
-  font-size: 0.69rem;
+.pageChipPos {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent);
 }
 
 /* Turn Actions */
@@ -416,7 +474,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 12px;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.assistantTurn:hover .turnActions,
+.latestActions {
+  opacity: 1;
 }
 
 .actionBtn {
@@ -428,9 +493,9 @@
   border-radius: 6px;
   padding: 0 8px;
   background: transparent;
-  color: var(--muted);
+  color: var(--foreground-soft);
   font-family: var(--font-inter);
-  font-size: 0.72rem;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 140ms ease;

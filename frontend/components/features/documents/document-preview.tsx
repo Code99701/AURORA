@@ -9,6 +9,7 @@ import {
   FileText,
   LoaderCircle,
   RefreshCw,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { api, ApiError } from "@/lib/api";
@@ -36,11 +37,13 @@ export function DocumentPreview({
   documentId,
   requestedPage,
   onPageChange,
+  onClose,
 }: {
   workspaceId: string;
   documentId: string;
   requestedPage: number;
   onPageChange: (page: number) => void;
+  onClose?: () => void;
 }) {
   const [document, setDocument] = useState<Document | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -137,6 +140,17 @@ export function DocumentPreview({
         <div className={styles.headerActions}>
           <a className="button button-ghost button-icon" href={downloadUrl} aria-label={`Download ${document.original_filename}`} title="Download source"><Download size={17} /></a>
           <a className="button button-secondary" href={state === "unsupported" ? downloadUrl : inlinePreviewUrl} target={state === "unsupported" ? undefined : "_blank"} rel={state === "unsupported" ? undefined : "noreferrer"}>{state === "unsupported" ? <Download size={16} /> : <ExternalLink size={16} />}{state === "unsupported" ? "Download file" : "Open file"}</a>
+          {onClose && (
+            <button
+              className="button button-ghost button-icon"
+              type="button"
+              onClick={onClose}
+              aria-label="Close preview"
+              title="Close preview"
+            >
+              <X size={17} />
+            </button>
+          )}
         </div>
       </header>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AlertTriangle,
   ArrowDown,
   Bookmark,
   Check,
@@ -8,6 +9,7 @@ import {
   Copy,
   Download,
   FileSearch,
+  FileText,
   Globe,
   Layers,
   LoaderCircle,
@@ -22,7 +24,7 @@ import {
 } from "lucide-react";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import type { Conversation, ConversationMessage, RAGSource, StreamingPhase } from "@/lib/types";
 import { advanceStreamingState, canStartStreaming, isNearStreamBottom } from "@/lib/streaming-state";
@@ -37,12 +39,6 @@ const LANGUAGES = [
   { value: "", label: "Match question" },
   { value: "English", label: "English" },
   { value: "Hindi", label: "हिन्दी" },
-];
-
-const SUGGESTIONS = [
-  "Which skills appear most often?",
-  "Summarise the projects in 3 lines",
-  "Translate this answer to Hindi",
 ];
 
 function formatConversationDate(value: string) {
@@ -68,26 +64,78 @@ function Evidence({
   sources: RAGSource[];
   onOpenSource: (source: RAGSource) => void;
 }) {
+  const [showAll, setShowAll] = useState(false);
+
+  const grouped = useMemo(() => {
+    const map = new Map<string, { filename: string; sources: RAGSource[] }>();
+    for (const src of sources) {
+      const key = src.document_id || src.filename;
+      if (!map.has(key)) {
+        map.set(key, { filename: src.filename, sources: [] });
+      }
+      map.get(key)!.sources.push(src);
+    }
+    return Array.from(map.values());
+  }, [sources]);
+
+  const displayedSources = showAll ? sources : sources.slice(0, 3);
+  const totalCount = sources.length;
+
   return (
-    <div className={styles.sourcesBar} aria-label="Evidence sources">
-      <span className={styles.sourcesLabel}>Sources</span>
-      <div className={styles.sourcePills}>
-        {sources.map((source) => (
+    <div className={styles.sourcesContainer} aria-label="Evidence sources">
+      <div className={styles.sourcesHeader}>
+        <span className={styles.sourcesLabel}>Sources ({totalCount})</span>
+        {totalCount > 3 && (
           <button
-            className={styles.sourcePill}
             type="button"
-            key={source.citation_id || source.position}
-            onClick={() => onOpenSource(source)}
-            aria-label={`Open ${source.filename}, ${formatSourceLocation(source)}`}
-            title={`View evidence: ${source.filename} (${confidence(source.similarity)})`}
+            className={styles.toggleSourcesBtn}
+            onClick={() => setShowAll(!showAll)}
           >
-            <span className={styles.sourcePillNum}>{source.position}</span>
-            <span className={styles.sourcePillText}>{source.filename}</span>
-            <span className={styles.sourcePillLoc}>
-              · {source.locator?.type === "pptx_slide" || /\.(pptx?|odp)$/i.test(source.filename || "") ? `Slide ${source.page_number || 1}` : `p. ${source.page_number || 1}`}
-            </span>
+            {showAll ? "Show less" : `Show all ${totalCount} sources`}
           </button>
-        ))}
+        )}
+      </div>
+
+      <div className={styles.groupedSourcesList}>
+        {grouped.map((group) => {
+          const groupSources = showAll
+            ? group.sources
+            : group.sources.filter((s) => displayedSources.includes(s));
+          if (groupSources.length === 0) return null;
+
+          return (
+            <div key={group.filename} className={styles.docSourceRow}>
+              <span className={styles.docSourceFilename} title={group.filename}>
+                <FileText size={13} className={styles.docSourceIcon} />
+                <span>{group.filename}</span>
+              </span>
+              <div className={styles.pageChipsWrap}>
+                {groupSources.map((source) => {
+                  const isPptx =
+                    source.locator?.type === "pptx_slide" ||
+                    /\.(pptx?|odp)$/i.test(source.filename || "");
+                  const pageLabel = isPptx
+                    ? `Slide ${source.page_number || 1}`
+                    : `p. ${source.page_number || 1}`;
+
+                  return (
+                    <button
+                      key={source.citation_id || source.position}
+                      type="button"
+                      className={styles.pageChip}
+                      onClick={() => onOpenSource(source)}
+                      aria-label={`Open ${source.filename}, ${pageLabel}`}
+                      title={`Open ${source.filename} at ${pageLabel} (${confidence(source.similarity)})`}
+                    >
+                      <span className={styles.pageChipPos}>[{source.position}]</span>
+                      <span>{pageLabel}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -99,12 +147,14 @@ function TurnActions({
   onSave,
   isSaved,
   onExport,
+  isLatest = false,
 }: {
   content: string;
   onRegenerate: () => void;
   onSave: () => void;
   isSaved: boolean;
   onExport: () => void;
+  isLatest?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -119,7 +169,10 @@ function TurnActions({
   };
 
   return (
-    <div className={styles.turnActions} aria-label="Answer actions">
+    <div
+      className={`${styles.turnActions} ${isLatest ? styles.latestActions : ""}`}
+      aria-label="Answer actions"
+    >
       <button
         type="button"
         className={styles.actionBtn}
@@ -163,29 +216,6 @@ function TurnActions({
   );
 }
 
-function SuggestedQuestions({
-  onSelect,
-  disabled,
-}: {
-  onSelect: (question: string) => void;
-  disabled?: boolean;
-}) {
-  return (
-    <div className={styles.suggestionsRow} aria-label="Suggested follow-up questions">
-      {SUGGESTIONS.map((item) => (
-        <button
-          key={item}
-          type="button"
-          className={styles.suggestionPill}
-          onClick={() => onSelect(item)}
-          disabled={disabled}
-        >
-          {item}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 export function ResearchDesk({
   workspaceId,
@@ -830,18 +860,23 @@ export function ResearchDesk({
                       </div>
 
                       {message.insufficient_evidence && (
-                        <div className={styles.insufficient}>
-                          <FileSearch size={16} />
-                          <div>
-                            <strong>Evidence is limited</strong>
-                            <span>This answer is constrained because no uploaded source met the confidence threshold.</span>
+                        <div className={styles.refusalCard} role="alert">
+                          <AlertTriangle size={18} className={styles.refusalIcon} />
+                          <div className={styles.refusalBody}>
+                            <strong className={styles.refusalTitle}>Not enough evidence</strong>
+                            <p className={styles.refusalText}>
+                              No uploaded source met the confidence threshold for this query.
+                            </p>
+                            <span className={styles.refusalHint}>
+                              Try naming a document, page or slide, or ask for a summary of a specific section.
+                            </span>
                           </div>
                         </div>
                       )}
 
                       {streaming && !message.content ? (
                         <div className={styles.streamPlaceholder} aria-hidden="true">
-                          <span />
+                          <LoaderCircle size={15} className="spin" />
                           <div>
                             <strong>{streamingStatus(streamState)}</strong>
                           </div>
@@ -860,7 +895,7 @@ export function ResearchDesk({
 
                       {streaming && message.content ? <span className={styles.streamCursor} aria-hidden="true" /> : null}
 
-                      {message.sources.length > 0 && (
+                      {!message.insufficient_evidence && message.sources.length > 0 && (
                         <Evidence
                           sources={message.sources}
                           onOpenSource={(src) => handleOpenSourceViewer(src, message.sources, message.content)}
@@ -868,24 +903,14 @@ export function ResearchDesk({
                       )}
 
                       {!streaming && message.content && (
-                        <>
-                          <TurnActions
-                            content={message.content}
-                            onRegenerate={() => prevUser && void runStream(prevUser.content)}
-                            onSave={() => toggleSaveTurn(message.id)}
-                            isSaved={savedTurns.has(message.id)}
-                            onExport={() => exportTurn(message)}
-                          />
-
-                          {isLastAssistant && (
-                            <div className={styles.suggestionsWrapper}>
-                              <SuggestedQuestions
-                                onSelect={(q) => void runStream(q)}
-                                disabled={submitting}
-                              />
-                            </div>
-                          )}
-                        </>
+                        <TurnActions
+                          content={message.content}
+                          onRegenerate={() => prevUser && void runStream(prevUser.content)}
+                          onSave={() => toggleSaveTurn(message.id)}
+                          isSaved={savedTurns.has(message.id)}
+                          onExport={() => exportTurn(message)}
+                          isLatest={isLastAssistant}
+                        />
                       )}
                     </article>
                   </li>
