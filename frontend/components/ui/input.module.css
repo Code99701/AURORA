@@ -40,7 +40,7 @@
 .input:focus {
   background: var(--surface);
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-glow);
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 .input:disabled {
@@ -54,7 +54,7 @@
 }
 
 .hasError:focus {
-  box-shadow: 0 0 0 2px var(--danger-soft) !important;
+  box-shadow: 0 0 0 2px var(--danger) !important;
 }
 
 .iconLeft {
