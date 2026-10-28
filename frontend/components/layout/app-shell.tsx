@@ -79,6 +79,15 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [mobileOpen]);
+
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
@@ -190,6 +199,13 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   const isResearchActive = pathname.startsWith("/workspaces/") && !pathname.includes("view=documents");
   const isDocumentsActive = pathname.includes("view=documents") || pathname.includes("/documents");
 
+  const userInitials = (user.display_name || user.email || "AU")
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   const nav = (
     <>
       <div className={styles.sidebarTop}>
@@ -204,7 +220,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       </div>
 
       <nav className={styles.nav} aria-label="Primary navigation">
-        {/* Search / ⌘K Button matching mockup */}
+        {/* Search / ⌘K Button */}
         <button
           type="button"
           onClick={() => {
@@ -212,6 +228,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             setCommandOpen(true);
           }}
           className={styles.searchTrigger}
+          aria-label="Search or jump to"
         >
           <span className={styles.searchTriggerLeft}>
             <Search size={14} /> Search or jump to...
@@ -219,35 +236,38 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
           <kbd className={styles.searchKbd}>⌘K</kbd>
         </button>
 
-        {/* Global Navigation Links */}
-        <Link
-          className={pathname === "/workspaces" && searchParams.get("manage") === "true" ? styles.active : ""}
-          href="/workspaces?manage=true"
-          onClick={() => setMobileOpen(false)}
-        >
-          <PanelsTopLeft size={17} />
-          <span>Workspaces</span>
-        </Link>
-        <Link
-          className={pathname === "/dashboard" ? styles.active : ""}
-          href="/dashboard"
-          onClick={() => setMobileOpen(false)}
-        >
-          <LayoutDashboard size={17} />
-          <span>Dashboard</span>
-        </Link>
-        <Link
-          className={pathname === "/settings" ? styles.active : ""}
-          href="/settings"
-          onClick={() => setMobileOpen(false)}
-        >
-          <Settings size={17} />
-          <span>Settings</span>
-        </Link>
+        {/* NAVIGATE Section */}
+        <div className={styles.navSectionGroup}>
+          <span className={styles.sectionHeader}>NAVIGATE</span>
+          <Link
+            className={pathname === "/workspaces" && searchParams.get("manage") === "true" ? styles.active : ""}
+            href="/workspaces?manage=true"
+            onClick={() => setMobileOpen(false)}
+          >
+            <PanelsTopLeft size={16} />
+            <span>Workspaces</span>
+          </Link>
+          <Link
+            className={pathname === "/dashboard" ? styles.active : ""}
+            href="/dashboard"
+            onClick={() => setMobileOpen(false)}
+          >
+            <LayoutDashboard size={16} />
+            <span>Dashboard</span>
+          </Link>
+          <Link
+            className={pathname === "/settings" ? styles.active : ""}
+            href="/settings"
+            onClick={() => setMobileOpen(false)}
+          >
+            <Settings size={16} />
+            <span>Settings</span>
+          </Link>
+        </div>
 
-        {/* CURRENT WORKSPACE Section matching mockup */}
+        {/* WORKSPACE Section */}
         <div className={styles.workspaceSection}>
-          <span className={styles.sectionHeader}>CURRENT WORKSPACE</span>
+          <span className={styles.sectionHeader}>WORKSPACE</span>
 
           <Link href="/workspaces?manage=true" className={styles.workspaceDropdownCard} title="Switch workspace">
             <span className={styles.wsAvatar}>{workspaceInitial}</span>
@@ -273,25 +293,28 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        {/* CONVERSATIONS Section matching mockup */}
-        {conversations.length > 0 && (
-          <div className={styles.conversationsSection}>
-            <div className={styles.conversationsHeader}>
-              <span className={styles.conversationsKicker}>CONVERSATIONS</span>
-              <button
-                className={styles.newConvBtn}
-                type="button"
-                onClick={handleNewConversation}
-                disabled={creatingConv}
-                aria-label="New conversation"
-                title="New conversation"
-              >
-                {creatingConv ? <LoaderCircle className="spin" size={13} /> : <Plus size={13} />}
-              </button>
-            </div>
+        {/* CONVERSATIONS Section */}
+        <div className={styles.conversationsSection}>
+          <div className={styles.conversationsHeader}>
+            <span className={styles.sectionHeader}>CONVERSATIONS</span>
+          </div>
 
-            <div className={styles.conversationsList}>
-              {conversations.map((conv, idx) => {
+          <button
+            className={styles.newChatButton}
+            type="button"
+            onClick={handleNewConversation}
+            disabled={creatingConv}
+            aria-label="New chat"
+          >
+            {creatingConv ? <LoaderCircle className="spin" size={14} /> : <Plus size={14} />}
+            <span>New chat</span>
+          </button>
+
+          <div className={styles.conversationsList}>
+            {conversations.length === 0 ? (
+              <span className={styles.emptyConversations}>No conversations yet</span>
+            ) : (
+              conversations.map((conv, idx) => {
                 const isActive = currentConvId ? conv.id === currentConvId : idx === 0 && isResearchActive;
                 return (
                   <Link
@@ -299,23 +322,24 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                     href={`/workspaces/${effectiveWsId}?conversation=${conv.id}`}
                     className={`${styles.conversationItem} ${isActive ? styles.activeConversationItem : ""}`}
                     onClick={() => setMobileOpen(false)}
+                    title={conv.title || "New thread"}
                   >
-                    <strong className={styles.convItemTitle}>{conv.title || "New thread"}</strong>
+                    <span className={styles.convItemTitle}>{conv.title || "New thread"}</span>
                     <span className={styles.convItemMeta}>
                       {formatSidebarDate(conv.updated_at)}
                     </span>
                   </Link>
                 );
-              })}
-            </div>
+              })
+            )}
           </div>
-        )}
+        </div>
       </nav>
 
-      {/* User Profile Block at bottom matching mockup */}
+      {/* User Profile Block at bottom */}
       <div className={styles.userBlock}>
         <div className={styles.avatar} aria-hidden="true">
-          {(user.display_name || user.email).slice(0, 2).toUpperCase()}
+          {userInitials}
         </div>
         <div className={styles.userInfo}>
           <strong>{user.display_name || user.email}</strong>
@@ -328,7 +352,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
         >
-          {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+          {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
         </button>
         <button
           className={styles.logoutBtn}
@@ -337,7 +361,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
           aria-label="Sign out"
           title="Sign out"
         >
-          <LogOut size={15} />
+          <LogOut size={16} />
         </button>
       </div>
     </>

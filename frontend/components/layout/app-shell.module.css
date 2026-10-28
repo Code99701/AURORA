@@ -120,11 +120,11 @@
 .sectionHeader {
   color: var(--muted);
   font-family: var(--font-inter);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 0 8px 4px;
+  padding: 8px 8px 4px;
 }
 
 .workspaceDropdownCard {
@@ -200,7 +200,7 @@
   font-weight: 600 !important;
 }
 
-/* Conversations Section matching mockup */
+/* Conversations Section */
 .conversationsSection {
   margin-top: 14px;
   display: flex;
@@ -215,37 +215,37 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px 4px;
-}
-
-.conversationsKicker {
-  color: var(--muted);
-  font-family: var(--font-inter);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.newConvBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background: var(--surface);
-  color: var(--foreground-soft);
-  cursor: pointer;
-  transition: all 140ms ease;
   padding: 0;
 }
 
-.newConvBtn:hover {
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-  border-color: var(--accent);
+.newChatButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  margin: 4px 0 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  color: var(--foreground);
+  font-family: var(--font-inter);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.newChatButton:hover:not(:disabled) {
+  background: var(--surface-raised);
+  border-color: var(--border-strong);
+}
+
+.newChatButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .conversationsList {
@@ -253,7 +253,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 2px;
@@ -265,8 +265,9 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 6px 10px;
-  border-radius: 8px;
+  padding: 6px 10px 6px 8px;
+  border-radius: 6px;
+  border-left: 2px solid transparent;
   text-decoration: none;
   transition: all 140ms ease;
 }
@@ -277,26 +278,39 @@
 
 .activeConversationItem {
   background: var(--accent-soft) !important;
+  border-left: 2px solid var(--accent) !important;
 }
 
 .convItemTitle {
   font-family: var(--font-inter);
-  font-size: 0.77rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--foreground);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: left;
+  display: block;
+  min-width: 0;
 }
 
 .activeConversationItem .convItemTitle {
-  color: var(--accent-strong);
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .convItemMeta {
   font-family: var(--font-inter);
-  font-size: 0.67rem;
+  font-size: 0.6875rem;
   color: var(--muted);
+  text-align: left;
+}
+
+.emptyConversations {
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding: 8px 10px;
+  font-style: italic;
 }
 
 /* User Profile block matching mockup */
@@ -348,12 +362,14 @@
 
 .themeToggleBtn,
 .logoutBtn {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   display: grid;
   place-items: center;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md, 8px);
   background: transparent;
   color: var(--muted);
   cursor: pointer;
@@ -395,7 +411,7 @@
   display: none;
 }
 
-@media (max-width: 840px) {
+@media (max-width: 900px) {
   .shell {
     display: flex;
     flex-direction: column;
@@ -433,7 +449,7 @@
     padding: 18px 14px 14px;
     transform: translateX(-105%);
     transition: transform 220ms ease;
-    box-shadow: var(--shadow-float);
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.2);
   }
   .mobileSidebarOpen {
     transform: translateX(0);
