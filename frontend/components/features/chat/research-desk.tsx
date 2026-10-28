@@ -844,7 +844,7 @@ export function ResearchDesk({
 
                 return (
                   <li className={`${styles.assistantTurn} ${streaming ? styles.streamingTurn : ""}`} key={message.id}>
-                    <article aria-label={streaming ? "Answer in progress" : "Grounded answer"}>
+                    <article aria-label={streaming ? "Answer in progress" : "Grounded answer"} aria-live={streaming ? "polite" : undefined}>
                       <div className={styles.assistantMeta}>
                         <span className={styles.auroraAvatar} aria-hidden="true">
                           <Sparkles size={13} />
