@@ -116,9 +116,9 @@ export function WorkspaceView({
         <div style={{
           width: 56,
           height: 56,
-          borderRadius: "16px",
-          background: "var(--coral-soft, #FFF0F0)",
-          color: "var(--coral, #FF6B6B)",
+          borderRadius: "12px",
+          background: "var(--danger-soft)",
+          color: "var(--danger)",
           display: "grid",
           placeItems: "center",
           margin: "0 auto 1.25rem",

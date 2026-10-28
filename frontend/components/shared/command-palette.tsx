@@ -53,7 +53,7 @@ export function CommandPalette({
       category: "Workspaces" as const,
       subtitle: ws.description || "Research workspace",
       href: `/workspaces/${ws.id}`,
-      icon: <FolderKanban size={16} color="var(--accent, #6C5CE7)" />,
+      icon: <FolderKanban size={16} color="var(--accent)" />,
     })),
     {
       id: "act-1",
@@ -61,7 +61,7 @@ export function CommandPalette({
       category: "Quick Actions",
       subtitle: "Initialize a high-assurance research corpus",
       href: "/workspaces",
-      icon: <Plus size={16} color="var(--accent, #6C5CE7)" />,
+      icon: <Plus size={16} color="var(--accent)" />,
     },
     {
       id: "act-2",
@@ -69,7 +69,7 @@ export function CommandPalette({
       category: "Quick Actions",
       subtitle: "Inspect multi-format document parser and chunks",
       href: "/documents",
-      icon: <Sparkles size={16} color="var(--teal, #00D2D3)" />,
+      icon: <Sparkles size={16} color="var(--accent)" />,
     },
     {
       id: "act-3",
@@ -77,7 +77,7 @@ export function CommandPalette({
       category: "Quick Actions",
       subtitle: "Inspect model configuration and language options",
       href: "/settings",
-      icon: <Languages size={16} color="var(--accent, #6C5CE7)" />,
+      icon: <Languages size={16} color="var(--accent)" />,
     },
   ];
 
@@ -153,13 +153,13 @@ export function CommandPalette({
         <div
           style={{
             padding: "1rem 1.25rem",
-            borderBottom: "1px solid var(--border, #E2E5F0)",
+            borderBottom: "1px solid var(--border)",
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
           }}
         >
-          <Search size={20} color="var(--accent, #6C5CE7)" />
+          <Search size={18} color="var(--accent)" />
           <input
             type="text"
             autoFocus
@@ -173,9 +173,9 @@ export function CommandPalette({
               flex: 1,
               border: "none",
               outline: "none",
-              fontSize: "1rem",
+              fontSize: "0.95rem",
               fontFamily: "var(--font-inter)",
-              color: "var(--foreground, #1A1D2E)",
+              color: "var(--foreground)",
               background: "transparent",
             }}
           />
@@ -184,11 +184,11 @@ export function CommandPalette({
             onClick={onClose}
             style={{
               border: "none",
-              background: "var(--surface-raised, #F5F7FC)",
+              background: "var(--surface-raised)",
               borderRadius: "6px",
               padding: "0.3rem",
               cursor: "pointer",
-              color: "var(--muted, #8E93B0)",
+              color: "var(--muted)",
               display: "grid",
               placeItems: "center",
             }}
@@ -209,7 +209,7 @@ export function CommandPalette({
           }}
         >
           {filteredItems.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "2.5rem 1rem", color: "var(--muted, #8E93B0)" }}>
+            <div style={{ textAlign: "center", padding: "2.5rem 1rem", color: "var(--muted)" }}>
               <p style={{ margin: 0, fontSize: "0.95rem" }}>No matching results for &ldquo;{query}&rdquo;</p>
               <p style={{ margin: "0.35rem 0 0", fontSize: "0.8rem" }}>Try searching for &ldquo;LLZO&rdquo;, &ldquo;LiPON&rdquo;, or &ldquo;Workspaces&rdquo;</p>
             </div>
@@ -223,8 +223,8 @@ export function CommandPalette({
                   onMouseEnter={() => setSelectedIndex(idx)}
                   style={{
                     padding: "0.75rem 1rem",
-                    borderRadius: "var(--radius-md, 12px)",
-                    background: isSelected ? "var(--accent-soft, #EDE9FE)" : "transparent",
+                    borderRadius: "var(--radius-md)",
+                    background: isSelected ? "var(--accent-soft)" : "transparent",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
@@ -239,10 +239,10 @@ export function CommandPalette({
                         width: 32,
                         height: 32,
                         borderRadius: "8px",
-                        background: isSelected ? "#FFFFFF" : "var(--surface-raised, #F5F7FC)",
+                        background: isSelected ? "var(--surface)" : "var(--surface-raised)",
                         display: "grid",
                         placeItems: "center",
-                        border: "1px solid var(--border, #E2E5F0)",
+                        border: "1px solid var(--border)",
                         flexShrink: 0,
                       }}
                     >
@@ -253,8 +253,8 @@ export function CommandPalette({
                         <span
                           style={{
                             fontWeight: 600,
-                            fontSize: "0.9rem",
-                            color: isSelected ? "var(--accent, #6C5CE7)" : "var(--foreground, #1A1D2E)",
+                            fontSize: "0.88rem",
+                            color: isSelected ? "var(--accent-strong)" : "var(--foreground)",
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
@@ -265,11 +265,12 @@ export function CommandPalette({
                         {item.badge && (
                           <span
                             style={{
-                              fontSize: "0.7rem",
-                              fontWeight: 700,
+                              fontSize: "0.68rem",
+                              fontWeight: 600,
                               fontFamily: "var(--font-mono)",
-                              background: "rgba(0, 210, 211, 0.15)",
-                              color: "var(--teal, #00D2D3)",
+                              background: "var(--surface-raised)",
+                              color: "var(--foreground-soft)",
+                              border: "1px solid var(--border)",
                               padding: "0.1rem 0.4rem",
                               borderRadius: "4px",
                             }}
@@ -280,8 +281,8 @@ export function CommandPalette({
                       </div>
                       <div
                         style={{
-                          fontSize: "0.78rem",
-                          color: "var(--foreground-soft, #4A4F6A)",
+                          fontSize: "0.76rem",
+                          color: "var(--muted)",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -295,9 +296,9 @@ export function CommandPalette({
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                     <span
                       style={{
-                        fontSize: "0.7rem",
+                        fontSize: "0.68rem",
                         fontWeight: 600,
-                        color: "var(--muted, #8E93B0)",
+                        color: "var(--muted)",
                         textTransform: "uppercase",
                       }}
                     >
@@ -305,7 +306,7 @@ export function CommandPalette({
                     </span>
                     <ArrowRight
                       size={14}
-                      color={isSelected ? "var(--accent, #6C5CE7)" : "var(--muted, #8E93B0)"}
+                      color={isSelected ? "var(--accent)" : "var(--muted)"}
                       style={{ transform: isSelected ? "translateX(2px)" : "none", transition: "transform 0.15s ease" }}
                     />
                   </div>
@@ -319,13 +320,13 @@ export function CommandPalette({
         <div
           style={{
             padding: "0.6rem 1.25rem",
-            background: "var(--surface-raised, #F5F7FC)",
-            borderTop: "1px solid var(--border, #E2E5F0)",
+            background: "var(--surface-raised)",
+            borderTop: "1px solid var(--border)",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             fontSize: "0.75rem",
-            color: "var(--muted, #8E93B0)",
+            color: "var(--muted)",
           }}
         >
           <div style={{ display: "flex", gap: "1rem" }}>
@@ -333,7 +334,7 @@ export function CommandPalette({
             <span>↵ Select</span>
             <span>Esc Close</span>
           </div>
-          <span style={{ fontFamily: "var(--font-mono)", color: "var(--accent, #6C5CE7)", fontWeight: 600 }}>
+          <span style={{ fontFamily: "var(--font-mono)", color: "var(--accent)", fontWeight: 600 }}>
             AURORA Universal Index
           </span>
         </div>

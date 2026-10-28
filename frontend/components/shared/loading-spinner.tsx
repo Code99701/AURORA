@@ -16,7 +16,7 @@ export function LoadingSpinner({
         alignItems: "center",
         justifyContent: "center",
         gap: "0.5rem",
-        color: "var(--accent, #6C5CE7)",
+        color: "var(--accent)",
       }}
       className={className}
       role="status"

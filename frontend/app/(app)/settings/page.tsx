@@ -24,17 +24,17 @@ export default function SettingsPage() {
         {/* Profile Details */}
         <Card>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-            <User size={20} color="var(--accent, #6C5CE7)" />
+            <User size={20} color="var(--accent)" />
             <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>Account Information</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", rowGap: "0.75rem", fontSize: "0.9rem" }}>
-            <span style={{ color: "var(--muted, #8E93B0)" }}>Display Name:</span>
+            <span style={{ color: "var(--muted)" }}>Display Name:</span>
             <strong>{user?.display_name || "—"}</strong>
-            <span style={{ color: "var(--muted, #8E93B0)" }}>Email:</span>
+            <span style={{ color: "var(--muted)" }}>Email:</span>
             <span>{user?.email || "—"}</span>
-            <span style={{ color: "var(--muted, #8E93B0)" }}>System Role:</span>
+            <span style={{ color: "var(--muted)" }}>System Role:</span>
             <span>{user?.system_role || "User"}</span>
-            <span style={{ color: "var(--muted, #8E93B0)" }}>Member Since:</span>
+            <span style={{ color: "var(--muted)" }}>Member Since:</span>
             <span>{user?.created_at ? formatDate(user.created_at) : "—"}</span>
           </div>
         </Card>
@@ -42,10 +42,10 @@ export default function SettingsPage() {
         {/* Appearance Settings */}
         <Card>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-            {theme === "dark" ? <Moon size={20} color="var(--accent, #6C5CE7)" /> : <Sun size={20} color="var(--amber, #FECA57)" />}
+            {theme === "dark" ? <Moon size={20} color="var(--accent)" /> : <Sun size={20} color="var(--accent)" />}
             <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>Appearance</h2>
           </div>
-          <p style={{ color: "var(--foreground-soft, #4A4F6A)", fontSize: "0.9rem", margin: "0 0 1rem" }}>
+          <p style={{ color: "var(--foreground-soft)", fontSize: "0.9rem", margin: "0 0 1rem" }}>
             Currently using <strong>{theme === "dark" ? "Dark" : "Light"}</strong> mode.
           </p>
           <Button
@@ -61,10 +61,10 @@ export default function SettingsPage() {
         {/* Security & Storage */}
         <Card>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-            <Shield size={20} color="var(--teal, #00D2D3)" />
+            <Shield size={20} color="var(--accent)" />
             <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>Security & Privacy</h2>
           </div>
-          <p style={{ color: "var(--foreground-soft, #4A4F6A)", fontSize: "0.9rem", margin: 0, lineHeight: 1.6 }}>
+          <p style={{ color: "var(--foreground-soft)", fontSize: "0.9rem", margin: 0, lineHeight: 1.6 }}>
             Your account is secured with encrypted HTTP-only session cookies and modern password hashing. Uploaded documents are stored in private workspace storage and never shared across accounts.
           </p>
         </Card>
@@ -72,12 +72,12 @@ export default function SettingsPage() {
         {/* System Information */}
         <Card>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.75rem" }}>
-            <Info size={20} color="var(--coral, #FF6B6B)" />
+            <Info size={20} color="var(--accent)" />
             <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0 }}>System Version</h2>
           </div>
-          <div style={{ fontSize: "0.85rem", color: "var(--foreground-soft, #4A4F6A)", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+          <div style={{ fontSize: "0.85rem", color: "var(--foreground-soft)", display: "flex", flexDirection: "column", gap: "0.35rem" }}>
             <span style={{ fontWeight: 600 }}>AURORA Platform · v1.0.0</span>
-            <span style={{ color: "var(--success, #00B894)", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+            <span style={{ color: "var(--success)", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: "0.35rem" }}>
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: "currentColor", display: "inline-block" }} />
               All systems operational
             </span>

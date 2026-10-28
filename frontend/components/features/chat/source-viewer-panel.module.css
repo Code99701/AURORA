@@ -93,16 +93,11 @@
 }
 
 .highlightCard {
-  background: #FEF9C3; /* Warm Amber Highlight per mockup */
-  border: 1px solid #FDE047;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-left: 3px solid var(--accent);
   border-radius: 8px;
-  padding: 14px 14px;
-  transition: background-color 160ms ease;
-}
-
-html[data-theme="dark"] .highlightCard {
-  background: rgba(254, 202, 87, 0.14);
-  border-color: rgba(254, 202, 87, 0.35);
+  padding: 14px;
 }
 
 .passageText {
@@ -110,12 +105,8 @@ html[data-theme="dark"] .highlightCard {
   font-family: var(--font-inter);
   font-size: 0.84rem;
   line-height: 1.6;
-  color: #713F12; /* Rich dark amber text */
+  color: var(--foreground);
   font-weight: 500;
-}
-
-html[data-theme="dark"] .passageText {
-  color: #FED368;
 }
 
 .footer {

@@ -118,9 +118,9 @@ export function DocumentViewerModal({
               style={{
                 width: 36,
                 height: 36,
-                borderRadius: "10px",
-                background: "var(--accent-soft, #EDE9FE)",
-                color: "var(--accent, #6C5CE7)",
+                borderRadius: "8px",
+                background: "var(--accent-soft)",
+                color: "var(--accent)",
                 display: "grid",
                 placeItems: "center",
               }}
@@ -192,11 +192,11 @@ export function DocumentViewerModal({
                 display: "flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                background: "var(--coral-soft, #FFF0F0)",
-                border: "1px solid color-mix(in srgb, var(--coral) 30%, transparent)",
-                borderRadius: "var(--radius-sm, 8px)",
+                background: "var(--danger-soft)",
+                border: "1px solid color-mix(in srgb, var(--danger) 30%, transparent)",
+                borderRadius: "var(--radius-sm, 6px)",
                 padding: "1rem",
-                color: "var(--coral, #FF6B6B)",
+                color: "var(--danger)",
               }}
             >
               <AlertCircle size={18} />
@@ -224,7 +224,7 @@ export function DocumentViewerModal({
                       fontWeight: 700,
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
-                      color: "var(--accent, #6C5CE7)",
+                      color: "var(--accent)",
                       marginBottom: "0.5rem",
                     }}
                   >

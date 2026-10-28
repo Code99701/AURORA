@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div style={{ maxWidth: "960px", margin: "0 auto", padding: "3rem 1.5rem 5rem" }}>
-      <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "2rem", color: "var(--accent, #6C5CE7)", fontWeight: 500 }}>
+      <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "2rem", color: "var(--accent)", fontWeight: 500 }}>
         <ArrowLeft size={16} /> Back to Home
       </Link>
 
@@ -30,7 +30,7 @@ export default function AboutPage() {
       <div style={{ display: "grid", gap: "1.5rem", marginBottom: "3.5rem" }}>
         <Card elevated>
           <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-            <div style={{ color: "var(--accent, #6C5CE7)", marginTop: "0.2rem" }}>
+            <div style={{ color: "var(--accent)", marginTop: "0.2rem" }}>
               <Layers size={24} />
             </div>
             <div>
@@ -44,12 +44,12 @@ export default function AboutPage() {
 
         <Card elevated>
           <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-            <div style={{ color: "var(--teal, #00D2D3)", marginTop: "0.2rem" }}>
+            <div style={{ color: "var(--accent)", marginTop: "0.2rem" }}>
               <Cpu size={24} />
             </div>
             <div>
               <h2 style={{ fontSize: "1.2rem", fontWeight: 700, margin: "0 0 0.5rem" }}>Cross-Lingual Embeddings</h2>
-              <p style={{ color: "var(--foreground-soft, #4A4F6A)", margin: 0, lineHeight: 1.6 }}>
+              <p style={{ color: "var(--foreground-soft)", margin: 0, lineHeight: 1.6 }}>
                 Native vector representations align semantic meanings across languages. Ask questions in English against Hindi text or vice-versa with matched citations.
               </p>
             </div>
@@ -58,7 +58,7 @@ export default function AboutPage() {
 
         <Card elevated>
           <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-            <div style={{ color: "var(--coral, #FF6B6B)", marginTop: "0.2rem" }}>
+            <div style={{ color: "var(--accent)", marginTop: "0.2rem" }}>
               <ShieldAlert size={24} />
             </div>
             <div>

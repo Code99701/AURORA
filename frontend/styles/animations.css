@@ -103,10 +103,10 @@
 /* 6. pulseGlow: Luminous glowing pulse */
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 20px var(--accent-glow, rgba(108, 92, 231, 0.18));
+    box-shadow: 0 0 20px var(--accent-glow, rgba(29, 78, 216, 0.15));
   }
   50% {
-    box-shadow: 0 0 45px var(--accent-glow, rgba(108, 92, 231, 0.38));
+    box-shadow: 0 0 35px var(--accent-glow, rgba(29, 78, 216, 0.25));
   }
 }
 

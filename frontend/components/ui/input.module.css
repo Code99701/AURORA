@@ -6,9 +6,10 @@
 }
 
 .label {
-  font-size: var(--text-sm, 0.875rem);
-  font-weight: 600;
-  color: var(--foreground, #1A1D2E);
+  font-family: var(--font-inter);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--foreground-soft);
 }
 
 .inputContainer {
@@ -20,60 +21,76 @@
 
 .input {
   width: 100%;
-  padding: 0.65rem 0.95rem;
-  font-size: var(--text-base, 1rem);
-  color: var(--foreground, #1A1D2E);
-  background: var(--surface-raised, #F5F7FC);
-  border: 1.5px solid var(--border, #E2E5F0);
-  border-radius: var(--radius-md, 12px);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 36px;
+  padding: 0 0.75rem;
+  font-family: var(--font-inter);
+  font-size: 0.875rem;
+  color: var(--foreground);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md, 8px);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
   outline: none;
 }
 
 .input::placeholder {
-  color: var(--muted, #8E93B0);
+  color: var(--muted);
 }
 
 .input:focus {
-  background: var(--surface, #ffffff);
-  border-color: var(--accent, #6C5CE7);
-  box-shadow: 0 0 0 3px var(--accent-glow, rgba(108, 92, 231, 0.18));
+  background: var(--surface);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
 .input:disabled {
   opacity: 0.6;
-  background: var(--surface-raised, #F5F7FC);
+  background: var(--surface-raised);
   cursor: not-allowed;
 }
 
 .hasError {
-  border-color: var(--danger, #E17055) !important;
+  border-color: var(--danger) !important;
 }
 
 .hasError:focus {
-  box-shadow: 0 0 0 3px rgba(225, 112, 85, 0.2) !important;
+  box-shadow: 0 0 0 2px var(--danger-soft) !important;
 }
 
 .iconLeft {
   position: absolute;
-  left: 0.85rem;
-  color: var(--muted, #8E93B0);
-  pointer-events: none;
+  left: 0.75rem;
+  color: var(--muted);
   display: flex;
   align-items: center;
+  pointer-events: none;
 }
 
-.inputWithLeftIcon {
-  padding-left: 2.5rem;
+.iconRight {
+  position: absolute;
+  right: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
 
-.helperText {
-  font-size: var(--text-xs, 0.75rem);
-  color: var(--muted, #8E93B0);
+.withIconLeft {
+  padding-left: 2.25rem;
+}
+
+.withIconRight {
+  padding-right: 2.25rem;
 }
 
 .errorText {
-  font-size: var(--text-xs, 0.75rem);
-  color: var(--danger, #E17055);
-  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--danger);
+  margin-top: 0.2rem;
+}
+
+.helperText {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.2rem;
 }

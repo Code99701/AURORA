@@ -161,22 +161,22 @@ export function UploadModal({
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
             <div
               style={{
-                width: 40,
-                height: 40,
-                borderRadius: "12px",
-                background: "var(--accent-soft, #EDE9FE)",
-                color: "var(--accent, #6C5CE7)",
+                width: 36,
+                height: 36,
+                borderRadius: "8px",
+                background: "var(--accent-soft)",
+                color: "var(--accent)",
                 display: "grid",
                 placeItems: "center",
               }}
             >
-              <UploadCloud size={20} />
+              <UploadCloud size={18} />
             </div>
             <div>
-              <h2 style={{ fontSize: "1.25rem", fontWeight: 700, margin: 0, color: "var(--foreground, #1A1D2E)" }}>
+              <h2 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0, color: "var(--foreground)" }}>
                 Upload Document
               </h2>
-              <p style={{ fontSize: "0.82rem", color: "var(--muted, #8E93B0)", margin: 0 }}>
+              <p style={{ fontSize: "0.8rem", color: "var(--muted)", margin: 0 }}>
                 PDF, DOCX, XLSX, PPTX, TXT, MD up to 10 MB
               </p>
             </div>
@@ -189,7 +189,7 @@ export function UploadModal({
               border: "none",
               background: "transparent",
               cursor: isBusy ? "not-allowed" : "pointer",
-              color: "var(--muted, #8E93B0)",
+              color: "var(--muted)",
             }}
           >
             <X size={20} />
@@ -204,12 +204,12 @@ export function UploadModal({
               display: "flex",
               alignItems: "center",
               gap: "0.5rem",
-              background: "var(--coral-soft, #FFF0F0)",
-              border: "1px solid color-mix(in srgb, var(--coral) 30%, transparent)",
-              borderRadius: "var(--radius-sm, 8px)",
+              background: "var(--danger-soft)",
+              border: "1px solid color-mix(in srgb, var(--danger) 30%, transparent)",
+              borderRadius: "var(--radius-sm, 6px)",
               padding: "0.65rem 0.85rem",
               fontSize: "0.82rem",
-              color: "var(--coral, #FF6B6B)",
+              color: "var(--danger)",
             }}
           >
             <AlertCircle size={16} />
@@ -224,11 +224,11 @@ export function UploadModal({
           onDrop={handleDrop}
           onClick={() => !isBusy && fileInputRef.current?.click()}
           style={{
-            border: isDragging ? "2px dashed var(--accent, #6C5CE7)" : "2px dashed var(--border, #E2E5F0)",
-            borderRadius: "var(--radius-lg, 16px)",
+            border: isDragging ? "2px dashed var(--accent)" : "2px dashed var(--border)",
+            borderRadius: "var(--radius-lg, 12px)",
             padding: "2rem 1.5rem",
             textAlign: "center",
-            background: isDragging ? "var(--accent-soft, #EDE9FE)" : "var(--surface-raised, #F5F7FC)",
+            background: isDragging ? "var(--accent-soft)" : "var(--surface-raised)",
             cursor: isBusy ? "not-allowed" : "pointer",
             transition: "all 0.15s ease",
           }}
@@ -241,11 +241,11 @@ export function UploadModal({
             style={{ display: "none" }}
             disabled={isBusy}
           />
-          <UploadCloud size={36} color="var(--accent, #6C5CE7)" style={{ margin: "0 auto 0.75rem" }} />
-          <p style={{ margin: "0 0 0.35rem", fontWeight: 600, color: "var(--foreground, #1A1D2E)" }}>
+          <UploadCloud size={32} color="var(--accent)" style={{ margin: "0 auto 0.75rem" }} />
+          <p style={{ margin: "0 0 0.35rem", fontWeight: 600, color: "var(--foreground)" }}>
             {selectedFile ? selectedFile.name : "Choose a file or drag & drop it here"}
           </p>
-          <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--muted, #8E93B0)" }}>
+          <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--muted)" }}>
             {selectedFile ? `${formatFileSize(selectedFile.size)} · Click to change` : "Extracts text, preserves tables, and prepares citations"}
           </p>
         </div>
@@ -253,19 +253,19 @@ export function UploadModal({
         {/* Progress Stages */}
         {isBusy && (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.85rem", color: "var(--foreground, #1A1D2E)" }}>
-              <Loader2 size={16} className="animate-spin" color="var(--accent, #6C5CE7)" />
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.85rem", color: "var(--foreground)" }}>
+              <Loader2 size={16} className="animate-spin" color="var(--accent)" />
               <span>
                 {status === "uploading" && "Uploading document…"}
                 {status === "processing" && "Extracting text and tables…"}
                 {status === "indexing" && "Indexing document for search…"}
               </span>
             </div>
-            <div style={{ height: "4px", background: "var(--surface-raised, #F5F7FC)", borderRadius: "2px", overflow: "hidden" }}>
+            <div style={{ height: "4px", background: "var(--surface-raised)", borderRadius: "2px", overflow: "hidden" }}>
               <div
                 style={{
                   height: "100%",
-                  background: "var(--accent, #6C5CE7)",
+                  background: "var(--accent)",
                   width: status === "uploading" ? "33%" : status === "processing" ? "66%" : "100%",
                   transition: "width 0.4s ease",
                 }}
@@ -275,7 +275,7 @@ export function UploadModal({
         )}
 
         {status === "done" && (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--teal, #00D2D3)", fontSize: "0.88rem", fontWeight: 600 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--success)", fontSize: "0.88rem", fontWeight: 600 }}>
             <CheckCircle2 size={18} />
             <span>Document ready for research!</span>
           </div>

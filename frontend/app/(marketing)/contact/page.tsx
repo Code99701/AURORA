@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto", padding: "3rem 1.5rem 5rem" }}>
-      <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "2rem", color: "var(--accent, #6C5CE7)", fontWeight: 500 }}>
+      <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "2rem", color: "var(--accent)", fontWeight: 500 }}>
         <ArrowLeft size={16} /> Back to Home
       </Link>
 
@@ -59,7 +59,7 @@ export default function ContactPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           <Card>
             <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "0.5rem" }}>
-              <Mail size={20} color="var(--accent, #6C5CE7)" />
+              <Mail size={20} color="var(--accent)" />
               <h2 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0 }}>Direct Support</h2>
             </div>
             <p style={{ color: "var(--foreground-soft, #4A4F6A)", fontSize: "0.9rem", margin: 0 }}>
@@ -69,7 +69,7 @@ export default function ContactPage() {
 
           <Card>
             <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", marginBottom: "0.5rem" }}>
-              <MessageSquare size={20} color="var(--teal, #00D2D3)" />
+              <MessageSquare size={20} color="var(--accent)" />
               <h2 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0 }}>Community & Research</h2>
             </div>
             <p style={{ color: "var(--foreground-soft, #4A4F6A)", fontSize: "0.9rem", margin: 0 }}>

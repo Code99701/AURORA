@@ -70,9 +70,9 @@ export default function DashboardPage() {
               style={{
                 width: 36,
                 height: 36,
-                borderRadius: "var(--radius-sm, 8px)",
-                background: "var(--accent-soft, #EDE9FE)",
-                color: "var(--accent, #6C5CE7)",
+                borderRadius: "var(--radius-sm, 6px)",
+                background: "var(--accent-soft)",
+                color: "var(--accent)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -93,9 +93,9 @@ export default function DashboardPage() {
               style={{
                 width: 36,
                 height: 36,
-                borderRadius: "var(--radius-sm, 8px)",
-                background: "rgba(0, 210, 211, 0.12)",
-                color: "var(--teal, #00D2D3)",
+                borderRadius: "var(--radius-sm, 6px)",
+                background: "var(--surface-raised)",
+                color: "var(--foreground-soft)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -103,11 +103,11 @@ export default function DashboardPage() {
             >
               <FileText size={18} />
             </div>
-            <span style={{ fontSize: "var(--text-sm, 0.875rem)", fontWeight: 600, color: "var(--foreground-soft, #4A4F6A)" }}>
+            <span style={{ fontSize: "var(--text-sm, 0.875rem)", fontWeight: 600, color: "var(--foreground-soft)" }}>
               Platform Status
             </span>
           </div>
-          <div style={{ fontSize: "1.25rem", fontWeight: 700, color: isHealthy ? "var(--success, #00B894)" : "var(--coral, #FF6B6B)", marginTop: "0.4rem" }}>
+          <div style={{ fontSize: "1.25rem", fontWeight: 700, color: isHealthy ? "var(--success)" : "var(--danger)", marginTop: "0.4rem" }}>
             {platformStatus}
           </div>
           <div style={{ fontSize: "0.75rem", color: "var(--muted, #8E93B0)", marginTop: "0.25rem" }}>
@@ -121,9 +121,9 @@ export default function DashboardPage() {
               style={{
                 width: 36,
                 height: 36,
-                borderRadius: "var(--radius-sm, 8px)",
-                background: "rgba(255, 107, 107, 0.12)",
-                color: "var(--coral, #FF6B6B)",
+                borderRadius: "var(--radius-sm, 6px)",
+                background: "var(--surface-raised)",
+                color: "var(--foreground-soft)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

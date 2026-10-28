@@ -220,13 +220,13 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
             <div
               role="status"
               style={{
-                background: "var(--teal-soft, #E0FAFA)",
-                border: "1px solid color-mix(in srgb, var(--teal) 30%, transparent)",
-                borderRadius: "var(--radius-sm, 8px)",
+                background: "var(--success-soft)",
+                border: "1px solid color-mix(in srgb, var(--success) 30%, transparent)",
+                borderRadius: "var(--radius-sm, 6px)",
                 padding: "0.65rem 0.85rem",
                 marginBottom: "1rem",
                 fontSize: "0.82rem",
-                color: "var(--teal, #00B894)",
+                color: "var(--success)",
               }}
             >
               {infoMessage}
@@ -238,13 +238,13 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
             <div
               role="alert"
               style={{
-                background: "var(--coral-soft, #FFF0F0)",
-                border: "1px solid color-mix(in srgb, var(--coral) 30%, transparent)",
-                borderRadius: "var(--radius-sm, 8px)",
+                background: "var(--danger-soft)",
+                border: "1px solid color-mix(in srgb, var(--danger) 30%, transparent)",
+                borderRadius: "var(--radius-sm, 6px)",
                 padding: "0.65rem 0.85rem",
                 marginBottom: "1rem",
                 fontSize: "0.82rem",
-                color: "var(--coral, #FF6B6B)",
+                color: "var(--danger)",
               }}
             >
               {error}
@@ -330,7 +330,7 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                       border: "none",
                       padding: 0,
                       fontSize: "0.75rem",
-                      color: "var(--accent, #6C5CE7)",
+                      color: "var(--accent)",
                       cursor: "pointer",
                       textDecoration: "underline",
                     }}

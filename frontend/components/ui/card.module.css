@@ -1,23 +1,17 @@
 .card {
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--border, #E2E5F0);
-  border-radius: var(--radius-lg, 18px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 12px);
   padding: var(--space-6, 24px);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--shadow-sm, 0 2px 8px rgba(26, 29, 46, 0.08));
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  box-shadow: none;
   position: relative;
 }
 
-.radiusLg {
-  border-radius: var(--radius-lg, 18px);
-}
-
-.radiusXl {
-  border-radius: var(--radius-xl, 24px);
-}
-
+.radiusLg,
+.radiusXl,
 .radius2Xl {
-  border-radius: var(--radius-2xl, 32px);
+  border-radius: var(--radius-lg, 12px);
 }
 
 .interactive {
@@ -25,31 +19,18 @@
 }
 
 .interactive:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md, 0 8px 24px rgba(26, 29, 46, 0.10));
-  border-color: var(--accent, #6C5CE7);
+  border-color: var(--border-strong);
 }
 
 .elevated {
-  box-shadow: var(--shadow-md, 0 8px 24px rgba(26, 29, 46, 0.10));
+  box-shadow: none;
+  border-color: var(--border-strong);
 }
 
 .glass {
-  background: var(--surface-glass, rgba(255, 255, 255, 0.82));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--surface);
 }
 
 .gradientTop {
   overflow: hidden;
-}
-
-.gradientTop::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent, #6C5CE7), var(--teal, #00D2D3), var(--coral, #FF6B6B));
 }

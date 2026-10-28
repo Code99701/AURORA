@@ -5,11 +5,6 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?:
     | "neutral"
     | "primary"
-    | "purple"
-    | "coral"
-    | "teal"
-    | "amber"
-    | "pink"
     | "success"
     | "warning"
     | "danger"
