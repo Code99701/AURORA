@@ -93,7 +93,7 @@ def print_table(summaries: list[CategorySummary]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="AURORA RAG Pipeline Evaluation Harness")
-    parser.add_argument("--live", action="store_true", help="Use real Gemini embedding and LLM providers")
+    parser.add_argument("--live", action="store_true", help="Use live local embedding and Ollama LLM providers")
     parser.add_argument("--json", action="store_true", help="Output summary in JSON format")
     parser.add_argument("--real-docs", action="store_true", help="Evaluate against real workspace documents (ANN PPT, Resume, ML Book)")
     parser.add_argument("--subset", type=int, default=None, help="Limit evaluation to first N cases (e.g. 10)")
@@ -102,6 +102,14 @@ def main() -> int:
         type=str,
         default=None,
         help="Path to golden evaluation dataset JSON",
+    )
+    parser.add_argument("--workspace-id", type=str, default=None, help="Evaluate against existing workspace ID")
+    parser.add_argument(
+        "--provider",
+        type=str,
+        choices=["ollama", "deterministic"],
+        default=None,
+        help="Explicit LLM provider override",
     )
     args = parser.parse_args()
 
@@ -116,15 +124,14 @@ def main() -> int:
     llm_provider = None
     delay = 0.0
 
-    if args.live:
+    if args.provider == "deterministic":
+        embedding_provider = EvalDeterministicEmbeddingProvider()
+        llm_provider = EvalDeterministicLLMProvider()
+    elif args.provider == "ollama" or args.live or args.real_docs:
         from app.embeddings.deps import get_embedding_provider
         from app.llm.deps import get_llm_provider
-        if not settings.GEMINI_API_KEY:
-            print("[ERROR] GEMINI_API_KEY must be configured in .env for --live evaluation", file=sys.stderr)
-            return 1
         embedding_provider = get_embedding_provider()
-        llm_provider = get_llm_provider()
-        delay = 3.5  # Safe pace to respect 15 RPM free quota
+        llm_provider = get_llm_provider() if (args.live or args.provider) else EvalDeterministicLLMProvider()
     else:
         embedding_provider = EvalDeterministicEmbeddingProvider()
         llm_provider = EvalDeterministicLLMProvider()
@@ -132,38 +139,48 @@ def main() -> int:
     db = SessionLocal()
     eval_workspace = None
     eval_user = None
+    is_ephemeral = True
 
     try:
-        eval_user = db.scalar(select(User).order_by(User.id).limit(1))
-        if not eval_user:
-            eval_user = User(
-                email=f"eval_{uuid.uuid4().hex[:8]}@aurora.internal",
-                password_hash="argon2id$mockhashforragtesting",
-                display_name="RAG Evaluator",
-                system_role="USER",
-            )
-            db.add(eval_user)
-            db.flush()
-
-        workspace_name = f"RAG-Eval-{uuid.uuid4().hex[:8]}"
-        eval_workspace = Workspace(
-            name=workspace_name,
-            description="Ephemeral RAG evaluation workspace",
-            created_by=eval_user.id,
-        )
-        db.add(eval_workspace)
-        db.commit()
-        db.refresh(eval_workspace)
-
-        print(f"[EVAL] Setting up evaluation workspace '{eval_workspace.name}'...")
-        if args.real_docs:
-            print("[EVAL] Cloning real documents from database (ANN PPT, Resume, ML Book)...")
-            from app.evaluation.rag_evaluator import seed_real_docs_workspace
-            docs = seed_real_docs_workspace(db, eval_workspace, eval_user)
-            print(f"[EVAL] Successfully cloned {len(docs)} documents into evaluation workspace.")
+        if args.workspace_id:
+            eval_workspace = db.scalar(select(Workspace).where(Workspace.id == uuid.UUID(args.workspace_id)))
+            if not eval_workspace:
+                print(f"[ERROR] Workspace '{args.workspace_id}' not found.", file=sys.stderr)
+                return 1
+            eval_user = db.scalar(select(User).where(User.id == eval_workspace.created_by))
+            is_ephemeral = False
+            print(f"[EVAL] Evaluating against existing workspace '{eval_workspace.name}' ({eval_workspace.id})...")
         else:
-            print("[EVAL] Ingesting and indexing 4 fixture documents (slides, handbook, quiz CSV, resume)...")
-            seed_eval_workspace(db, eval_workspace, eval_user, embedding_provider)
+            eval_user = db.scalar(select(User).order_by(User.id).limit(1))
+            if not eval_user:
+                eval_user = User(
+                    email=f"eval_{uuid.uuid4().hex[:8]}@aurora.internal",
+                    password_hash="argon2id$mockhashforragtesting",
+                    display_name="RAG Evaluator",
+                    system_role="USER",
+                )
+                db.add(eval_user)
+                db.flush()
+
+            workspace_name = f"RAG-Eval-{uuid.uuid4().hex[:8]}"
+            eval_workspace = Workspace(
+                name=workspace_name,
+                description="Ephemeral RAG evaluation workspace",
+                created_by=eval_user.id,
+            )
+            db.add(eval_workspace)
+            db.commit()
+            db.refresh(eval_workspace)
+
+            print(f"[EVAL] Setting up evaluation workspace '{eval_workspace.name}'...")
+            if args.real_docs:
+                print("[EVAL] Cloning real documents from database (ANN PPT, Resume, ML Book)...")
+                from app.evaluation.rag_evaluator import seed_real_docs_workspace
+                docs = seed_real_docs_workspace(db, eval_workspace, eval_user)
+                print(f"[EVAL] Successfully cloned {len(docs)} documents into evaluation workspace.")
+            else:
+                print("[EVAL] Ingesting and indexing 4 fixture documents (slides, handbook, quiz CSV, resume)...")
+                seed_eval_workspace(db, eval_workspace, eval_user, embedding_provider)
 
         print(f"[EVAL] Running evaluation against dataset: {dataset_path}...")
         results, summaries = run_evaluation(
@@ -190,7 +207,7 @@ def main() -> int:
         return 0
     finally:
         # Clean up ephemeral evaluation workspace
-        if eval_workspace:
+        if eval_workspace and is_ephemeral:
             try:
                 db.delete(eval_workspace)
                 db.commit()

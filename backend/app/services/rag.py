@@ -7,7 +7,12 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
 from app.embeddings import EmbeddingProvider
-from app.llm import LLMProvider, LLMProviderError, LLMRateLimitError
+from app.llm import (
+    LLMProvider,
+    LLMProviderError,
+    LLMQuotaExhaustedError,
+    LLMRateLimitError,
+)
 from app.models.workspace import Workspace
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk
@@ -16,6 +21,8 @@ from app.models.rag_response import RAGResponseRecord
 from app.rag.context import build_context
 from app.rag.prompt import build_grounded_prompt
 from app.rag.prompt import GroundedPrompt
+from app.rag.rewriter import rewrite_query_for_retrieval
+from app.rag.understanding import understand_query
 from app.services.retrieval import RetrievedChunk
 from app.services import retrieval as retrieval_service
 
@@ -65,6 +72,7 @@ class RAGPreparation:
     top_k: int
     evidence: tuple[RetrievedChunk, ...]
     prompt: GroundedPrompt | None
+    search_query: str | None = None
 
     @property
     def insufficient_evidence(self) -> bool:
@@ -190,14 +198,55 @@ def prepare_question(
     answer_language: str | None,
     embedding_provider: EmbeddingProvider,
     conversation_history: tuple[tuple[str, str], ...] = (),
+    llm_provider: LLMProvider | None = None,
 ) -> RAGPreparation:
-    """Retrieve and bound authorized evidence without invoking an LLM."""
+    """Retrieve and bound authorized evidence without invoking an LLM for generation."""
+    search_query = query
+    effective_language = answer_language
+    if conversation_history:
+        rewrite_result = rewrite_query_for_retrieval(
+            query=query,
+            conversation_history=conversation_history,
+            llm_provider=llm_provider,
+        )
+        if rewrite_result.rewritten_query:
+            search_query = rewrite_result.rewritten_query
+        if rewrite_result.detected_language and not effective_language:
+            effective_language = rewrite_result.detected_language
+
+    indexed_docs = (
+        list(
+            db.scalars(
+                select(Document).where(
+                    Document.workspace_id == workspace.id,
+                    Document.indexing_status == "INDEXED",
+                )
+            ).all()
+        )
+        if hasattr(db, "scalars")
+        else []
+    )
+    intent = understand_query(query, indexed_docs, conversation_history)
+    if intent.target_language and not effective_language:
+        effective_language = intent.target_language
+
     try:
+        import inspect
+        sig = inspect.signature(retrieval_service.search_workspace)
+        if "intent" in sig.parameters or any(p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()):
+            retrieved = retrieval_service.search_workspace(
+                db, workspace, search_query, top_k, embedding_provider, intent=intent
+            )
+        else:
+            retrieved = retrieval_service.search_workspace(
+                db, workspace, search_query, top_k, embedding_provider
+            )
+    except TypeError:
         retrieved = retrieval_service.search_workspace(
-            db, workspace, query, top_k, embedding_provider
+            db, workspace, search_query, top_k, embedding_provider
         )
     except retrieval_service.RetrievalError as exc:
-        if exc.code == "NO_RESEARCH_READY_SOURCES":
+        if exc.code in {"NO_RESEARCH_READY_SOURCES", "INDEX_MODEL_MISMATCH"}:
             raise RAGError(exc.code, exc.public_message, 409) from exc
         raise RAGError(
             "RAG_RETRIEVAL_ERROR", "Authorized evidence retrieval failed", exc.status_code
@@ -209,17 +258,22 @@ def prepare_question(
     context = build_context(relevant, settings.RAG_CONTEXT_MAX_CHARACTERS)
     prompt = (
         build_grounded_prompt(
-            query, context.text, answer_language, conversation_history
+            query,
+            context.text,
+            effective_language,
+            conversation_history,
+            task_guidance=intent.task_guidance,
         )
         if context.evidence
         else None
     )
     return RAGPreparation(
         query=query,
-        answer_language=answer_language,
+        answer_language=effective_language,
         top_k=top_k,
         evidence=context.evidence,
         prompt=prompt,
+        search_query=search_query,
     )
 
 
@@ -233,6 +287,40 @@ def require_research_ready(db: Session, workspace: Workspace) -> None:
         )
 
 
+def is_model_refusal(text: str) -> bool:
+    """Detect if the generated answer is an explicit refusal due to lack of evidence."""
+    lowered = text.casefold()
+    refusal_phrases = (
+        "couldn't find enough information",
+        "could not find enough information",
+        "does not contain enough information",
+        "do not contain enough information",
+        "provided context does not contain",
+        "provided documents do not contain",
+        "provided text does not contain",
+        "provided evidence does not contain",
+        "provided sources do not contain",
+        "retrieved evidence does not contain",
+        "retrieved documents do not contain",
+        "no information is provided in the",
+        "no information is available in the",
+        "not mentioned in the provided",
+        "not found in the provided",
+        "not mentioned in the authorized",
+        "not found in the authorized",
+        "do not mention",
+        "does not mention",
+        "authorized documents do not contain",
+        "authorized documents to answer this",
+        "cannot find any mention of",
+        "can't find any mention of",
+        "there is no mention of",
+        "पर्याप्त जानकारी नहीं",
+        "उल्लेख नहीं है",
+    )
+    return any(p in lowered for p in refusal_phrases)
+
+
 def persist_prepared_answer(
     db: Session,
     workspace: Workspace,
@@ -243,6 +331,8 @@ def persist_prepared_answer(
     commit: bool = True,
 ) -> RAGResult:
     """Persist one completed answer and its server-authorized evidence graph."""
+    refusal = preparation.insufficient_evidence or is_model_refusal(answer)
+    evidence_to_persist = [] if refusal else list(preparation.evidence)
     return _persist_response(
         db=db,
         workspace=workspace,
@@ -251,9 +341,9 @@ def persist_prepared_answer(
         answer=answer,
         answer_language=preparation.answer_language,
         top_k=preparation.top_k,
-        insufficient_evidence=preparation.insufficient_evidence,
+        insufficient_evidence=refusal,
         model=model,
-        evidence=list(preparation.evidence),
+        evidence=evidence_to_persist,
         commit=commit,
     )
 
@@ -279,6 +369,7 @@ def answer_question(
         answer_language=answer_language,
         embedding_provider=embedding_provider,
         conversation_history=conversation_history,
+        llm_provider=llm_provider,
     )
     if preparation.insufficient_evidence:
         return persist_prepared_answer(
@@ -295,6 +386,12 @@ def answer_question(
         generation = llm_provider.generate(
             preparation.prompt.system_instruction, preparation.prompt.user_prompt
         )
+    except LLMQuotaExhaustedError as exc:
+        raise RAGError(
+            "LLM_QUOTA_EXHAUSTED",
+            str(exc),
+            429,
+        ) from exc
     except LLMRateLimitError as exc:
         raise RAGError(
             "LLM_RATE_LIMIT_ERROR",

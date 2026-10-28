@@ -4,6 +4,7 @@ const backendOrigin = process.env.AURORA_BACKEND_ORIGIN ?? "http://127.0.0.1:800
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  devIndicators: false,
   async rewrites() {
     return [
       {

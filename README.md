@@ -29,7 +29,8 @@ Document Ingestion
 - Frontend: Next.js 16 App Router + React 19 + TypeScript
 - Backend: FastAPI + Python
 - Database: PostgreSQL + pgvector
-- AI: Gemini initially
+- AI Generation: Local Ollama with `qwen3:8b` (`think=False`, 100% private, on-device, no cloud LLM)
+- Embeddings: Local `intfloat/multilingual-e5-base` (768 dimensions)
 - Authentication: Server-side sessions
 - Authorization: RBAC
 - Architecture: Modular monolith
@@ -111,7 +112,7 @@ pnpm dev
 
 Open `http://localhost:3000`. The backend origin defaults to
 `http://127.0.0.1:8000`; override it with `AURORA_BACKEND_ORIGIN` when needed.
-No Gemini or other provider secret belongs in the frontend environment.
+No external provider secrets or cloud API keys belong in the frontend environment.
 
 ### One-click Windows launcher
 
@@ -202,23 +203,22 @@ POST /api/v1/workspaces/{workspace_id}/search
 The deterministic 1,000-character/150-overlap chunker preserves canonical
 locators and page provenance where applicable. Bounded candidate retrieval
 adds within-document deduplication and multi-document diversity. Embeddings use
-`gemini-embedding-001` at 768 dimensions through a
+local `intfloat/multilingual-e5-base` at 768 dimensions through a
 provider-neutral interface and are stored in PostgreSQL `vector(768)`. Search
-uses exact cosine distance with workspace filtering in SQL. Configure
-`GEMINI_API_KEY` to use the production adapter; tests use a deterministic fake
-and make no cloud calls. See `docs/rag_data_pipeline_v0.7.md` for details.
+uses exact cosine distance with workspace filtering in SQL. No cloud API
+keys are required; local embeddings run privately on-device. See `docs/rag_data_pipeline_v0.7.md` for details.
 
 ## RAG Generation (v0.8)
 
-Authorized workspace questions can now produce one-shot grounded answers:
+Authorized workspace questions produce one-shot grounded answers:
 
 ```http
 POST /api/v1/workspaces/{workspace_id}/rag
 ```
 
 The server retrieves authorized chunks, applies a relevance threshold, builds a
-bounded untrusted-evidence context, calls the configurable Gemini generation
-model, and constructs source references from retrieval data. Empty or weak
+bounded untrusted-evidence context, calls the local Ollama `qwen3:8b` generation
+model (`think=False`), and constructs source references from retrieval data. Empty or weak
 evidence returns a controlled insufficient-evidence answer without calling the
 LLM. See `docs/rag_generation_foundation_v0.8.md` for configuration, security,
 testing, and limitations.

@@ -120,11 +120,16 @@ def get_indexable_sources(db: Session, document: Document) -> list[IndexableSour
             if unit.status != "USABLE" or not unit.text.strip():
                 continue
             page = pages_by_unit_id.get(unit.id)
-            located_page = unit.locator.get("page") if unit.locator else None
+            located_num = None
+            if unit.locator:
+                if isinstance(unit.locator.get("page"), int) and unit.locator["page"] > 0:
+                    located_num = unit.locator["page"]
+                elif isinstance(unit.locator.get("slide"), int) and unit.locator["slide"] > 0:
+                    located_num = unit.locator["slide"]
             page_number = (
-                int(located_page)
-                if isinstance(located_page, int) and located_page > 0
-                else page.page_number if page is not None else None
+                located_num
+                if located_num is not None
+                else (page.page_number if page is not None else None)
             )
             sources.append(
                 IndexableSource(

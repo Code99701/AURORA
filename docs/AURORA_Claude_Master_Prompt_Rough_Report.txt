@@ -1,0 +1,285 @@
+AURORA — CLAUDE MASTER PROMPT
+Academic Project Report | Rough Draft for Faculty Review
+Project: AURORA: Multilingual RAG Platform
+Student: Arnav Mahajan | Enrolment No.: BTMC24O1031
+
+INSTRUCTIONS FOR USE
+1. Open this file and copy the prompt beginning at “TASK SPECIFICATION FOR CLAUDE” through its final instruction.
+2. Paste it into Claude.
+3. Upload the supporting documents listed in the separate upload checklist from Antigravity's output, especially the official MITS MAC sample report, Phase 5B/5C reports, evaluation JSON, and project architecture/requirements documents.
+4. Verify all personal, supervisor, and institutional details before final submission. This is a rough draft for faculty review.
+
+======================================================================
+
+# TASK SPECIFICATION FOR CLAUDE: AURORA ACADEMIC PROJECT REPORT GENERATION (ROUGH DRAFT FOR FACULTY REVIEW)
+## 1. YOUR ROLE & CORE DIRECTIVE
+You are acting as an elite Academic Documentation Architect, Principal Software Engineering Auditor, and Technical Writer. 
+Your objective is to generate the complete, publication-grade, academically rigorous **Rough Project Report** for the undergraduate engineering project **AURORA: Multilingual RAG Platform**. 
+This rough draft is prepared specifically for **urgent faculty review** at **Madhav Institute of Technology & Science (MITS), Gwalior**, fulfilling Milestone 3 (Methodology), Milestone 4 (Results and Conclusion), and Milestone 5 (Project Report Draft).
+### NON-NEGOTIABLE COMPLIANCE RULES:
+1. **Academic Grounding:** The report must rigorously adhere to the official MITS Department of Engineering Mathematics & Computing format (derived from `Sample_Report for MAC Department for all.pdf`).
+2. **Absolute Factual Integrity:** Every architectural claim, parameter, metric, database table, and component described must be grounded in the verified project evidence dossier provided below. **DO NOT invent components, benchmarks, deployment topologies, or capabilities that do not exist.**
+3. **No Hallucinated References:** Use only genuine, verifiable academic citations and technical documentation provided in Section 7.
+4. **No Fabricated Approvals:** Because this is a **Rough Draft for Faculty Review**, use standardized placeholders (`[Supervisor Designation]`, `[Turnitin %]`, `[Date]`) for administrative fields. Do not forge signatures, submission certificates, or imaginary grading rubrics.
+5. **Tone & Style:** Maintain a formal, restrained, Third-Person Academic Tone ("The system implements...", "In Phase 5C, local embeddings were evaluated..."). Avoid informal marketing fluff ("revolutionary", "magical", "game-changing"). Explain concepts clearly so that a beginner B.Tech evaluator can understand the mathematics, architecture, and pipeline while an experienced examiner appreciates the engineering rigor.
+---
+## 2. INSTITUTIONAL & ACADEMIC DOSSIER
+- **Institution:** Madhav Institute of Technology & Science (MITS), Gwalior  
+  *(A Govt. Aided UGC Autonomous & NAAC A++ Accredited Institute, Affiliated to RGPV Bhopal, Established 1957)*
+- **Department:** Department of Engineering Mathematics and Computing (MAC)
+- **Degree:** Bachelor of Technology (B.Tech) in Mathematics and Computing
+- **Academic Scheme:** 2024-Batch Scheme, V-Semester Cornerstone Project, Academic Session July–December 2026
+- **Project Foundation:** Topic #16 — *Design and Development of Multilingual RAG Chatbot* (Recommended in Board of Studies meeting of 1 June 2026, Annexure 10)
+- **Project Title:** AURORA: Multilingual RAG Platform
+- **Developer:** Solo Student Developer — **Arnav Mahajan** (Enrolment No.: `BTMC24O1031`)
+- **Faculty Supervisor / Mentor:** **Dr. Minakshi Poonia**, Assistant Professor, Department of Engineering Mathematics & Computing, MITS Gwalior
+- **Head of Department:** `[Dr. Name of HoD]`, Department of Engineering Mathematics & Computing
+- **Institutional Leadership (for Acknowledgement):**
+  - Hon'ble Vice Chancellor: **Dr. R.K. Pandit**
+  - Pro Vice Chancellor: **Dr. Manjree Pandit**
+---
+## 3. TYPOGRAPHICAL & REPORT FORMAT SPECIFICATIONS (MITS MAC STANDARD)
+Follow these layout and formatting rules extracted from the official MITS Mathematics & Computing Department sample report:
+- **Paper Size:** Standard A4 (210 mm × 297 mm)
+- **Primary Typeface:** **Times New Roman** throughout
+- **Font Hierarchy:**
+  - **Document Title / Main Chapter Headings (Level 1):** Times New Roman, 16 pt to 18 pt, Bold, Centered or Left-aligned, ALL CAPS (e.g., `CHAPTER 1: INTRODUCTION`)
+  - **Section Headings (Level 2):** Times New Roman, 14 pt, Bold, Title Case (e.g., `1.1 Problem Statement and Motivation`)
+  - **Sub-section Headings (Level 3):** Times New Roman, 12 pt, Bold, Title Case (e.g., `1.1.1 Semantic Drift in Multilingual Queries`)
+  - **Body Text:** Times New Roman, 12 pt, Regular, Justified alignment
+  - **Line Spacing:** 1.5 line spacing for main body text; 1.0 (single) for code listings, tables, and long quotations
+  - **Paragraph Spacing:** 0 pt before, 6 pt after (or standard paragraph indent of 0.5 inches)
+  - **Margins:** Left: 1.25 inches (31.75 mm) for binding; Right: 1.0 inch (25.4 mm); Top: 1.0 inch (25.4 mm); Bottom: 1.0 inch (25.4 mm)
+- **Pagination Rules:**
+  - **Preliminary Pages** (Declaration, Plagiarism Certificate, Abstract, Acknowledgement, Table of Contents, Acronyms, Nomenclature, List of Figures, List of Tables): **Lower-case Roman numerals (`i`, `ii`, `iii`, `iv`, `v`, `vi`, `vii`, `viii`, `ix`)**, centered at the bottom of the page.
+  - **Cover / Title Page:** Counted as page 0, unnumbered.
+  - **Main Body** (Chapter 1 Introduction through References & Appendices): **Arabic numerals (`1`, `2`, `3`, ...)**, centered at the bottom of the page, restarting at 1 on Chapter 1.
+- **Captions & Numbering:**
+  - **Figures:** Numbered by chapter (e.g., `Figure 1.1: Overall AURORA System Architecture`, `Figure 4.2: Research Desk Interface`). Captions placed **below** the figure, 10–11 pt Times New Roman.
+  - **Tables:** Numbered by chapter (e.g., `Table 1.1: Document Format Support`, `Table 5.2: Presentation Evaluation Results`). Captions placed **above** the table, 10–11 pt Times New Roman Bold.
+- **Reference Style:** APA / Author-Date with Hanging Indent or Numbered Author-Date (as demonstrated in the official departmental reference screenshot on page 17 of `Sample_Report for MAC Department for all.pdf`).
+---
+## 4. MANDATORY REPORT OUTLINE & STRUCTURE
+Structure the report using this exact sequence prescribed by MITS MAC:
+```text
+COVER / TITLE PAGE (Unnumbered)
+CANDIDATE DECLARATION (Page i)
+PLAGIARISM CHECK CERTIFICATE (Page ii)
+ABSTRACT (Page iii)
+ACKNOWLEDGEMENT (Page iv)
+TABLE OF CONTENTS (Page v)
+ACRONYMS & ABBREVIATIONS (Page vi)
+NOMENCLATURE / MATHEMATICAL NOTATION (Page vii)
+LIST OF FIGURES (Page viii)
+LIST OF TABLES (Page ix)
+CHAPTER 1: INTRODUCTION
+  1.1 Background and Context
+  1.2 Problem Statement & Motivation
+  1.3 Aim and Objectives
+  1.4 Scope and Limitations
+  1.5 Thesis/Report Organization
+CHAPTER 2: LITERATURE SURVEY & RELATED WORK
+  2.1 Evolution of Retrieval-Augmented Generation (RAG)
+  2.2 Dense Retrieval & Multilingual Embedding Models
+  2.3 Document Intelligence and Multi-Format Ingestion
+  2.4 Cross-Lingual Semantic Search (English & Hindi)
+  2.5 Comparative Analysis & Justification of AURORA Architecture
+CHAPTER 3: SYSTEM ANALYSIS & METHODOLOGY
+  3.1 Functional & Non-Functional Requirements
+  3.2 The 7-Stage AURORA RAG Pipeline Workflow
+  3.3 Canonical Document Intelligence & Multi-Format Ingestion
+  3.4 Mathematical Formulation of Embeddings & Cosine Retrieval
+  3.5 Structure-Aware Chunking, Page-Range Routing, and Query Rewriting
+CHAPTER 4: SYSTEM DESIGN & IMPLEMENTATION
+  4.1 Architectural Overview (Modular Monolith)
+  4.2 Technology Stack Justification
+  4.3 Database Schema & Relational Design (PostgreSQL + pgvector)
+  4.4 Core Subsystems Implementation:
+      4.4.1 Ingestion Registry & OCR Boundary (PDF, DOCX, PPTX, XLSX, etc.)
+      4.4.2 Local Multilingual Embedding Engine (intfloat/multilingual-e5-base)
+      4.4.3 Dual-Engine Generation & Quota Fallback (Gemini + Local Ollama/Qwen3 8B)
+      4.4.4 Multi-Turn Query Rewriter & Session Persistence
+      4.4.5 Citation Tracking & Source Inspection
+  4.5 User Interface Implementation (Next.js 16, React 19, Research Desk)
+CHAPTER 5: TESTING, RELIABILITY & EMPIRICAL EVALUATION
+  5.1 Verification Strategy & Automated Regression Test Suites
+  5.2 Phase 5C Reliability Enhancements:
+      5.2.1 Local Embedding Lifespan Warm-Up (Cold vs. Warm Query Benchmarks)
+      5.2.2 Legacy In-Place Embedding Migration (1,639 Chunks, 0 Failures, Rollback Manifests)
+      5.2.3 PPTX Slide-Number Consistency & Backfill
+  5.3 Empirical RAG Evaluation (10-Case Cornerstone Presentation Benchmark)
+  5.4 Live User Experience Verification (Hindi, Citations, Quota Exhaustion Fallback)
+CHAPTER 6: CONCLUSION & FUTURE SCOPE
+  6.1 Summary of Contributions
+  6.2 Key Challenges Encountered & Engineering Solutions
+  6.3 Future Directions (Agentic RAG, Hybrid BM25/Dense Search, GraphRAG)
+REFERENCES (APA / Author-Date formatted)
+APPENDICES
+  Appendix A: Core Database Schema Definitions (DDL)
+  Appendix B: API Route Catalogue
+  Appendix C: Sample Recovery Manifest Schema
+5. EMBEDDED TECHNICAL & ARCHITECTURAL DOSSIER
+5.1 System Architecture & Technical Stack
+AURORA is architected as an enterprise-grade Modular Monolith designed for academic and corporate research assistance without external billing or cloud API dependencies:
+
+Frontend: Next.js 16 (App Router), React 19, TypeScript, Vanilla CSS Modules. Uses a same-origin /api rewrite proxying to FastAPI. Features an interactive Research Desk with split-screen source evidence inspector, live Server-Sent Events (SSE) streaming tokens, and responsive document library.
+Backend: Python 3.13, FastAPI, Pydantic v2, SQLAlchemy 2.0 ORM, Alembic database migrations.
+Database: PostgreSQL 16 with the pgvector extension for storing 768-dimensional vector embeddings, full-text search (tsv vector generation), and relational schemas.
+Embeddings: Local intfloat/multilingual-e5-base (SentenceTransformers, 768 dimensions), utilizing NVIDIA CUDA acceleration (RTX 4060 Laptop GPU, 8 GB VRAM) with automatic CPU fallback. Strictly adheres to E5 prefix conventions: "query: " for search queries, "passage: " for chunks.
+Language Models (Dual-Engine with Quota Fallback):
+Primary LLM: Google Gemini 2.5/3.6 Flash (gemini-3.6-flash) via Google AI Studio Free Tier.
+Local Fallback LLM: Ollama running qwen3:8b (stored entirely on D:\AI\Models\Ollama to protect OS drive). Configured with think: false for low-latency generation.
+Fallback Mechanism (backend/app/llm/fallback.py): AutoFallbackLLMProvider automatically catches Gemini HTTP 429 quota exhaustion (LLMQuotaExhaustedError), quota timeouts, and API connection failures, falling back transparently to local Ollama.
+Multi-Format Ingestion Foundation: Canonical document model extracting 8 distinct format families:
+PDF: Native extraction via pypdf with selective OCR fallback via Tesseract 5.3 (.runtime/tesseract/tesseract.exe).
+DOCX: Paragraphs, headings, and nested tables via python-docx.
+PPTX: Slide text, shapes, tables, and speaker notes via python-pptx (strict 1-based slide numbers).
+XLSX: Multi-worksheet cell extraction via openpyxl.
+TXT: UTF-8 text blocks.
+Markdown: Sectional parsing by heading path.
+CSV & TSV: Delimited row-group extraction.
+Security & Multi-Tenancy:
+Opaque HttpOnly session cookies.
+Workspace authorization boundaries (OWNER / MEMBER roles). All document queries and vector searches strictly filter by workspace_id in SQL queries, completely eliminating cross-tenant leakage.
+5.2 The 7-Stage Core Pipeline Workflow
+Explain the end-to-end mathematical and operational dataflow: $$\text{Document} \xrightarrow{\text{1. Ingestion}} \text{Canonical Units} \xrightarrow{\text{2. Chunking}} \text{Structured Chunks} \xrightarrow{\text{3. Embedding}} \text{PostgreSQL pgvector}$$ $$\text{User Query} \xrightarrow{\text{4. Query Rewriter}} \text{Search Query} \xrightarrow{\text{5. Vector Retrieval}} \text{Context Assembly} \xrightarrow{\text{6. Grounded LLM}} \text{Answer + Citations}$$
+
+Ingestion & Canonicalization: Files are validated (format allowlist, size limits), ingested through format-specific adapters, and stored as normalized ContentUnit rows with structured locator metadata (e.g., {"type": "pptx_slide", "slide": 2} or {"type": "pdf_page", "page": 4}).
+Structure-Aware Chunking: Chunks are bounded to 800–1000 characters with 120-character overlap. Slide boundaries are respected; heading paths are preserved. Each chunk receives a contextual prefix: [Document: filename | Section: heading | Pages/Slides: start-end].
+Local Vector Generation: Batches of passages prefixed with "passage: " are embedded via intfloat/multilingual-e5-base into 768-dimensional normalized vectors: $$\vec{v} = \frac{f_{\text{E5}}(\text{"passage: "} + T)}{|f_{\text{E5}}(\text{"passage: "} + T)|_2}$$
+Context-Aware Query Rewriting (backend/app/rag/rewriter.py): In multi-turn chat sessions, follow-up queries (e.g., "Summarise the second one", "Explain it in Hindi", "What are its advantages?") are rewritten using recent conversation history into standalone, keyword-rich search queries while preserving the target language preference.
+Semantic Retrieval with Positional Routing (backend/app/services/retrieval.py):
+Cosine Similarity: Retrieved using 1 - cosine_distance over pgvector cosine operator <=>: $$\text{Similarity}(\vec{q}, \vec{d}) = 1.0 - \frac{\vec{q} \cdot \vec{d}}{|\vec{q}|_2 |\vec{d}|_2} = \vec{q} \cdot \vec{d} \quad (\text{since vectors are } L_2\text{-normalized})$$
+Positional & Page-Range Routing: Regex detects page/slide constraints (e.g., "What is on slide 2?") and applies SQL filters DocumentChunk.page_number.between(start, end).
+Keyword Boosting & Diversification: Matches on user terms boost candidate similarity by up to $+0.10$. A diversification algorithm ensures top-$k$ results represent multiple documents rather than clustering on one noisy section.
+Grounded Generation & Refusal Discipline: The prompt instructs the LLM: "Answer ONLY based on the provided evidence. If the evidence does not contain sufficient facts, state honestly that the information is unavailable."
+Durable Source Citation Provenance: Each cited passage is persisted in the rag_citations database table with its exact chunk_id, document_id, page_number, locator JSON, and cosine similarity. In the UI, citations render as interactive clickable badges (e.g., [1] · Slide 2) that open the verbatim source excerpt in a slide-out drawer.
+6. EMPIRICAL BENCHMARKS & EVALUATION EVIDENCE (PHASES 5B & 5C)
+Include the exact empirical measurements from the project repository. Distinguish verified benchmarks from initial limits:
+
+6.1 Phase 5C: Local Embedding Warm-Up Latency Optimization
+To eliminate cold-start lag, an asynchronous startup warm-up was integrated into FastAPI's lifespan:
+
+Cold First-Query Latency (Before Warm-Up): 15,478.75 ms (~15.48 seconds) — caused by lazy loading model weights, tokenizers, and PyTorch CUDA kernels into GPU VRAM on the first user query.
+Server Startup Lifespan Warm-Up: 26,630.10 ms (~26.63 seconds) — runs once at boot in a background thread without blocking /api/v1/health checks.
+Warm First-Query Latency (After Warm-Up): 44.33 ms (0.044 seconds) — immediate tensor computation on GPU.
+Acceleration Factor: 349.16x Speedup in user-facing query responsiveness.
+6.2 Phase 5C: Legacy Document Re-Indexing
+Migrated 100% of legacy documents indexed with deprecated gemini-embedding-001 to intfloat/multilingual-e5-base:
+
+Total Migrated Documents: 14 documents (1 pilot resume + 13 batch documents across 7 workspaces).
+Total Chunks Re-embedded: 1,639 chunks.
+Migration Strategy: In-Place vector update (DocumentChunk.embedding = new_vector). Zero chunk IDs or primary keys altered; 100% of historical rag_citations foreign keys preserved intact.
+Recovery Manifests: 14 cryptographically verified JSON backup manifests written to storage/uploads/backups/embeddings/ prior to SQL commit, storing chunk text SHA-256 hashes and vector checksums.
+Safety Skip: 5 empty or unindexed documents (ui_ux_design_styles.pdf, test_audit_notes.txt, ann_unit2_slides.pdf) safely protected from unguided chunking.
+Failure Rate: 0% (0 errors, 0 rollbacks).
+6.3 Phase 5C: PPTX Slide-Number Consistency
+Resolved defect where IndexableSource checked unit.locator.get("page") instead of "slide", causing slide numbers to be None.
+Backfilled all 15 existing PPTX chunks in the database with 1-based slide numbers ($1, 2, \dots, 7$).
+Updated frontend citations to render "Slide X" instead of "Page X" or "p. None".
+6.4 Phase 5B: Reproducible Evaluation Benchmark (Cornerstone Presentation Dataset)
+Evaluated on backend/tests/rag_eval/aurora_presentation_dataset.json against AURORA_Cornerstone_Presentation_FIXED.pptx (10 test cases):
+
+Overall Retrieval Hit Rate: 100.0%
+Overall Key Factual Coverage: 90.0% (100% on 8/10 cases; 50% on FOLLOWUP-01 and HINDI-01)
+Citation Accuracy: 100.0% (every generated citation mapped to valid authoritative evidence)
+Refusal Accuracy: 100.0% (correctly identified unanswerable queries and suppressed hallucinations)
+Latency by Category:
+Factual Queries: 8,286.3 ms (mean including cold start; warm: ~1,500 ms)
+Section Summary: 1,667.5 ms
+Comparison: 1,722.2 ms
+Document Overview: 2,628.9 ms
+Aggregation: 1,461.6 ms
+Follow-up Queries: 809.8 ms
+Unanswerable Refusals: 882.1 ms
+Evaluation Scope Caveat: State clearly that this 10-case evaluation validates the pipeline mechanics, refusal discipline, and language routing on the project presentation, but does not represent an exhaustive industry-scale benchmark across millions of open-domain documents.
+6.5 Comprehensive Test Suite Status
+Full test suite executed in 27.85s via pytest: 42 passed, 0 failed (100% pass rate):
+
+test_embedding_warmup.py: 4 passed (lifespan warmup, singleton reuse, failure tolerance, non-local bypass)
+test_pptx_slide_numbers.py: 4 passed (1-based slide extraction, locator mapping, chunking slide 1, 2, and final slide, ContentUnit fallback)
+test_local_embeddings.py: 16 passed (device resolution, E5 prefix discipline, $L_2$ normalization, LRU cache eviction, manifest verification, rollback, quota parsing)
+test_retrieval_diversity.py: 2 passed (multi-document representation, intra-document duplicate suppression)
+test_structure_aware_retrieval.py: 5 passed (page-range routing, document scoping, positional ordering, overview sampling, honest refusal)
+test_query_rewriter.py: 11 passed (pronoun resolution, Hindi follow-ups, ordinal references, quota exhaustion resilience, workspace isolation)
+7. AUTHENTIC ACADEMIC & TECHNICAL REFERENCES
+Format all references in APA / Author-Date format with hanging indents, strictly following the department's reference screenshot on page 17 of Sample_Report for MAC Department for all.pdf:
+
+Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., Küttler, H., Lewis, M., Yih, W., Rocktäschel, T., Riedel, S., & Kiela, D. (2020), "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks," Advances in Neural Information Processing Systems (NeurIPS 2020), 33, 9459–9474.
+Wang, L., Yang, N., Huang, X., Jiao, B., Yang, L., Jiang, D., Majumder, R., & Wei, F. (2022), "Text Embeddings by Weakly-Supervised Contrastive Pre-training," arXiv preprint, arXiv:2212.03533. (Introduces multilingual-e5-base architecture and prefix conventions).
+Karpukhin, V., Oğuz, B., Min, S., Lewis, P., Wu, L., Edunov, S., Chen, D., & Yih, W. (2020), "Dense Passage Retrieval for Open-Domain Question Answering," Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP), 6769–6781.
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., & Polosukhin, I. (2017), "Attention Is All You Need," Advances in Neural Information Processing Systems (NeurIPS 2017), 30, 5998–6008.
+Qwen Team. (2024), "Qwen2.5 Technical Report: Open Foundation and Chat Models," arXiv preprint, arXiv:2412.15115. (Documents Qwen architectural foundation and multilingual reasoning).
+Gemini Team, Google. (2024), "Gemini 1.5: Unlocking Multimodal Understanding Across Millions of Tokens," arXiv preprint, arXiv:2403.05530.
+PostgreSQL Global Development Group. (2024), "PostgreSQL 16 Documentation," PostgreSQL.org, https://www.postgresql.org/docs/16/.
+pgvector Contributors. (2024), "pgvector: Open-source vector similarity search for PostgreSQL," GitHub Repository, https://github.com/pgvector/pgvector.
+Ramírez, S. (2024), "FastAPI: High performance, easy to learn, fast to code, ready for production," FastAPI Documentation, https://fastapi.tiangolo.com/.
+Facebook React Team. (2024), "React 19 Release Notes and Documentation," React Official Website, https://react.dev.
+Vercel. (2024), "Next.js 16 Documentation: The React Framework for the Web," Vercel.com, https://nextjs.org/docs.
+Department of Mathematics and Computing, MITS Gwalior. (2026), "List of Capstone/Cornerstone Project Topics, V Semester, Annexure 10," Board of Studies Meeting of 1 June 2026, Topic 16: Design and Development of Multilingual RAG Chatbot.
+8. INVENTORY OF FIGURES & TABLES
+Direct Claude to insert and format the following figures and tables in the appropriate chapters:
+
+Figure 3.1: The 7-Stage AURORA RAG Pipeline Workflow (Include complete Mermaid diagram showing Ingestion $\to$ Extraction $\to$ Cleaning $\to$ Chunking $\to$ E5 Embeddings $\to$ pgvector $\to$ Query Rewriting $\to$ Retrieval $\to$ Dual-LLM Generation $\to$ Citations).
+Figure 4.1: AURORA System Architecture and Boundary Model (Include Mermaid component diagram detailing Next.js frontend, FastAPI modular services, PostgreSQL + pgvector, local Ollama engine, and Gemini API boundary).
+Figure 4.2: AURORA Research Desk User Interface (Refer to verified UI layout: left document workspace sidebar with status badges, central interactive conversation stream with citations, and right-hand evidence excerpt drawer).
+Figure 4.3: Dual-Engine LLM Fallback Workflow (Mermaid state diagram showing primary Gemini call $\to$ 429 quota exception catch $\to$ transparent fallback to ollama/qwen3:8b).
+Table 3.1: Supported Document Format Families and Canonical Locators (PDF, DOCX, PPTX, XLSX, TXT, Markdown, CSV, TSV).
+Table 4.1: Core Database Entities and Schema Specifications (users, workspaces, documents, ingestion_runs, content_units, document_chunks, conversations, rag_citations).
+Table 5.1: Local Embedding Latency Benchmark: Cold-Start vs. Warm-Up Performance (Cold: 15,478.75 ms vs. Warm: 44.33 ms, 349.16x speedup).
+Table 5.2: Legacy Document Re-Indexing Execution Matrix (14 documents, 1,639 chunks, in-place update, backup manifest paths, 0 errors).
+Table 5.3: Cornerstone Presentation RAG Evaluation Benchmark Results (Categories: FACT, SECTION_SUMMARY, COMPARISON, DOC_OVERVIEW, AGGREGATION, FOLLOWUP, HINDI, UNANSWERABLE).
+9. CHAPTER-BY-CHAPTER DRAFTING INSTRUCTIONS
+Generate the full report text adhering to the following content guidelines:
+
+Preliminary Pages
+Cover Page: Format precisely using the layout in Sample_Report for MAC Department for all.pdf: Project Title (AURORA: MULTILINGUAL RAG PLATFORM), Subtitle (A Cornerstone Project Report), Degree (Bachelor of Technology in Mathematics and Computing), Candidate Name (Arnav Mahajan), Enrolment No. (BTMC24O1031), Supervisor (Dr. Minakshi Poonia, Assistant Professor), Institute Name, and Session (July–December 2026).
+Declaration: Match the verbatim candidate declaration from page 2 of the sample report with candidate signature line and supervisor "Guided By" block.
+Plagiarism Certificate: Include the standard Turnitin plagiarism certification block (with [Turnitin %: < 15%] placeholder).
+Abstract (Page iii): Exactly 250–350 words summarizing the research motivation (information silos and multilingual query drift), core architectural contribution (canonical multi-format ingestion, 768-dim local E5 vector store, dual-engine generation with automatic quota fallback), empirical milestones (349x startup warm-up speedup, 1,639 legacy chunks migrated, 100% retrieval hit rate on presentation dataset), and relevance to academic research assistance.
+Acknowledgement (Page iv): Formally acknowledge Hon'ble VC Dr. R.K. Pandit, Pro-VC Dr. Manjree Pandit, Head of Department [Dr. Name], Project Guide Dr. Minakshi Poonia, faculty peers, and family.
+Front Matter Tables: Generate Table of Contents (v), Acronyms (vi), Nomenclature (vii), List of Figures (viii), and List of Tables (ix).
+Chapter 1: Introduction
+Explain why enterprise knowledge discovery across heterogeneous documents (PDFs, presentations, spreadsheets) fails under traditional keyword search (lexical gap, synonym blindness) and generic cloud chatbots (hallucination, data privacy, quota lockouts).
+State the specific problem of cross-lingual question answering (e.g., asking in Hindi about an English technical slide).
+Formulate the 5 core objectives of AURORA: (1) multi-format canonical extraction, (2) workspace-isolated pgvector storage, (3) local multilingual embeddings, (4) dual-engine generation with automatic fallback, and (5) persistent, auditable citations.
+Detail the engineering scope (PDF, DOCX, PPTX, XLSX, TXT, MD, CSV, TSV) and explicit out-of-scope boundaries (GraphRAG, agentic tools, video/audio).
+Chapter 2: Literature Survey & Related Work
+Review seminal RAG architecture (Lewis et al., 2020) and Dense Passage Retrieval (Karpukhin et al., 2020).
+Analyze embedding model paradigms: Contrastive learning, bilingual encoders, and why intfloat/multilingual-e5-base (Wang et al., 2022) with 768 dimensions was selected over proprietary cloud APIs.
+Contrast cloud LLMs (Gemini) with lightweight open weights (Qwen 2.5 / Qwen 3 8B).
+Provide a structured comparative synthesis table comparing traditional search, naive PDF chatbots, commercial enterprise RAG, and AURORA.
+Chapter 3: System Analysis & Proposed Methodology
+Formulate the complete 7-stage pipeline with mathematical definitions of vector normalization, cosine similarity, and contextual chunk prefixes.
+Describe the canonical ContentUnit abstraction that unifies tables, slides, text ranges, and pages into a single processing schema.
+Detail the structure-aware chunking algorithm, page-range routing (handling "slide 2" or "pages 4-6" queries), and multi-turn query rewriting.
+Chapter 4: System Architecture & Implementation
+Present the Modular Monolith architecture, detailing how the Next.js frontend, FastAPI services, PostgreSQL database, Ollama daemon, and Gemini API interact.
+Detail the relational data model (documents, content_units, document_chunks, rag_citations, etc.).
+Explain the implementation of the Dual-Engine Fallback: how Gemini 429 quota exhaustion is detected and routed to local Qwen3 8B running with thinking disabled on the D: drive.
+Detail the frontend implementation: Server-Sent Events (SSE) streaming, interactive source pill badges, and the evidence inspection drawer.
+Chapter 5: Testing, Reliability & Empirical Results
+Present the automated testing methodology and the 42/42 passing regression test suite.
+Present the Local Embedding Warm-Up benchmark table (15.48s cold-start vs. 44.33ms warm query; 349x speedup).
+Present the Legacy Document Migration: 14 documents, 1,639 chunks, in-place chunk updates, zero citation breakage, and SHA-256 backup manifests.
+Detail the PPTX Slide-Number Consistency resolution: root-cause diagnosis, 1-based indexing, database backfill, and UI badge updates.
+Present the 10-case Cornerstone Presentation evaluation results table across all 8 categories (100% retrieval hit rate, 90% facts coverage, 100% citation accuracy, 100% refusal accuracy). Discuss category-specific findings honestly.
+Chapter 6: Conclusion & Future Scope
+Summarize the achieved engineering outcomes and milestone completions.
+Discuss real-world engineering constraints encountered (free-tier API rate limits, hardware memory boundaries, slide locator mismatches) and how they were solved.
+Outline concrete future extensions: Hybrid BM25 + dense vector search, GraphRAG for entity relation discovery, and claim-level NLI verification.
+References & Appendices
+Provide complete APA / Author-Date references for all 12 citations in Section 7.
+Provide Appendix A (Core DDL Schema), Appendix B (API Routes), and Appendix C (Recovery Manifest JSON Sample).
+10. FINAL QUALITY-CONTROL CHECKLIST FOR CLAUDE
+Before finalizing the report text, verify:
+
+ Are all preliminary pages numbered in lowercase Roman numerals (i to ix) and main body pages in Arabic numerals (1, 2, ...)?
+ Are Times New Roman and the exact font sizes (16–18pt title, 14pt section, 12pt body) specified?
+ Is the student name Arnav Mahajan and Enrolment BTMC24O1031 correctly placed?
+ Is Dr. Minakshi Poonia listed as the project supervisor?
+ Are all 42 passed tests, 1,639 migrated chunks, and 349x warmup speedup cited with exact empirical figures?
+ Are all figures and tables properly captioned and referenced in the text?
+ Are references strictly formatted in APA / Author-Date style matching the MITS MAC sample screenshot?
+ Is the document clearly identified as a Rough Project Report for Faculty Review?
+Now, generate the complete, self-contained, publication-grade academic project report following all the directives above.

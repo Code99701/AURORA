@@ -11,6 +11,18 @@ class LLMProviderError(Exception):
 
 
 class LLMRateLimitError(LLMProviderError):
+    def __init__(
+        self,
+        message: str = "Generation provider rate limit reached",
+        delay: float | None = None,
+    ):
+        super().__init__(message)
+        self.delay = delay
+
+
+class LLMQuotaExhaustedError(LLMRateLimitError):
+    """Raised when the non-recoverable daily quota (e.g. 20 RPD) is exhausted."""
+
     pass
 
 

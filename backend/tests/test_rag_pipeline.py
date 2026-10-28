@@ -12,7 +12,7 @@ from app.core.config import settings
 from app.db.session import SessionLocal
 from app.embeddings.base import EmbeddingConfigurationError, EmbeddingProviderError
 from app.embeddings.deps import get_embedding_provider
-from app.embeddings.gemini import GeminiEmbeddingProvider
+from app.embeddings.local import LocalEmbeddingProvider
 from app.main import app
 from app.models.document import Document
 from app.models.document_chunk import DocumentChunk, EMBEDDING_DIMENSION
@@ -229,8 +229,8 @@ def test_indexing_requires_processed_document(fake_provider):
 
 
 def test_embedding_configuration_and_dimension_fail_safely():
-    with pytest.raises(EmbeddingConfigurationError, match="API key"):
-        GeminiEmbeddingProvider(None, "gemini-embedding-001", EMBEDDING_DIMENSION)
+    with pytest.raises(EmbeddingConfigurationError, match="not be blank"):
+        LocalEmbeddingProvider("", EMBEDDING_DIMENSION)
 
     provider = WrongDimensionProvider()
     app.dependency_overrides[get_embedding_provider] = lambda: provider
@@ -246,116 +246,6 @@ def test_embedding_configuration_and_dimension_fail_safely():
     assert response.status_code == 503
     assert response.json()["detail"]["code"] == "EMBEDDING_DIMENSION_MISMATCH"
 
-
-def test_gemini_embedding_provider_batches_large_documents(monkeypatch):
-    batch_sizes: list[int] = []
-
-    class FakeResponse:
-        status_code = 200
-        headers: dict[str, str] = {}
-
-        def __init__(self, size: int):
-            self.size = size
-
-        def raise_for_status(self):
-            return None
-
-        def json(self):
-            return {
-                "embeddings": [
-                    {"values": [1.0, 0.0, 0.0]}
-                    for _ in range(self.size)
-                ]
-            }
-
-    def fake_post(url, *, headers, json, timeout):
-        requests = json["requests"]
-        batch_sizes.append(len(requests))
-        assert len(requests) <= 100
-        assert headers == {"x-goog-api-key": "test-key"}
-        assert "test-key" not in url
-        return FakeResponse(len(requests))
-
-    monkeypatch.setattr("app.embeddings.gemini.httpx.post", fake_post)
-    provider = GeminiEmbeddingProvider("test-key", "gemini-test", 3)
-
-    vectors = provider.embed_documents([f"chunk {index}" for index in range(387)])
-
-    assert batch_sizes == [100, 100, 100, 87]
-    assert len(vectors) == 387
-    assert vectors[0] == [1.0, 0.0, 0.0]
-
-
-def test_gemini_embedding_provider_validates_each_batch_count(monkeypatch):
-    calls = 0
-
-    class FakeResponse:
-        status_code = 200
-        headers: dict[str, str] = {}
-
-        def raise_for_status(self):
-            return None
-
-        def json(self):
-            nonlocal calls
-            calls += 1
-            size = 100 if calls == 1 else 86
-            return {
-                "embeddings": [
-                    {"values": [1.0, 0.0, 0.0]}
-                    for _ in range(size)
-                ]
-            }
-
-    monkeypatch.setattr(
-        "app.embeddings.gemini.httpx.post",
-        lambda *args, **kwargs: FakeResponse(),
-    )
-    provider = GeminiEmbeddingProvider("test-key", "gemini-test", 3)
-
-    with pytest.raises(EmbeddingProviderError, match="unexpected count"):
-        provider.embed_documents([f"chunk {index}" for index in range(187)])
-
-
-def test_gemini_embedding_provider_retries_quota_without_url_secret(monkeypatch):
-    request = httpx.Request(
-        "POST",
-        "https://generativelanguage.googleapis.com/v1beta/models/test:batchEmbedContents",
-    )
-    responses = iter(
-        [
-            httpx.Response(
-                429,
-                request=request,
-                json={
-                    "error": {
-                        "message": "Quota exhausted. Please retry in 12.5s.",
-                        "status": "RESOURCE_EXHAUSTED",
-                    }
-                },
-            ),
-            httpx.Response(
-                200,
-                request=request,
-                json={"embeddings": [{"values": [1.0, 0.0, 0.0]}]},
-            ),
-        ]
-    )
-    delays: list[float] = []
-
-    def fake_post(url, *, headers, json, timeout):
-        assert headers == {"x-goog-api-key": "test-key"}
-        assert "test-key" not in url
-        return next(responses)
-
-    monkeypatch.setattr("app.embeddings.gemini.httpx.post", fake_post)
-    monkeypatch.setattr("app.embeddings.gemini.time.sleep", delays.append)
-    provider = GeminiEmbeddingProvider("test-key", "gemini-test", 3)
-
-    vector = provider.embed_query("quota-safe query")
-
-    assert vector == [1.0, 0.0, 0.0]
-    assert delays == [13.5]
 
 
 def test_wrong_provider_output_marks_indexing_failed():

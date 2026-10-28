@@ -337,7 +337,7 @@ def test_document_response_can_retry():
         indexing_status="INDEXED",
         indexing_error=None,
         indexed_at=now,
-        embedding_model="gemini",
+        embedding_model="intfloat/multilingual-e5-base",
         embedding_dimension=768,
         created_at=now,
         updated_at=now,

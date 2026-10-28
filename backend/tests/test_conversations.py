@@ -281,7 +281,10 @@ def test_follow_up_uses_bounded_recent_context_and_fresh_retrieval(
     assert client.post(path, json={"content": "Establish the first finding."}).status_code == 200
     assert client.post(path, json={"content": "How does that affect the conclusion?"}).status_code == 200
 
-    assert retrieval_queries == ["Establish the first finding.", "How does that affect the conclusion?"]
+    assert retrieval_queries == [
+        "Establish the first finding.",
+        "How does Establish the first finding affect the conclusion?",
+    ]
     second_prompt = conversation_providers.calls[1][1]
     assert "RECENT CONVERSATION CONTEXT (NOT EVIDENCE)" in second_prompt
     assert "Establish the first finding." in second_prompt

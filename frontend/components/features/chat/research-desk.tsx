@@ -83,7 +83,9 @@ function Evidence({
           >
             <span className={styles.sourcePillNum}>{source.position}</span>
             <span className={styles.sourcePillText}>{source.filename}</span>
-            <span className={styles.sourcePillLoc}>· p. {source.page_number || 1}</span>
+            <span className={styles.sourcePillLoc}>
+              · {source.locator?.type === "pptx_slide" || /\.(pptx?|odp)$/i.test(source.filename || "") ? `Slide ${source.page_number || 1}` : `p. ${source.page_number || 1}`}
+            </span>
           </button>
         ))}
       </div>

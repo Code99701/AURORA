@@ -48,7 +48,7 @@ if errorlevel 1 (
     for /L %%I in (1,1,60) do (
         docker info >nul 2>&1
         if not errorlevel 1 goto docker_ready
-        timeout /t 2 /nobreak >nul
+        ping -n 3 127.0.0.1 >nul
     )
     echo [ERROR] Docker did not become ready within two minutes.
     goto launch_failed
@@ -66,16 +66,44 @@ set "DB_HEALTH="
 for /L %%I in (1,1,30) do (
     for /F "delims=" %%H in ('docker inspect --format "{{.State.Health.Status}}" aurora-postgres 2^>nul') do set "DB_HEALTH=%%H"
     if /I "!DB_HEALTH!"=="healthy" goto database_ready
-    timeout /t 2 /nobreak >nul
+    ping -n 3 127.0.0.1 >nul
 )
 echo [ERROR] PostgreSQL did not report a healthy state within one minute.
 goto launch_failed
 
 :database_ready
-echo [2/6] PostgreSQL is healthy.
+echo [2/7] PostgreSQL is healthy.
+
+echo [3/7] Checking local Ollama AI engine...
+call :port_open 11434
+if errorlevel 1 (
+    echo [WAIT] Ollama is not running. Starting local Ollama server...
+    set "OLLAMA_EXE="
+    if exist "%LOCALAPPDATA%\Programs\Ollama\ollama.exe" set "OLLAMA_EXE=%LOCALAPPDATA%\Programs\Ollama\ollama.exe"
+    if not defined OLLAMA_EXE (
+        where ollama.exe >nul 2>&1
+        if not errorlevel 1 set "OLLAMA_EXE=ollama.exe"
+    )
+    if defined OLLAMA_EXE (
+        set "OLLAMA_MODELS=D:\AI\Models\Ollama"
+        start "Ollama Engine" /min cmd.exe /c "set OLLAMA_MODELS=D:\AI\Models\Ollama&& "!OLLAMA_EXE!" serve"
+        for /L %%I in (1,1,20) do (
+            call :port_open 11434
+            if not errorlevel 1 goto ollama_ready
+            ping -n 2 127.0.0.1 >nul
+        )
+        echo [WARNING] Ollama server took longer than expected to start.
+    ) else (
+        echo [WARNING] Ollama executable not found. Ensure Ollama is running for AI generation.
+    )
+) else (
+    echo [INFO] Ollama server is already active on port 11434.
+)
+:ollama_ready
+echo [3/7] Ollama AI engine is ready.
 
 if not exist "%PYTHON_EXE%" (
-    echo [3/6] Creating the backend Python environment...
+    echo [4/7] Creating the backend Python environment...
     where py.exe >nul 2>&1
     if not errorlevel 1 (
         py -3 -m venv "%BACKEND_DIR%\aurora-env"
@@ -95,14 +123,14 @@ if not exist "%PYTHON_EXE%" (
 
 "%PYTHON_EXE%" -c "import fastapi, sqlalchemy, docx, openpyxl, pptx" >nul 2>&1
 if errorlevel 1 (
-    echo [3/6] Installing backend dependencies...
+    echo [4/7] Installing backend dependencies...
     "%PYTHON_EXE%" -m pip install -r "%BACKEND_DIR%\requirements.txt"
     if errorlevel 1 (
         echo [ERROR] Backend dependencies could not be installed.
         goto launch_failed
     )
 ) else (
-    echo [3/6] Backend environment is ready.
+    echo [4/7] Backend environment is ready.
 )
 
 where node.exe >nul 2>&1
@@ -113,7 +141,7 @@ if errorlevel 1 (
 )
 
 if not exist "%NEXT_EXE%" (
-    echo [4/6] Installing frontend dependencies...
+    echo [5/7] Installing frontend dependencies...
     call :install_frontend
     if errorlevel 1 (
         echo [ERROR] Frontend dependencies could not be installed.
@@ -121,10 +149,10 @@ if not exist "%NEXT_EXE%" (
         goto launch_failed
     )
 ) else (
-    echo [4/6] Frontend environment is ready.
+    echo [5/7] Frontend environment is ready.
 )
 
-echo [5/6] Applying database migrations...
+echo [6/7] Applying database migrations...
 pushd "%BACKEND_DIR%"
 "%PYTHON_EXE%" -m alembic -c alembic.ini upgrade head
 set "MIGRATION_RESULT=!errorlevel!"
@@ -134,12 +162,12 @@ if not "!MIGRATION_RESULT!"=="0" (
     goto launch_failed
 )
 
-echo [6/6] Starting application servers...
+echo [7/7] Starting application servers...
 if /I not "%~1"=="--keep" (
     echo Stopping any existing servers on ports 8000 and 3000 to ensure fresh launch...
     call :kill_port 8000
     call :kill_port 3000
-    timeout /t 1 /nobreak >nul
+    ping -n 2 127.0.0.1 >nul
 )
 
 call :port_open 8000
@@ -163,7 +191,7 @@ echo Waiting for backend at http://127.0.0.1:8000 ...
 for /L %%I in (1,1,30) do (
     call :port_open 8000
     if not errorlevel 1 goto backend_ready
-    timeout /t 1 /nobreak >nul
+    ping -n 2 127.0.0.1 >nul
 )
 echo [WARNING] Backend is taking longer than expected to start.
 :backend_ready
@@ -172,7 +200,7 @@ echo Waiting for frontend at http://localhost:3000 ...
 for /L %%I in (1,1,45) do (
     call :port_open 3000
     if not errorlevel 1 goto frontend_ready
-    timeout /t 1 /nobreak >nul
+    ping -n 2 127.0.0.1 >nul
 )
 echo [WARNING] The frontend is still starting. Check the AURORA Frontend window.
 goto launch_complete

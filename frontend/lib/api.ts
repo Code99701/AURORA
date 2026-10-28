@@ -113,7 +113,7 @@ async function streamConversationMessage(
       headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
       body: JSON.stringify({
         content,
-        top_k: 5,
+        top_k: 10,
         answer_language: answerLanguage || null,
       }),
       credentials: "include",
@@ -244,7 +244,7 @@ export const api = {
       method: "POST",
       body: JSON.stringify({
         query,
-        top_k: 5,
+        top_k: 10,
         answer_language: answerLanguage || null,
       }),
     }),
@@ -271,7 +271,7 @@ export const api = {
   sendConversationMessage: (workspaceId: string, conversationId: string, content: string, answerLanguage: string | null) =>
     request<ConversationTurn>(`/workspaces/${workspaceId}/conversations/${conversationId}/messages`, {
       method: "POST",
-      body: JSON.stringify({ content, top_k: 5, answer_language: answerLanguage || null }),
+      body: JSON.stringify({ content, top_k: 10, answer_language: answerLanguage || null }),
     }),
   streamConversationMessage,
 };

@@ -1,0 +1,218 @@
+[EVAL] Evaluating against existing workspace 'MY SPACE' (ecb804a2-0ae1-42af-acdc-66edcd4242b0)...
+[EVAL] Running evaluation against dataset: tests/rag_eval/aurora_presentation_dataset.json...
+{
+  "summaries": [
+    {
+      "category": "FACT",
+      "case_count": 2,
+      "retrieval_hit_rate": 100.0,
+      "facts_coverage": 100.0,
+      "citation_accuracy": 100.0,
+      "refusal_accuracy": 100.0,
+      "mean_latency_ms": 8286.3,
+      "mean_llm_calls": 0.0
+    },
+    {
+      "category": "SECTION_SUMMARY",
+      "case_count": 1,
+      "retrieval_hit_rate": 100.0,
+      "facts_coverage": 100.0,
+      "citation_accuracy": 100.0,
+      "refusal_accuracy": 100.0,
+      "mean_latency_ms": 1667.5,
+      "mean_llm_calls": 0.0
+    },
+    {
+      "category": "COMPARISON",
+      "case_count": 1,
+      "retrieval_hit_rate": 100.0,
+      "facts_coverage": 100.0,
+      "citation_accuracy": 100.0,
+      "refusal_accuracy": 100.0,
+      "mean_latency_ms": 1722.2,
+      "mean_llm_calls": 0.0
+    },
+    {
+      "category": "DOC_OVERVIEW",
+      "case_count": 1,
+      "retrieval_hit_rate": 100.0,
+      "facts_coverage": 100.0,
+      "citation_accuracy": 100.0,
+      "refusal_accuracy": 100.0,
+      "mean_latency_ms": 2628.9,
+      "mean_llm_calls": 0.0
+    },
+    {
+      "category": "AGGREGATION",
+      "case_count": 1,
+      "retrieval_hit_rate": 100.0,
+      "facts_coverage": 100.0,
+      "citation_accuracy": 100.0,
+      "refusal_accuracy": 100.0,
+      "mean_latency_ms": 1461.6,
+      "mean_llm_calls": 0.0
+    },
+    {
+      "category": "FOLLOWUP",
+      "case_count": 1,
+      "retrieval_hit_rate": 100.0,
+      "facts_coverage": 50.0,
+      "citation_accuracy": 100.0,
+      "refusal_accuracy": 100.0,
+      "mean_latency_ms": 809.8,
+      "mean_llm_calls": 0.0
+    },
+    {
+      "category": "HINDI",
+      "case_count": 1,
+      "retrieval_hit_rate": 100.0,
+      "facts_coverage": 50.0,
+      "citation_accuracy": 100.0,
+      "refusal_accuracy": 100.0,
+      "mean_latency_ms": 9959.2,
+      "mean_llm_calls": 0.0
+    },
+    {
+      "category": "UNANSWERABLE",
+      "case_count": 2,
+      "retrieval_hit_rate": 100.0,
+      "facts_coverage": 100.0,
+      "citation_accuracy": 100.0,
+      "refusal_accuracy": 100.0,
+      "mean_latency_ms": 882.1,
+      "mean_llm_calls": 0.0
+    }
+  ],
+  "results": [
+    {
+      "case_id": "FACT-01",
+      "category": "FACT",
+      "retrieval_hit": true,
+      "facts_covered": 1.0,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 15478.75,
+      "llm_calls": 0,
+      "answer": "The mentor for the AURORA project is Dr. Minakshi Poonia.",
+      "sources_count": 5,
+      "error": null
+    },
+    {
+      "case_id": "FACT-02",
+      "category": "FACT",
+      "retrieval_hit": true,
+      "facts_covered": 1.0,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 1093.89,
+      "llm_calls": 0,
+      "answer": "The enrolment number of Arnav Mahajan listed in the presentation is BTMC24O1031.",
+      "sources_count": 5,
+      "error": null
+    },
+    {
+      "case_id": "SECTION_SUMMARY-01",
+      "category": "SECTION_SUMMARY",
+      "retrieval_hit": true,
+      "facts_covered": 1.0,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 1667.5,
+      "llm_calls": 0,
+      "answer": "The 7 stages of the methodology pipeline in AURORA are: 1. Upload, 2. Process, 3. Prepare, 4. Embed, 5. Retrieve, 6. Generate, and 7. Cite.",
+      "sources_count": 5,
+      "error": null
+    },
+    {
+      "case_id": "COMPARISON-01",
+      "category": "COMPARISON",
+      "retrieval_hit": true,
+      "facts_covered": 1.0,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 1722.23,
+      "llm_calls": 0,
+      "answer": "AURORA addresses the challenge of different formats requiring different extraction logic by converting heterogeneous documents into a canonical representation through a unified pipeline. This involves processing documents into structured knowledge, using semantic retrieval, and generating grounded answers with citations, ensuring consistent handling across various formats.",
+      "sources_count": 5,
+      "error": null
+    },
+    {
+      "case_id": "DOC_OVERVIEW-01",
+      "category": "DOC_OVERVIEW",
+      "retrieval_hit": true,
+      "facts_covered": 1.0,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 2628.86,
+      "llm_calls": 0,
+      "answer": "The AURORA project aims to transform heterogeneous documents into a structured knowledge base, enabling semantically relevant, source-grounded answers. Its core objectives include processing documents through a unified pipeline that involves document intelligence, semantic retrieval, and citation-backed generation. The scope encompasses multilingual document-based question answering, document upload and management, semantic retrieval, RAG-based grounded answers with citations, authentication, and workspace isolation. Future enhancements include hybrid retrieval, cross-document analysis, and advanced RAG workflows.",
+      "sources_count": 5,
+      "error": null
+    },
+    {
+      "case_id": "AGGREGATION-01",
+      "category": "AGGREGATION",
+      "retrieval_hit": true,
+      "facts_covered": 1.0,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 1461.64,
+      "llm_calls": 0,
+      "answer": "The planned future scope items mentioned in the presentation include hybrid retrieval and reranking, cross-document analysis, citation/evidence verification, research-gap detection, agentic RAG workflows, and graph-based knowledge exploration.",
+      "sources_count": 5,
+      "error": null
+    },
+    {
+      "case_id": "FOLLOWUP-01",
+      "category": "FOLLOWUP",
+      "retrieval_hit": true,
+      "facts_covered": 0.5,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 809.8,
+      "llm_calls": 0,
+      "answer": "In the fourth stage, the system converts chunks into semantic vectors.",
+      "sources_count": 5,
+      "error": null
+    },
+    {
+      "case_id": "HINDI-01",
+      "category": "HINDI",
+      "retrieval_hit": true,
+      "facts_covered": 0.5,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 9959.16,
+      "llm_calls": 0,
+      "answer": "AURORA \u0915\u0940 \u0915\u093e\u0930\u094d\u092f\u092a\u094d\u0930\u0923\u093e\u0932\u0940 \u0935\u093f\u0936\u093e\u0932 \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c\u094b\u0902 \u0915\u0947 \u0938\u093e\u0925 \u0915\u093e\u092e \u0915\u0930\u0924\u0940 \u0939\u0948 \u091c\u094b \u0935\u093f\u092d\u093f\u0928\u094d\u0928 \u092d\u093e\u0937\u093e\u0913\u0902 \u0914\u0930 \u092b\u0949\u0930\u094d\u092e\u0948\u091f \u092e\u0947\u0902 \u0939\u094b \u0938\u0915\u0924\u0947 \u0939\u0948\u0902\u0964 \u0907\u0938\u0915\u0940 \u0915\u093e\u0930\u094d\u092f\u092a\u094d\u0930\u0923\u093e\u0932\u0940 \u0907\u0938 \u092a\u094d\u0930\u0915\u093e\u0930 \u0939\u0948: \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c \u0905\u092a\u0932\u094b\u0921 \u0915\u0930\u0947\u0902, \u092b\u093f\u0930 \u0909\u0928\u094d\u0939\u0947\u0902 \u0935\u0948\u0927\u0924\u093e \u0914\u0930 \u092b\u0949\u0930\u094d\u092e\u0948\u091f \u0915\u0947 \u0905\u0928\u0941\u0938\u093e\u0930 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u093f\u0924 \u0915\u0930\u0947\u0902, \u092b\u093f\u0930 \u090f\u0915 \u0914\u092a\u091a\u093e\u0930\u093f\u0915 \u091c\u094d\u091e\u093e\u0928 \u0930\u0942\u092a \u092c\u0928\u093e\u090f\u0902, \u0907\u0938\u0915\u0947 \u092c\u093e\u0926 \u0935\u0947\u0915\u094d\u091f\u0930 \u090f\u092e\u094d\u092c\u0947\u0921\u093f\u0902\u0917 \u092c\u0928\u093e\u090f\u0902, \u0907\u0928 \u090f\u092e\u094d\u092c\u0947\u0921\u093f\u0902\u0917 \u0915\u0947 \u0906\u0927\u093e\u0930 \u092a\u0930 \u0938\u0902\u092c\u0902\u0927\u093f\u0924 \u091c\u093e\u0928\u0915\u093e\u0930\u0940 \u0916\u094b\u091c\u0947\u0902, \u092b\u093f\u0930 RAG (Retrieval-Augmented Generation) \u0915\u093e \u0909\u092a\u092f\u094b\u0917 \u0915\u0930\u0915\u0947 \u091c\u094d\u091e\u093e\u0928 \u0935\u093e\u0932\u0947 \u0909\u0924\u094d\u0924\u0930 \u092c\u0928\u093e\u090f\u0902, \u0914\u0930 \u0905\u0902\u0924 \u092e\u0947\u0902 \u0909\u0924\u094d\u0924\u0930 \u0915\u0947 \u0938\u093e\u0925 \u0938\u094d\u0930\u094b\u0924 \u091c\u093e\u0928\u0915\u093e\u0930\u0940 \u0915\u0947 \u0938\u0902\u0926\u0930\u094d\u092d \u091c\u0941\u0921\u093c\u0947 \u0926\u093f\u0916\u093e\u090f\u0902\u0964",
+      "sources_count": 5,
+      "error": null
+    },
+    {
+      "case_id": "UNANSWERABLE-01",
+      "category": "UNANSWERABLE",
+      "retrieval_hit": true,
+      "facts_covered": 1.0,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 863.83,
+      "llm_calls": 0,
+      "answer": "I couldn't find enough information in your authorized documents to answer this reliably.",
+      "sources_count": 0,
+      "error": null
+    },
+    {
+      "case_id": "UNANSWERABLE-02",
+      "category": "UNANSWERABLE",
+      "retrieval_hit": true,
+      "facts_covered": 1.0,
+      "citation_correct": true,
+      "correct_refusal": true,
+      "latency_ms": 900.42,
+      "llm_calls": 0,
+      "answer": "I couldn't find enough information in your authorized documents to answer this reliably.",
+      "sources_count": 0,
+      "error": null
+    }
+  ]
+}

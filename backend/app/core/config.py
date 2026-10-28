@@ -71,20 +71,27 @@ class Settings(BaseSettings):
 
     # RAG indexing and embedding configuration. The database vector dimension is
     # deliberately fixed for v0.7 so provider output cannot silently drift.
-    GEMINI_API_KEY: str | None = None
-    EMBEDDING_PROVIDER: Literal["gemini"] = "gemini"
-    EMBEDDING_MODEL: str = "gemini-embedding-001"
+    EMBEDDING_PROVIDER: str = "local"
+    EMBEDDING_MODEL: str = "intfloat/multilingual-e5-base"
     EMBEDDING_DIMENSION: int = 768
+    LOCAL_EMBEDDING_MODEL: str = "intfloat/multilingual-e5-base"
+    LOCAL_EMBEDDING_DEVICE: str | None = None
+    LOCAL_EMBEDDING_BATCH_SIZE: int = 32
+    LOCAL_EMBEDDING_CACHE_SIZE: int = 2048
     CHUNK_SIZE_CHARACTERS: int = 1000
     CHUNK_OVERLAP_CHARACTERS: int = 150
     RETRIEVAL_MAX_TOP_K: int = 20
     RETRIEVAL_CANDIDATE_MULTIPLIER: int = 4
 
-    # One-shot grounded RAG generation. Generation and embedding models are
-    # independent configuration because they serve different workloads.
-    LLM_PROVIDER: Literal["gemini"] = "gemini"
-    LLM_MODEL: str = "gemini-3.6-flash"
-    LLM_MAX_OUTPUT_TOKENS: int = 1024
+    # Local Ollama generation
+    LLM_PROVIDER: str = "ollama"
+    LLM_MODEL: str = "qwen3:8b"
+    LLM_MAX_OUTPUT_TOKENS: int = 4096
+    OLLAMA_BASE_URL: str = "http://127.0.0.1:11434"
+    OLLAMA_MODEL: str = "qwen3:8b"
+    OLLAMA_NUM_CTX: int = 8192
+    OLLAMA_TIMEOUT_SECONDS: float = 180.0
+    OLLAMA_THINK: bool = False
     RAG_CONTEXT_MAX_CHARACTERS: int = 12000
     RAG_MIN_SIMILARITY: float = 0.30
     CONVERSATION_HISTORY_MAX_MESSAGES: int = 8
@@ -200,6 +207,12 @@ class Settings(BaseSettings):
             raise ValueError("XLSX_MAX_SHEETS must be greater than zero")
         if self.EMBEDDING_DIMENSION != 768:
             raise ValueError("EMBEDDING_DIMENSION must be 768 for the v0.7 database schema")
+        if not self.LOCAL_EMBEDDING_MODEL.strip():
+            raise ValueError("LOCAL_EMBEDDING_MODEL must not be blank")
+        if not 1 <= self.LOCAL_EMBEDDING_BATCH_SIZE <= 512:
+            raise ValueError("LOCAL_EMBEDDING_BATCH_SIZE must be between 1 and 512")
+        if not 0 <= self.LOCAL_EMBEDDING_CACHE_SIZE <= 100_000:
+            raise ValueError("LOCAL_EMBEDDING_CACHE_SIZE must be between 0 and 100000")
         if self.CHUNK_SIZE_CHARACTERS <= 0:
             raise ValueError("CHUNK_SIZE_CHARACTERS must be greater than zero")
         if not 0 <= self.CHUNK_OVERLAP_CHARACTERS < self.CHUNK_SIZE_CHARACTERS:

@@ -1,0 +1,100 @@
+{
+  "version": "1.0",
+  "description": "Reproducible AURORA evaluation dataset for the real Cornerstone Presentation document",
+  "cases": [
+    {
+      "id": "FACT-01",
+      "category": "FACT",
+      "question": "Who is the mentor for the AURORA project according to the presentation?",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": ["Minakshi Poonia"],
+      "should_refuse": false
+    },
+    {
+      "id": "FACT-02",
+      "category": "FACT",
+      "question": "What is the enrolment number of Arnav Mahajan listed in the presentation?",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": ["BTMC24O1031"],
+      "should_refuse": false
+    },
+    {
+      "id": "SECTION_SUMMARY-01",
+      "category": "SECTION_SUMMARY",
+      "question": "What are the 7 stages of the methodology pipeline in AURORA?",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": ["Upload", "Process", "Prepare", "Embed", "Retrieve", "Generate", "Cite"],
+      "should_refuse": false
+    },
+    {
+      "id": "COMPARISON-01",
+      "category": "COMPARISON",
+      "question": "How does AURORA approach the challenge of different formats requiring different extraction logic?",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": ["Canonical"],
+      "should_refuse": false
+    },
+    {
+      "id": "DOC_OVERVIEW-01",
+      "category": "DOC_OVERVIEW",
+      "question": "Summarize the core objectives and scope of the AURORA project",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": ["multilingual", "RAG", "citations"],
+      "should_refuse": false
+    },
+    {
+      "id": "AGGREGATION-01",
+      "category": "AGGREGATION",
+      "question": "What are the planned future scope items mentioned in the presentation?",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": ["Hybrid retrieval", "Agentic RAG"],
+      "should_refuse": false
+    },
+    {
+      "id": "FOLLOWUP-01",
+      "category": "FOLLOWUP",
+      "question": "What happens in the fourth stage?",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": ["Embed", "vectors"],
+      "should_refuse": false,
+      "history": [
+        ["What is the primary methodology of AURORA?", "AURORA processes documents through 7 stages: Upload, Process, Prepare, Embed, Retrieve, Generate, and Cite."]
+      ]
+    },
+    {
+      "id": "HINDI-01",
+      "category": "HINDI",
+      "question": "AURORA की कार्यप्रणाली क्या है?",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": ["दस्तावेज", "पाइपलाइन"],
+      "answer_language": "hindi",
+      "should_refuse": false
+    },
+    {
+      "id": "UNANSWERABLE-01",
+      "category": "UNANSWERABLE",
+      "question": "What is the training dataset size used for the LLaMA model in AURORA?",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": [],
+      "should_refuse": true
+    },
+    {
+      "id": "UNANSWERABLE-02",
+      "category": "UNANSWERABLE",
+      "question": "What was the exact financial budget in rupees allocated for this project?",
+      "target_documents": ["AURORA_Cornerstone_Presentation_FIXED.pptx"],
+      "expected_pages": {},
+      "expected_key_facts": [],
+      "should_refuse": true
+    }
+  ]
+}

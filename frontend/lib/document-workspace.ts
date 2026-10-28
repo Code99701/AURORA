@@ -66,7 +66,12 @@ function stringAt(locator: Record<string, unknown>, key: string) {
 }
 
 export function formatSourceLocation(source: RAGSource) {
-  if (source.page_number !== null) return `Page ${source.page_number}`;
+  const isPresentation =
+    source.locator?.type === "pptx_slide" ||
+    (typeof source.filename === "string" && /\.(pptx?|odp)$/i.test(source.filename));
+  if (source.page_number !== null) {
+    return isPresentation ? `Slide ${source.page_number}` : `Page ${source.page_number}`;
+  }
   const locator = source.locator;
   if (!locator || typeof locator.type !== "string") return "Source location";
   const lineStart = numberAt(locator, "line_start");

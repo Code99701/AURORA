@@ -18,7 +18,7 @@ from app.llm import (
     StreamingGenerationEvent,
 )
 from app.llm.deps import get_llm_provider
-from app.llm.gemini import GeminiLLMProvider
+from app.llm.ollama import OllamaLLMProvider
 from app.main import app
 from app.models.conversation import Conversation, ConversationMessage
 from app.models.rag_citation import RAGCitation
@@ -372,7 +372,7 @@ def test_stream_retrieval_and_malformed_provider_failures_are_terminal(monkeypat
 
 
 def test_provider_secret_never_appears_in_stream_error(monkeypatch):
-    secret = settings.GEMINI_API_KEY or "configured-provider-secret"
+    secret = "configured-provider-secret"
     provider = StreamingLLMProvider(
         events=["Partial"], error=LLMProviderError(f"credential={secret}")
     )
@@ -483,10 +483,10 @@ def test_existing_synchronous_conversation_endpoint_remains_functional(
     assert streaming_provider.stream_calls == []
 
 
-def test_gemini_adapter_normalizes_provider_sse(monkeypatch):
+def test_ollama_adapter_normalizes_stream_ndjson(monkeypatch):
     lines = [
-        'data: {"candidates":[{"content":{"parts":[{"text":"private reasoning","thought":true},{"text":"Gemini "}]}}]}',
-        'data: {"modelVersion":"gemini-test","candidates":[{"content":{"parts":[{"text":"stream"}]},"finishReason":"STOP"}],"usageMetadata":{"totalTokenCount":9}}',
+        json.dumps({"message": {"content": "Ollama "}, "done": False}),
+        json.dumps({"message": {"content": "stream"}, "done": True, "done_reason": "stop"}),
     ]
 
     class FakeResponse:
@@ -518,8 +518,8 @@ def test_gemini_adapter_normalizes_provider_sse(monkeypatch):
         def stream(self, *args, **kwargs):
             return FakeResponse()
 
-    monkeypatch.setattr("app.llm.gemini.httpx.AsyncClient", FakeClient)
-    provider = GeminiLLMProvider("test-key", "gemini-test", 100)
+    monkeypatch.setattr(httpx, "AsyncClient", FakeClient)
+    provider = OllamaLLMProvider(base_url="http://127.0.0.1:11434", model_name="qwen3:8b", think=False)
 
     async def collect():
         return [
@@ -530,24 +530,17 @@ def test_gemini_adapter_normalizes_provider_sse(monkeypatch):
     events = asyncio.run(collect())
     assert [event.event_type for event in events] == [
         "text_delta",
-        "usage",
         "text_delta",
         "completion",
     ]
-    assert "".join(event.text for event in events) == "Gemini stream"
-    assert events[-1].model_name == "gemini-test"
-    assert events[-1].finish_reason == "STOP"
-    assert events[-1].usage == {"totalTokenCount": 9}
+    assert "".join(event.text for event in events) == "Ollama stream"
+    assert events[-1].model_name == "ollama/qwen3:8b"
+    assert events[-1].finish_reason == "stop"
 
 
-def test_gemini_adapter_retries_transient_failure_before_first_text(monkeypatch):
-    attempts = 0
-
+def test_ollama_adapter_handles_missing_model_stream(monkeypatch):
     class FakeResponse:
-        status_code = 200
-
-        def __init__(self, attempt: int):
-            self.attempt = attempt
+        status_code = 404
 
         async def __aenter__(self):
             return self
@@ -556,12 +549,11 @@ def test_gemini_adapter_retries_transient_failure_before_first_text(monkeypatch)
             return False
 
         def raise_for_status(self):
-            return None
+            req = httpx.Request("POST", "http://127.0.0.1:11434/api/chat")
+            raise httpx.HTTPStatusError("Not found", request=req, response=httpx.Response(404, request=req))
 
         async def aiter_lines(self):
-            if self.attempt == 1:
-                raise httpx.ReadTimeout("temporary provider timeout")
-            yield 'data: {"candidates":[{"content":{"parts":[{"text":"Recovered"}]},"finishReason":"STOP"}]}'
+            yield '{"error": "model not found"}'
 
     class FakeClient:
         def __init__(self, *args, **kwargs):
@@ -574,16 +566,10 @@ def test_gemini_adapter_retries_transient_failure_before_first_text(monkeypatch)
             return False
 
         def stream(self, *args, **kwargs):
-            nonlocal attempts
-            attempts += 1
-            return FakeResponse(attempts)
+            return FakeResponse()
 
-    async def no_sleep(*args, **kwargs):
-        return None
-
-    monkeypatch.setattr("app.llm.gemini.httpx.AsyncClient", FakeClient)
-    monkeypatch.setattr("app.llm.gemini.asyncio.sleep", no_sleep)
-    provider = GeminiLLMProvider("test-key", "gemini-test", 100)
+    monkeypatch.setattr(httpx, "AsyncClient", FakeClient)
+    provider = OllamaLLMProvider(base_url="http://127.0.0.1:11434", model_name="qwen3:8b", think=False)
 
     async def collect():
         return [
@@ -591,7 +577,6 @@ def test_gemini_adapter_retries_transient_failure_before_first_text(monkeypatch)
             async for event in provider.stream_generate("system", "question")
         ]
 
-    events = asyncio.run(collect())
-    assert attempts == 2
-    assert "".join(event.text for event in events) == "Recovered"
-    assert events[-1].event_type == "completion"
+    with pytest.raises(LLMProviderError, match="model 'qwen3:8b' was not found"):
+        asyncio.run(collect())
+

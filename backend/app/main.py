@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -5,10 +6,26 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.api.v1.router import api_router
+from app.embeddings.deps import warm_up_embedding_model
 
 # Initialize logging for the application
 setup_logging()
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown events."""
+    logger.info("Application starting up: initializing background services...")
+    warmup_result = warm_up_embedding_model()
+    app.state.embedding_warmup = warmup_result
+    logger.info(
+        "Application startup: embedding warm-up completed with status '%s'.",
+        warmup_result.get("status"),
+    )
+    yield
+    logger.info("Application shutting down.")
+
 
 def create_app() -> FastAPI:
     """
@@ -22,6 +39,7 @@ def create_app() -> FastAPI:
         # Disable default docs in production, enable in development
         docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
         redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
+        lifespan=lifespan,
     )
 
     # Configure CORS (Cross-Origin Resource Sharing)

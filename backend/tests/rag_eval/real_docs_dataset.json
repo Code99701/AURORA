@@ -91,6 +91,51 @@
       "expected_pages": {"Arnav_Mahajan_Resume.pdf": [1]},
       "expected_key_facts": ["Amazon ML Challenge 2026", "Business Entity Resolution"],
       "should_refuse": false
+    },
+    {
+      "id": "REAL-11",
+      "category": "CROSS_DOC_COMPARISON",
+      "question": "Compare the neural network definition in ANN PPT with the ML book",
+      "target_documents": ["ANN PPT UNIT 2.pdf", "the-hundred-page-machine-learning-book_compress.pdf"],
+      "expected_pages": {"ANN PPT UNIT 2.pdf": [1, 2], "the-hundred-page-machine-learning-book_compress.pdf": [1, 2]},
+      "expected_key_facts": ["biological", "learning", "network"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-12",
+      "category": "EXTRACTION",
+      "question": "List all technologies and frameworks mentioned in the skills section of the resume",
+      "target_documents": ["Arnav_Mahajan_Resume.pdf"],
+      "expected_pages": {"Arnav_Mahajan_Resume.pdf": [1]},
+      "expected_key_facts": ["Python", "FastAPI", "React", "PostgreSQL"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-13",
+      "category": "MULTILINGUAL",
+      "question": "Explain biological neuron structure from the ANN presentation in Hindi",
+      "target_documents": ["ANN PPT UNIT 2.pdf"],
+      "expected_pages": {"ANN PPT UNIT 2.pdf": [8]},
+      "expected_key_facts": ["neuron"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-14",
+      "category": "SLIDE_RANGE",
+      "question": "What topics are covered on slides 1 to 4 of the ANN presentation?",
+      "target_documents": ["ANN PPT UNIT 2.pdf"],
+      "expected_pages": {"ANN PPT UNIT 2.pdf": [1, 2, 3, 4]},
+      "expected_key_facts": ["Neural Networks", "brain"],
+      "should_refuse": false
+    },
+    {
+      "id": "REAL-15",
+      "category": "HONEST_REFUSAL",
+      "question": "Who is the CEO of SpaceX according to the resume?",
+      "target_documents": ["Arnav_Mahajan_Resume.pdf"],
+      "expected_pages": {},
+      "expected_key_facts": [],
+      "should_refuse": true
     }
   ]
 }

@@ -12,14 +12,14 @@ from fastapi.testclient import TestClient
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.embeddings.deps import get_embedding_provider
-from app.embeddings.gemini import GeminiEmbeddingProvider
+from app.embeddings.local import LocalEmbeddingProvider
 from app.evaluation.multilingual import (
     MultilingualCaseMeasurement,
     summarize_measurements,
 )
 from app.llm import GenerationResult
 from app.llm.deps import get_llm_provider
-from app.llm.gemini import GeminiLLMProvider
+from app.llm.ollama import OllamaLLMProvider
 from app.main import app
 from app.models.document import Document
 from app.models.document_chunk import EMBEDDING_DIMENSION
@@ -287,14 +287,16 @@ def test_multilingual_workspace_isolation_with_original_hindi_text():
 
 @pytest.mark.skipif(
     os.getenv("AURORA_RUN_REAL_MULTILINGUAL_TEST") != "1",
-    reason="explicit, quota-consuming Gemini multilingual evaluation only",
+    reason="explicit, local Qwen3 multilingual evaluation only",
 )
-def test_real_gemini_cross_language_retrieval_generation_and_provenance():
-    embedding = GeminiEmbeddingProvider(
-        settings.GEMINI_API_KEY, settings.EMBEDDING_MODEL, settings.EMBEDDING_DIMENSION
+def test_real_qwen3_cross_language_retrieval_generation_and_provenance():
+    embedding = LocalEmbeddingProvider(
+        settings.LOCAL_EMBEDDING_MODEL, settings.EMBEDDING_DIMENSION
     )
-    llm = GeminiLLMProvider(
-        settings.GEMINI_API_KEY, settings.LLM_MODEL, settings.LLM_MAX_OUTPUT_TOKENS
+    llm = OllamaLLMProvider(
+        base_url=settings.OLLAMA_BASE_URL,
+        model_name=settings.OLLAMA_MODEL,
+        think=False,
     )
     app.dependency_overrides[get_embedding_provider] = lambda: embedding
     app.dependency_overrides[get_llm_provider] = lambda: llm

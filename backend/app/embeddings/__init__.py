@@ -4,10 +4,12 @@ from app.embeddings.base import (
     EmbeddingProvider,
     EmbeddingProviderError,
 )
+from app.embeddings.local import LocalEmbeddingProvider
 
 __all__ = [
     "EmbeddingConfigurationError",
     "EmbeddingDimensionError",
     "EmbeddingProvider",
     "EmbeddingProviderError",
+    "LocalEmbeddingProvider",
 ]

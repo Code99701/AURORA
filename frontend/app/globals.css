@@ -619,3 +619,16 @@ select:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Hide Next.js development indicator overlay */
+nextjs-portal,
+#nextjs-portal,
+[data-nextjs-dev-tools],
+#nextjs-dev-tools,
+[data-nextjs-toast] {
+  display: none !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+

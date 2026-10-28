@@ -9,7 +9,12 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.embeddings import EmbeddingProvider
-from app.llm import LLMProvider, LLMProviderError, LLMRateLimitError
+from app.llm import (
+    LLMProvider,
+    LLMProviderError,
+    LLMQuotaExhaustedError,
+    LLMRateLimitError,
+)
 from app.models.conversation import Conversation, ConversationMessage
 from app.models.rag_response import RAGResponseRecord
 from app.models.user import User
@@ -265,6 +270,7 @@ async def stream_message(
             answer_language=answer_language,
             embedding_provider=embedding_provider,
             conversation_history=history,
+            llm_provider=llm_provider,
         )
 
         if preparation.insufficient_evidence:
@@ -304,6 +310,12 @@ async def stream_message(
                     raise LLMProviderError(
                         "Generation provider returned an incomplete stream"
                     )
+            except LLMQuotaExhaustedError as exc:
+                raise rag_service.RAGError(
+                    "LLM_QUOTA_EXHAUSTED",
+                    str(exc),
+                    429,
+                ) from exc
             except LLMRateLimitError as exc:
                 raise rag_service.RAGError(
                     "LLM_RATE_LIMIT_ERROR",

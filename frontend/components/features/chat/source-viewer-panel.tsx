@@ -21,7 +21,10 @@ function extractHeading(source: RAGSource): string {
     return String(locator.heading_path[locator.heading_path.length - 1]).toUpperCase();
   }
   if (source.page_number) {
-    return `PAGE ${source.page_number} EVIDENCE`;
+    const isPresentation =
+      source.locator?.type === "pptx_slide" ||
+      (typeof source.filename === "string" && /\.(pptx?|odp)$/i.test(source.filename));
+    return isPresentation ? `SLIDE ${source.page_number} EVIDENCE` : `PAGE ${source.page_number} EVIDENCE`;
   }
   return "PASSAGE EXCERPT";
 }

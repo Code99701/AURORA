@@ -274,6 +274,14 @@ def chunk_document_sources(
             extracted_page_id = getattr(s, "extracted_page_id", None)
             content_unit_id = getattr(s, "content_unit_id", None)
 
+        if page_num is None and hasattr(s, "locator") and getattr(s, "locator"):
+            loc = getattr(s, "locator")
+            if isinstance(loc, dict):
+                if isinstance(loc.get("page"), int) and loc["page"] > 0:
+                    page_num = loc["page"]
+                elif isinstance(loc.get("slide"), int) and loc["slide"] > 0:
+                    page_num = loc["slide"]
+
         is_noise = is_noise_text(cleaned)
         cleaned_sources.append({
             "source": s,

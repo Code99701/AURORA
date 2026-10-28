@@ -17,7 +17,7 @@ from app.llm import (
 )
 from app.llm.deps import get_llm_provider
 from app.llm import deps as llm_deps
-from app.llm.gemini import GeminiLLMProvider
+from app.llm.ollama import OllamaLLMProvider
 from app.main import app
 from app.rag.context import build_context
 from app.rag.prompt import SYSTEM_INSTRUCTION, build_grounded_prompt
@@ -299,17 +299,16 @@ def test_provider_errors_are_sanitized(monkeypatch, error, expected_code):
     assert "private" not in raised.value.public_message
 
 
-def test_gemini_adapter_configuration_is_separate_and_requires_key():
+def test_ollama_adapter_configuration_requires_base_url():
     with pytest.raises(LLMConfigurationError):
-        GeminiLLMProvider(None, settings.LLM_MODEL, 100)
-    provider = GeminiLLMProvider("test-key", "generation-only-model", 321)
-    assert provider.model_name == "generation-only-model"
-    assert provider.max_output_tokens == 321
-    assert settings.EMBEDDING_MODEL != provider.model_name
+        OllamaLLMProvider(base_url="", model_name="qwen3:8b")
+    provider = OllamaLLMProvider(base_url="http://127.0.0.1:11434", model_name="qwen3:8b")
+    assert provider.model_name == "qwen3:8b"
+    assert provider.provider_name == "ollama"
 
 
 def test_missing_llm_configuration_is_handled_safely(monkeypatch):
-    monkeypatch.setattr(settings, "GEMINI_API_KEY", None)
+    monkeypatch.setattr(settings, "OLLAMA_BASE_URL", "")
     llm_deps._configured_llm_provider.cache_clear()
     try:
         with pytest.raises(HTTPException) as raised:
@@ -477,8 +476,7 @@ def test_rag_request_validation(generation_dependencies, payload):
 def test_api_key_never_appears_in_sanitized_api_error(
     monkeypatch, generation_dependencies, caplog
 ):
-    secret = settings.GEMINI_API_KEY
-    assert secret
+    secret = "test-secret-key-for-leak-check"
 
     class SecretFailingProvider(CapturingLLMProvider):
         def generate(self, system_instruction, user_prompt):
@@ -501,14 +499,13 @@ def test_api_key_never_appears_in_sanitized_api_error(
 
 
 @pytest.mark.skipif(
-    os.getenv("AURORA_RUN_REAL_GEMINI_TEST") != "1",
-    reason="explicit, quota-consuming Gemini verification only",
+    os.getenv("AURORA_RUN_REAL_OLLAMA_TEST") != "1",
+    reason="explicit Ollama verification only (requires running Ollama server)",
 )
-def test_real_gemini_generation_explicit_integration():
-    provider = GeminiLLMProvider(
-        settings.GEMINI_API_KEY,
-        settings.LLM_MODEL,
-        max_output_tokens=256,
+def test_real_ollama_generation_explicit_integration():
+    provider = OllamaLLMProvider(
+        base_url=settings.OLLAMA_BASE_URL,
+        model_name=settings.OLLAMA_MODEL,
     )
     result = provider.generate(
         "Answer only from supplied evidence and use one short sentence.",
@@ -516,4 +513,3 @@ def test_real_gemini_generation_explicit_integration():
     )
     assert result.text
     assert result.model_name
-    assert settings.GEMINI_API_KEY not in result.text
