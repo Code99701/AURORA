@@ -392,9 +392,9 @@ export default function LandingPage() {
       {/* ── CTA Section ──────────────────────────────────────── */}
       <section
         style={{
-          background: "var(--accent)",
-          color: "#ffffff",
-          borderRadius: "var(--radius-lg, 12px)",
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--radius-md)",
           padding: "3.5rem 2rem",
           textAlign: "center",
         }}
@@ -405,6 +405,7 @@ export default function LandingPage() {
             fontWeight: 700,
             margin: "0 0 0.75rem",
             letterSpacing: "-0.02em",
+            color: "var(--foreground)",
           }}
         >
           Ready to research smarter?
@@ -412,7 +413,7 @@ export default function LandingPage() {
         <p
           style={{
             fontSize: "1rem",
-            opacity: 0.9,
+            color: "var(--foreground-soft)",
             maxWidth: "500px",
             margin: "0 auto 2rem",
             lineHeight: 1.6,
@@ -424,20 +425,10 @@ export default function LandingPage() {
           <Link href="/register">
             <Button
               size="lg"
-              variant="secondary"
+              variant="primary"
               rightIcon={<ArrowRight size={18} />}
-              style={{ fontWeight: 600 }}
             >
-              Create Free Account
-            </Button>
-          </Link>
-          <Link href="/login">
-            <Button
-              size="lg"
-              variant="outline"
-              style={{ borderColor: "rgba(255,255,255,0.6)", color: "#ffffff" }}
-            >
-              Sign In
+              Get started
             </Button>
           </Link>
         </div>

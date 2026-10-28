@@ -30,8 +30,8 @@ export default function NotFound() {
       >
         <FileQuestion size={32} />
       </div>
-      <h1 style={{ fontSize: "2rem", fontWeight: 800, margin: "0 0 0.5rem" }}>Page Not Found</h1>
-      <p style={{ color: "var(--foreground-soft, #4A4F6A)", maxWidth: "440px", margin: "0 0 1.5rem" }}>
+      <h1 style={{ fontSize: "2rem", fontWeight: 800, margin: "0 0 0.5rem", color: "var(--foreground)" }}>Page Not Found</h1>
+      <p style={{ color: "var(--foreground-soft)", maxWidth: "440px", margin: "0 0 1.5rem" }}>
         The research page or workspace you requested does not exist or has been moved.
       </p>
       <Link href="/">

@@ -120,7 +120,7 @@ export function WorkspaceDashboard() {
 
       {/* Quick Stats */}
       <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
-        <div style={{ background: "var(--surface)", padding: "1.25rem", borderRadius: "var(--radius-lg, 12px)", border: "1px solid var(--border)" }}>
+        <div style={{ background: "var(--surface)", padding: "1.25rem", borderRadius: "var(--radius-md)", border: "1px solid var(--border)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}>
             <div style={{ width: 28, height: 28, borderRadius: "6px", background: "var(--accent-soft)", color: "var(--accent)", display: "grid", placeItems: "center" }}>
               <FolderKanban size={14} />
@@ -132,7 +132,7 @@ export function WorkspaceDashboard() {
           <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--foreground)" }}>{workspaces.length}</span>
         </div>
 
-        <div style={{ background: "var(--surface)", padding: "1.25rem", borderRadius: "var(--radius-lg, 12px)", border: "1px solid var(--border)" }}>
+        <div style={{ background: "var(--surface)", padding: "1.25rem", borderRadius: "var(--radius-md)", border: "1px solid var(--border)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.5rem" }}>
             <div style={{ width: 28, height: 28, borderRadius: "6px", background: "var(--surface-raised)", color: "var(--foreground-soft)", display: "grid", placeItems: "center" }}>
               <FileText size={14} />
@@ -141,58 +141,58 @@ export function WorkspaceDashboard() {
               Formats
             </span>
           </div>
-          <span style={{ fontSize: "0.95rem", fontWeight: 700, color: "var(--foreground, #1A1D2E)" }}>PDF, DOCX, XLSX, PPTX, TXT, MD, CSV</span>
+          <span style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--foreground)" }}>PDF, DOCX, XLSX, PPTX, TXT, MD, CSV</span>
         </div>
       </section>
 
       {/* Search & View Controls */}
       <section
         style={{
-          background: "var(--surface, #FFFFFF)",
-          padding: "1rem 1.25rem",
-          borderRadius: "var(--radius-xl, 24px)",
-          border: "1px solid var(--border, #E2E5F0)",
-          boxShadow: "0 2px 12px rgba(108, 92, 231, 0.03)",
-          marginBottom: "2rem",
+          background: "var(--surface)",
+          padding: "0.75rem 1rem",
+          borderRadius: "var(--radius-md)",
+          border: "1px solid var(--border)",
+          marginBottom: "1.5rem",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          gap: "1rem",
+          gap: "0.75rem",
         }}
       >
         {/* Search Box */}
         <div style={{ position: "relative", width: "100%", maxWidth: "420px" }}>
-          <Search size={18} color="var(--muted, #8E93B0)" style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+          <Search size={16} color="var(--muted)" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
           <input
             type="text"
-            placeholder="Search workspaces by name or description..."
+            placeholder="Search workspaces…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
               width: "100%",
-              padding: "0.6rem 1rem 0.6rem 2.6rem",
-              borderRadius: "var(--radius-md, 12px)",
-              border: "1px solid var(--border, #E2E5F0)",
-              background: "var(--surface-raised, #F5F7FC)",
-              fontSize: "0.9rem",
+              height: "36px",
+              padding: "0 0.75rem 0 2.25rem",
+              borderRadius: "var(--radius-sm)",
+              border: "1px solid var(--border)",
+              background: "var(--surface-raised)",
+              fontSize: "0.875rem",
               outline: "none",
-              color: "var(--foreground, #1A1D2E)",
+              color: "var(--foreground)",
             }}
           />
         </div>
 
         {/* View Toggles */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <div style={{ display: "flex", background: "var(--surface-raised)", padding: "0.25rem", borderRadius: "8px", border: "1px solid var(--border)" }}>
+          <div style={{ display: "flex", background: "var(--surface-raised)", padding: "0.2rem", borderRadius: "6px", border: "1px solid var(--border)" }}>
             <button
               type="button"
               onClick={() => setViewMode("grid")}
               aria-label="Grid view"
               style={{
                 border: "none",
-                padding: "0.35rem 0.5rem",
-                borderRadius: "6px",
+                padding: "0.3rem 0.45rem",
+                borderRadius: "4px",
                 background: viewMode === "grid" ? "var(--surface)" : "transparent",
                 color: viewMode === "grid" ? "var(--accent)" : "var(--muted)",
                 cursor: "pointer",
@@ -200,7 +200,7 @@ export function WorkspaceDashboard() {
                 placeItems: "center",
               }}
             >
-              <Grid size={16} />
+              <Grid size={15} />
             </button>
             <button
               type="button"
@@ -208,8 +208,8 @@ export function WorkspaceDashboard() {
               aria-label="List view"
               style={{
                 border: "none",
-                padding: "0.35rem 0.5rem",
-                borderRadius: "6px",
+                padding: "0.3rem 0.45rem",
+                borderRadius: "4px",
                 background: viewMode === "table" ? "var(--surface)" : "transparent",
                 color: viewMode === "table" ? "var(--accent)" : "var(--muted)",
                 cursor: "pointer",
@@ -217,7 +217,7 @@ export function WorkspaceDashboard() {
                 placeItems: "center",
               }}
             >
-              <List size={16} />
+              <List size={15} />
             </button>
           </div>
         </div>
@@ -318,29 +318,29 @@ export function WorkspaceDashboard() {
         </section>
       ) : (
         /* Dense Table View */
-        <section style={{ background: "var(--surface, #FFFFFF)", borderRadius: "var(--radius-xl, 24px)", overflow: "hidden", border: "1px solid var(--border, #E2E5F0)", boxShadow: "0 4px 20px rgba(108, 92, 231, 0.04)" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.88rem" }}>
+        <section style={{ background: "var(--surface)", borderRadius: "var(--radius-md)", overflow: "hidden", border: "1px solid var(--border)" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
             <thead>
-              <tr style={{ background: "var(--surface-raised, #F5F7FC)", color: "var(--foreground-soft, #4A4F6A)", borderBottom: "1px solid var(--border, #E2E5F0)" }}>
-                <th style={{ padding: "0.85rem 1.25rem", textAlign: "left" }}>Workspace</th>
-                <th style={{ padding: "0.85rem 1rem", textAlign: "left" }}>Description</th>
-                <th style={{ padding: "0.85rem 1rem", textAlign: "left" }}>Created</th>
-                <th style={{ padding: "0.85rem 1.25rem", textAlign: "right" }}>Action</th>
+              <tr style={{ background: "var(--surface-raised)", color: "var(--foreground-soft)", borderBottom: "1px solid var(--border)" }}>
+                <th style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--muted)" }}>Workspace</th>
+                <th style={{ padding: "0.75rem 1rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--muted)" }}>Description</th>
+                <th style={{ padding: "0.75rem 1rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--muted)" }}>Created</th>
+                <th style={{ padding: "0.75rem 1.25rem", textAlign: "right", fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--muted)" }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredWorkspaces.map((ws) => (
-                <tr key={ws.id} style={{ borderBottom: "1px solid var(--border, #E2E5F0)" }}>
-                  <td style={{ padding: "1rem 1.25rem" }}>
-                    <div style={{ fontWeight: 700, color: "var(--foreground, #1A1D2E)" }}>{ws.name}</div>
+                <tr key={ws.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td style={{ padding: "0.85rem 1.25rem" }}>
+                    <div style={{ fontWeight: 600, color: "var(--foreground)" }}>{ws.name}</div>
                   </td>
-                  <td style={{ padding: "1rem", color: "var(--foreground-soft, #4A4F6A)", fontSize: "0.82rem", maxWidth: "380px" }}>
+                  <td style={{ padding: "0.85rem 1rem", color: "var(--foreground-soft)", fontSize: "0.82rem", maxWidth: "380px" }}>
                     {ws.description || "Upload documents and ask questions with cited answers."}
                   </td>
-                  <td style={{ padding: "1rem", fontSize: "0.78rem", color: "var(--muted, #8E93B0)", fontFamily: "var(--font-mono)" }}>
+                  <td style={{ padding: "0.85rem 1rem", fontSize: "0.78rem", color: "var(--muted)" }}>
                     {new Date(ws.created_at).toLocaleDateString()}
                   </td>
-                  <td style={{ padding: "1rem 1.25rem", textAlign: "right" }}>
+                  <td style={{ padding: "0.85rem 1.25rem", textAlign: "right" }}>
                     <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
                       <button
                         type="button"
@@ -350,10 +350,10 @@ export function WorkspaceDashboard() {
                         style={{
                           background: "none",
                           border: "none",
-                          color: "var(--muted, #8E93B0)",
+                          color: "var(--muted)",
                           cursor: "pointer",
                           padding: "6px",
-                          borderRadius: "6px",
+                          borderRadius: "4px",
                         }}
                       >
                         <Trash2 size={15} />
@@ -378,8 +378,8 @@ export function WorkspaceDashboard() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(15, 23, 42, 0.45)",
-            backdropFilter: "blur(4px)",
+            background: "rgba(0, 0, 0, 0.5)",
+            backdropFilter: "blur(2px)",
             display: "grid",
             placeItems: "center",
             padding: "1rem",
@@ -388,13 +388,13 @@ export function WorkspaceDashboard() {
         >
           <div
             style={{
-              background: "var(--surface, #FFFFFF)",
-              borderRadius: "var(--radius-xl, 24px)",
-              padding: "2rem",
+              background: "var(--surface)",
+              borderRadius: "var(--radius-md)",
+              padding: "1.5rem",
               width: "100%",
-              maxWidth: "520px",
-              boxShadow: "0 24px 60px rgba(0,0,0,0.18)",
-              border: "1px solid var(--border, #E2E5F0)",
+              maxWidth: "480px",
+              boxShadow: "var(--shadow-md)",
+              border: "1px solid var(--border)",
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
@@ -402,14 +402,15 @@ export function WorkspaceDashboard() {
                 <div style={{ width: 32, height: 32, borderRadius: "6px", background: "var(--accent-soft)", color: "var(--accent)", display: "grid", placeItems: "center" }}>
                   <Plus size={18} />
                 </div>
-                <h2 style={{ fontSize: "1.25rem", fontWeight: 700, margin: 0 }}>Create Workspace</h2>
+                <h2 style={{ fontSize: "1.15rem", fontWeight: 700, margin: 0, color: "var(--foreground)" }}>Create Workspace</h2>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--muted, #8E93B0)" }}
+                style={{ border: "none", background: "transparent", cursor: "pointer", color: "var(--muted)" }}
+                aria-label="Close modal"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
@@ -419,9 +420,9 @@ export function WorkspaceDashboard() {
               </div>
             )}
 
-            <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.35rem", color: "var(--foreground, #1A1D2E)" }}>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.35rem", color: "var(--foreground)" }}>
                   Workspace Title *
                 </label>
                 <input
@@ -433,18 +434,20 @@ export function WorkspaceDashboard() {
                   onChange={(e) => setNewTitle(e.target.value)}
                   style={{
                     width: "100%",
-                    padding: "0.65rem 0.85rem",
-                    borderRadius: "var(--radius-md, 12px)",
-                    border: "1px solid var(--border, #E2E5F0)",
-                    background: "var(--surface-raised, #F5F7FC)",
-                    fontSize: "0.9rem",
+                    height: "36px",
+                    padding: "0 0.75rem",
+                    borderRadius: "var(--radius-sm)",
+                    border: "1px solid var(--border)",
+                    background: "var(--surface-raised)",
+                    fontSize: "0.875rem",
+                    color: "var(--foreground)",
                     outline: "none",
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.35rem", color: "var(--foreground, #1A1D2E)" }}>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "0.35rem", color: "var(--foreground)" }}>
                   Research Scope / Description
                 </label>
                 <textarea
@@ -455,11 +458,12 @@ export function WorkspaceDashboard() {
                   onChange={(e) => setNewDesc(e.target.value)}
                   style={{
                     width: "100%",
-                    padding: "0.65rem 0.85rem",
-                    borderRadius: "var(--radius-md, 12px)",
-                    border: "1px solid var(--border, #E2E5F0)",
-                    background: "var(--surface-raised, #F5F7FC)",
-                    fontSize: "0.9rem",
+                    padding: "0.65rem 0.75rem",
+                    borderRadius: "var(--radius-sm)",
+                    border: "1px solid var(--border)",
+                    background: "var(--surface-raised)",
+                    fontSize: "0.875rem",
+                    color: "var(--foreground)",
                     outline: "none",
                     resize: "none",
                   }}

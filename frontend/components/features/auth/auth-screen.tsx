@@ -115,53 +115,53 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
         alignItems: "center",
         justifyContent: "center",
         padding: "2rem 1.5rem",
-        background: "var(--background, #FAFBFE)",
+        background: "var(--background)",
       }}
     >
       <div
         style={{
           width: "100%",
-          maxWidth: "420px",
+          maxWidth: "400px",
           display: "flex",
           flexDirection: "column",
-          gap: "1.5rem",
+          gap: "1.25rem",
         }}
       >
         {/* Header */}
         <div style={{ textAlign: "center" }}>
-          <Link href="/" style={{ display: "inline-block", marginBottom: "1.5rem" }}>
+          <Link href="/" style={{ display: "inline-block", marginBottom: "1.25rem" }}>
             <Brand />
           </Link>
           <h1
             style={{
-              fontSize: "1.5rem",
+              fontSize: "1.35rem",
               fontWeight: 700,
               margin: "0 0 0.35rem",
-              color: "var(--foreground, #1A1D2E)",
+              color: "var(--foreground)",
             }}
           >
             {mode === "login" ? "Welcome back" : "Create your account"}
           </h1>
           <p
             style={{
-              fontSize: "0.88rem",
-              color: "var(--foreground-soft, #4A4F6A)",
+              fontSize: "0.85rem",
+              color: "var(--foreground-soft)",
               margin: 0,
             }}
           >
             {mode === "login"
               ? "Sign in to access your research workspaces."
-              : "Get started with AURORA — it takes less than a minute."}
+              : "Get started with AURORA — research with cited evidence."}
           </p>
         </div>
 
         {/* Form Card */}
         <div
           style={{
-            background: "var(--surface, #FFFFFF)",
-            borderRadius: "var(--radius-xl, 24px)",
-            padding: "2rem",
-            border: "1px solid var(--border, #E2E5F0)",
+            background: "var(--surface)",
+            borderRadius: "var(--radius-md)",
+            padding: "1.5rem",
+            border: "1px solid var(--border)",
             boxShadow: "var(--shadow-sm)",
           }}
         >
@@ -169,10 +169,10 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
           <div
             style={{
               display: "flex",
-              background: "var(--surface-raised, #F5F7FC)",
+              background: "var(--surface-raised)",
               padding: "0.25rem",
-              borderRadius: "var(--radius-sm, 8px)",
-              marginBottom: "1.5rem",
+              borderRadius: "var(--radius-sm)",
+              marginBottom: "1.25rem",
             }}
           >
             <button
@@ -182,13 +182,13 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                 flex: 1,
                 border: "none",
                 padding: "0.45rem 0.75rem",
-                borderRadius: "6px",
-                fontSize: "0.85rem",
+                borderRadius: "4px",
+                fontSize: "0.84rem",
                 fontWeight: 600,
                 cursor: "pointer",
-                background: mode === "login" ? "var(--surface, #FFFFFF)" : "transparent",
-                color: mode === "login" ? "var(--foreground, #1A1D2E)" : "var(--muted, #8E93B0)",
-                boxShadow: mode === "login" ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
+                background: mode === "login" ? "var(--surface)" : "transparent",
+                color: mode === "login" ? "var(--foreground)" : "var(--muted)",
+                boxShadow: mode === "login" ? "var(--shadow-sm)" : "none",
                 transition: "all 0.15s ease",
               }}
             >
@@ -201,13 +201,13 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                 flex: 1,
                 border: "none",
                 padding: "0.45rem 0.75rem",
-                borderRadius: "6px",
-                fontSize: "0.85rem",
+                borderRadius: "4px",
+                fontSize: "0.84rem",
                 fontWeight: 600,
                 cursor: "pointer",
-                background: mode === "register" ? "var(--surface, #FFFFFF)" : "transparent",
-                color: mode === "register" ? "var(--foreground, #1A1D2E)" : "var(--muted, #8E93B0)",
-                boxShadow: mode === "register" ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
+                background: mode === "register" ? "var(--surface)" : "transparent",
+                color: mode === "register" ? "var(--foreground)" : "var(--muted)",
+                boxShadow: mode === "register" ? "var(--shadow-sm)" : "none",
                 transition: "all 0.15s ease",
               }}
             >
@@ -261,7 +261,7 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                     fontSize: "0.82rem",
                     fontWeight: 600,
                     marginBottom: "0.35rem",
-                    color: "var(--foreground, #1A1D2E)",
+                    color: "var(--foreground)",
                   }}
                 >
                   Display Name
@@ -287,7 +287,7 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                   fontSize: "0.82rem",
                   fontWeight: 600,
                   marginBottom: "0.35rem",
-                  color: "var(--foreground, #1A1D2E)",
+                  color: "var(--foreground)",
                 }}
               >
                 Email
@@ -312,13 +312,13 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                     display: "block",
                     fontSize: "0.82rem",
                     fontWeight: 600,
-                    color: "var(--foreground, #1A1D2E)",
+                    color: "var(--foreground)",
                   }}
                 >
                   Password
                 </label>
                 {mode === "register" ? (
-                  <span style={{ fontSize: "0.74rem", color: "var(--muted, #8E93B0)" }}>
+                  <span style={{ fontSize: "0.74rem", color: "var(--muted)" }}>
                     Min. 8 characters
                   </span>
                 ) : (
@@ -363,7 +363,7 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "var(--muted, #8E93B0)",
+                    color: "var(--muted)",
                     display: "flex",
                     alignItems: "center",
                     padding: 0,
@@ -377,8 +377,8 @@ export function AuthScreen({ initialMode = "login" }: { initialMode?: "login" | 
                   style={{
                     margin: "0.5rem 0 0",
                     fontSize: "0.78rem",
-                    color: "var(--foreground-soft, #4A4F6A)",
-                    background: "var(--surface-raised, #F5F7FC)",
+                    color: "var(--foreground-soft)",
+                    background: "var(--surface-raised)",
                     padding: "0.5rem 0.75rem",
                     borderRadius: "6px",
                     border: "1px solid var(--border)",
