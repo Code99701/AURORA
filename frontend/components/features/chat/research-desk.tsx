@@ -895,12 +895,13 @@ export function ResearchDesk({
           ) : null}
 
           <div ref={endRef} />
-          {showLatest && (
-            <button className={styles.jumpLatest} type="button" onClick={() => scrollToLatest("smooth")}>
-              <ArrowDown size={15} /> Latest response
-            </button>
-          )}
         </div>
+
+        {showLatest && (
+          <button className={styles.jumpLatest} type="button" onClick={() => scrollToLatest("smooth")}>
+            <ArrowDown size={14} /> Latest response
+          </button>
+        )}
 
         {/* Compact Floating Composer Card */}
         <div className={styles.composerCardWrap}>

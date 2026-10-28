@@ -364,7 +364,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
         <Brand compact />
       </header>
       <div className={styles.content}>
-        <main id="main-content" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <main id="main-content" className={styles.main}>
           {children}
         </main>
       </div>

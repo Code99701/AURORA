@@ -124,14 +124,19 @@ html[data-theme="dark"] {
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 html {
   background: var(--background);
-  scroll-behavior: smooth;
 }
 
 body {
-  min-height: 100vh;
-  margin: 0;
   color: var(--foreground);
   background:
     radial-gradient(circle at 85% -5%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 36rem),
@@ -142,6 +147,29 @@ body {
   font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-soft);
 }
 
 button,

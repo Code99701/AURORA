@@ -8,7 +8,7 @@ export default function AuthLayout({
   return (
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
         background: "var(--background)",

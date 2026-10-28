@@ -59,7 +59,7 @@
 
 .body {
   padding: 1.5rem;
-  max-height: calc(85vh - 120px);
+  max-height: calc(85dvh - 120px);
   overflow-y: auto;
 }
 

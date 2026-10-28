@@ -1,10 +1,13 @@
 .desk {
   position: relative;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
-  height: calc(100vh - 128px);
-  min-height: 640px;
+  padding: 16px 24px 20px;
+  overflow: hidden;
 }
 
 .deskWithViewer {
@@ -174,6 +177,9 @@
 /* Chat Center Area */
 .chat {
   position: relative;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--surface);
@@ -202,9 +208,11 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 24px clamp(16px, 3.5vw, 36px) 16px;
   background: var(--background);
   scroll-behavior: smooth;
+  scrollbar-width: thin;
 }
 
 .messages {
@@ -644,22 +652,29 @@
 }
 
 .jumpLatest {
-  position: sticky;
-  bottom: 8px;
-  z-index: 10;
-  display: flex;
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 12px 0 0 auto;
+  padding: 6px 14px;
   border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  padding: 6px 12px;
+  border-radius: 20px;
   background: var(--surface);
   color: var(--foreground);
-  box-shadow: var(--shadow-float);
-  font-size: 0.72rem;
+  font-family: var(--font-inter);
+  font-size: 0.78rem;
   font-weight: 600;
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
+  transition: all 140ms ease;
+}
+
+.jumpLatest:hover {
+  background: var(--surface-raised);
 }
 
 .sourceNotice {
@@ -732,8 +747,11 @@
 
 @media (max-width: 820px) {
   .desk {
-    display: block;
-    height: auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    padding: 10px 12px 14px;
   }
   .desktopPanel {
     display: none;

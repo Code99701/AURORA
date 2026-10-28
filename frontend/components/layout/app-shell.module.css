@@ -1,8 +1,10 @@
 .shell {
-  min-height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: 248px minmax(0, 1fr);
   background: var(--background);
+  overflow: hidden;
 }
 
 .sidebar,
@@ -14,11 +16,12 @@
 }
 
 .sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   padding: 16px 14px 14px;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .sidebarTop {
@@ -246,14 +249,19 @@
 }
 
 .conversationsList {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
   overflow-y: auto;
+  overflow-x: hidden;
   padding-right: 2px;
+  scrollbar-width: thin;
 }
 
 .conversationItem {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -363,9 +371,22 @@
 .content {
   position: relative;
   min-width: 0;
+  min-height: 0;
+  height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
   background: var(--background);
+  overflow: hidden;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .mobileHeader,
@@ -376,7 +397,10 @@
 
 @media (max-width: 840px) {
   .shell {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    overflow: hidden;
   }
   .sidebar {
     display: none;

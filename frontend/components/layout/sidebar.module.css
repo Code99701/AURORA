@@ -1,6 +1,6 @@
 .sidebar {
   width: 260px;
-  height: 100vh;
+  height: 100dvh;
   position: sticky;
   top: 0;
   background: var(--surface, #ffffff);

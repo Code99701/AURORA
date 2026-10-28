@@ -1,5 +1,5 @@
-.shell { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.16fr) minmax(420px, .84fr); }
-.story { position: relative; overflow: hidden; display: flex; flex-direction: column; min-height: 100vh; padding: 32px clamp(28px, 5vw, 76px); border-right: 1px solid var(--border); background: linear-gradient(150deg, color-mix(in srgb, var(--surface) 92%, transparent), color-mix(in srgb, var(--background-deep) 92%, transparent)); }
+.shell { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1.16fr) minmax(420px, .84fr); }
+.story { position: relative; overflow: hidden; display: flex; flex-direction: column; min-height: 100dvh; padding: 32px clamp(28px, 5vw, 76px); border-right: 1px solid var(--border); background: linear-gradient(150deg, color-mix(in srgb, var(--surface) 92%, transparent), color-mix(in srgb, var(--background-deep) 92%, transparent)); }
 .story::after { content: ""; position: absolute; width: 440px; height: 440px; right: -190px; bottom: 7%; border-radius: 50%; background: conic-gradient(from 210deg, color-mix(in srgb, var(--accent) 20%, transparent), color-mix(in srgb, var(--violet) 20%, transparent), transparent 65%); filter: blur(44px); pointer-events: none; }
 .storyTop { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1; }
 .storyBody { width: min(680px, 100%); margin: auto 0; position: relative; z-index: 1; }

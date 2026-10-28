@@ -1,4 +1,14 @@
-.library { display: grid; gap: 18px; }
+.library {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 24px 32px;
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  scrollbar-width: thin;
+}
 .toolbar { min-height: 86px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .toolbar > div:first-child { display: grid; grid-template-columns: auto auto; align-items: baseline; gap: 3px 12px; }
 .toolbar h2 { margin: 0; font-size: 1.1rem; }
