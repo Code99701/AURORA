@@ -54,12 +54,36 @@ class QueryIntent:
     is_overview: bool
     is_follow_up: bool
     topic_subject: str
+    is_full_coverage: bool = False
     task_guidance: str | None = None
 
 
 # ---------------------------------------------------------------------------
 # Regex Patterns for Intent and Constraints
 # ---------------------------------------------------------------------------
+
+# Numeral normalization mappings for flexible document and query matching
+ROMAN_TO_ARABIC = {
+    "i": "1", "ii": "2", "iii": "3", "iv": "4", "v": "5",
+    "vi": "6", "vii": "7", "viii": "8", "ix": "9", "x": "10",
+    "xi": "11", "xii": "12", "xiii": "13", "xiv": "14", "xv": "15",
+    "xvi": "16", "xvii": "17", "xviii": "18", "xix": "19", "xx": "20",
+}
+ARABIC_TO_ROMAN = {v: k for k, v in ROMAN_TO_ARABIC.items()}
+
+
+def normalize_numerals_in_text(text: str) -> list[str]:
+    """Generate numeral-normalized variants of a string (e.g. 'unit i' <-> 'unit 1')."""
+    words = re.findall(r"[a-zA-Z0-9]+", text.casefold())
+    if not words:
+        return [text.casefold()]
+    variants = [text.casefold()]
+    if any(w in ROMAN_TO_ARABIC for w in words):
+        variants.append(" ".join(ROMAN_TO_ARABIC.get(w, w) for w in words))
+    if any(w in ARABIC_TO_ROMAN for w in words):
+        variants.append(" ".join(ARABIC_TO_ROMAN.get(w, w) for w in words))
+    return list(dict.fromkeys(variants))
+
 
 # Multi-page and multi-slide patterns
 PAGE_SLIDE_PATTERNS = [
@@ -74,6 +98,24 @@ PAGE_SLIDE_PATTERNS = [
         lambda m: (
             int(m.group("start")),
             min(int(m.group("end")), int(m.group("start")) + 50),
+            "slide" if "slide" in m.group("unit").lower() else "page",
+        ),
+    ),
+    # "starting from page/slide X", "from page/slide X onwards", "from page/slide X"
+    (
+        re.compile(r"\b(?:starting\s+from|from)\s+(?:(?P<unit>pages?|slides?)\s+)?(?P<num>\d+)(?:\s+onwards|\s+to\s+the\s+end)?\b", re.IGNORECASE),
+        lambda m: (
+            int(m.group("num")),
+            999999,
+            "slide" if m.group("unit") and "slide" in m.group("unit").lower() else "page",
+        ),
+    ),
+    # "cover all pages/slides", "every page/slide", "all pages/slides"
+    (
+        re.compile(r"\b(?:cover\s+)?(?:all|every)\s+(?P<unit>pages?|slides?)\b", re.IGNORECASE),
+        lambda m: (
+            1,
+            999999,
             "slide" if "slide" in m.group("unit").lower() else "page",
         ),
     ),
@@ -94,11 +136,30 @@ COMPARISON_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+FULL_COVERAGE_PATTERN = re.compile(
+    r"\b(?:cover\s+(?:all|every|each)\s+(?:pages?|slides?))\b|"
+    r"\b(?:starting\s+from\s+(?:page|slide)?\s*\d+)\b|"
+    r"\b(?:tell\s+me\s+everything\s+present\s+in|what\s+is\s+present\s+in)\b|"
+    r"\b(?:(?:list|inventory|enumerate)\s+(?:all|every|each)\s+(?:slides?|pages?|sections?|topics?))\b|"
+    r"\b(?:section[-\s]+by[-\s]+section|page[-\s]+by[-\s]+page|slide[-\s]+by[-\s]+slide|chapter[-\s]+by[-\s]+chapter)\b|"
+    r"\b(?:walk\s+through\s+(?:the\s+)?(?:entire|whole)?\s*(?:document|presentation|report|paper|pdf|file|slides?))\b|"
+    r"\b(?:inventory\s+of\s+(?:all\s+)?(?:sections?|pages?|slides?|topics?|chapters?))\b|"
+    r"\b(?:explain\s+(?:the\s+)?(?:whole|entire)\s+(?:document|presentation|report|paper|pdf|file))\b|"
+    r"\b(?:summarize\s+this\s+entire\s+document|summarise\s+this\s+entire\s+document|summarize\s+the\s+whole\s+document|summarise\s+the\s+whole\s+document)\b",
+    re.IGNORECASE,
+)
+
 DOCUMENT_OVERVIEW_PATTERN = re.compile(
     r"\b(?:summar(?:y|ise|ize|izing)|overview|outline|synopsis|table\s+of\s+contents)\s+(?:of\s+)?(?:this|the|all|entire|whole)?\s*(?:document|pdf|book|paper|file|presentation|slides?|workspace)\b|"
     r"\b(?:explain|describe|details?\s+(?:present\s+in|of|in)|what\s+(?:are|is)\s+(?:the\s+)?(?:details|contents?)\s+(?:in|of)|contents?\s+of)\s+(?:this|the|all|entire|whole)?\s*(?:document|pdf|book|paper|file|presentation|slides?|\.[a-z]{3,4})\b|"
     r"\b(?:what\s+is\s+(?:this|the)\s+(?:document|presentation|book|pdf|file)\s+about|general\s+overview|executive\s+summary)\b|"
-    r"^(?:can\s+you\s+)?(?:please\s+)?(?:provide\s+(?:an?\s+)?|give\s+(?:an?\s+)?)?(?:summarise|summarize|summary|overview|outline)\s*(?:of\s+(?:this|the|all)?\s*(?:document|pdf|book|presentation|file|paper)?)?\s*[\?\.]?$",
+    r"^(?:can\s+you\s+)?(?:please\s+)?(?:provide\s+(?:an?\s+)?|give\s+(?:an?\s+)?)?(?:summarise|summarize|summary|overview|outline)\s*(?:of\s+(?:this|the|all)?\s*(?:document|pdf|book|presentation|file|paper)?)?\s*[\?\.]?$|"
+    r"\b(?:cover\s+(?:all|every)\s+(?:pages?|slides?))\b|"
+    r"\b(?:starting\s+from\s+(?:page|slide)?\s*\d+)\b|"
+    r"\b(?:tell\s+me\s+everything\s+present\s+in|what\s+is\s+present\s+in)\b|"
+    r"\b(?:list\s+all\s+(?:slides?|pages?)\s+and\s+their\s+topics)\b|"
+    r"\b(?:section[-\s]+by[-\s]+section|page[-\s]+by[-\s]+page|slide[-\s]+by[-\s]+slide|chapter[-\s]+by[-\s]+chapter)\b|"
+    r"\b(?:summarize\s+this\s+entire\s+document|summarise\s+this\s+entire\s+document|summarize\s+the\s+whole\s+document)\b",
     re.IGNORECASE,
 )
 
@@ -160,6 +221,8 @@ def extract_page_or_slide_constraint(query: str) -> PageSlideConstraint | None:
 def _clean_stem(filename: str) -> str:
     """Derive clean search stem by removing extensions and punctuation."""
     stem = filename.rsplit(".", 1)[0]
+    stem = re.sub(r"([a-zA-Z])(\d+)", r"\1 \2", stem)
+    stem = re.sub(r"(\d+)([a-zA-Z])", r"\1 \2", stem)
     return re.sub(r"[-_\.]+", " ", stem).strip().casefold()
 
 
@@ -168,10 +231,16 @@ def _generate_document_aliases(filename: str) -> list[str]:
     stem = _clean_stem(filename)
     aliases = [stem]
 
-    # Meaningful tokens
-    tokens = [t for t in stem.split() if len(t) >= 2 and t not in {"pdf", "pptx", "docx", "xlsx", "file", "document", "the", "for", "all", "unit"}]
+    # Add Roman <-> Arabic numeral variants of the stem
+    for var in normalize_numerals_in_text(stem):
+        if var not in aliases:
+            aliases.append(var)
+
+    # Stopwords to exclude from single-word tokens (keep identifying terms like unit, part, chapter)
+    exclude_tokens = {"pdf", "pptx", "docx", "xlsx", "file", "document", "the", "for", "all", "and", "with", "test"}
+    tokens = [t for t in stem.split() if len(t) >= 1 and t not in exclude_tokens]
     
-    # 2-word combinations and key unique words
+    # Domain aliases
     if "resume" in tokens or "cv" in tokens:
         aliases.extend(["resume", "cv", "candidate resume"])
     if "machine" in tokens and "learning" in tokens:
@@ -181,9 +250,16 @@ def _generate_document_aliases(filename: str) -> list[str]:
     if "report" in tokens:
         aliases.extend(["sample report", "mac report", "department report", "mac department report"])
 
-    # Include first two significant tokens (e.g. "Arnav Mahajan")
+    # If stem has >= 2 tokens, include normalized combinations
     if len(tokens) >= 2:
-        aliases.append(" ".join(tokens[:2]))
+        token_str = " ".join(tokens)
+        for v in normalize_numerals_in_text(token_str):
+            if v not in aliases:
+                aliases.append(v)
+        prefix_2 = " ".join(tokens[:2])
+        for v in normalize_numerals_in_text(prefix_2):
+            if v not in aliases:
+                aliases.append(v)
 
     # Deduplicate while preserving order
     seen = set()
@@ -200,7 +276,15 @@ def resolve_target_documents(
     indexed_documents: list[Document],
 ) -> list[TargetDocumentMatch]:
     """Dynamically match zero, one, or multiple documents referenced in the query."""
-    q_norm = f" {re.sub(r'[^a-zA-Z0-9]', ' ', query.casefold())} "
+    q_lower = query.casefold()
+    query_variants = normalize_numerals_in_text(query)
+    q_norms = [f" {re.sub(r'[^a-zA-Z0-9]', ' ', qv)} " for qv in query_variants]
+
+    # Format indicators
+    query_indicates_pdf = bool(re.search(r"\b(?:pdf|document)\b", q_lower))
+    query_indicates_slides = bool(re.search(r"\b(?:pptx?|slides?|presentation)\b", q_lower))
+    query_indicates_doc = bool(re.search(r"\b(?:docx?|word)\b", q_lower))
+
     matches: list[TargetDocumentMatch] = []
     seen_ids: set[Any] = set()
 
@@ -208,15 +292,23 @@ def resolve_target_documents(
         if doc.id in seen_ids:
             continue
         fname_lower = doc.original_filename.casefold()
+        ext = fname_lower.rsplit(".", 1)[-1] if "." in fname_lower else ""
+
+        # Format affinity boost
+        format_boost = 0.0
+        if (ext == "pdf" and query_indicates_pdf) or \
+           (ext in ("pptx", "ppt") and query_indicates_slides) or \
+           (ext in ("docx", "doc") and query_indicates_doc):
+            format_boost = 0.05
 
         # 1. Exact filename check
-        if fname_lower in query.casefold():
+        if fname_lower in q_lower or any(fname_lower in qv for qv in query_variants):
             matches.append(
                 TargetDocumentMatch(
                     document_id=doc.id,
                     filename=doc.original_filename,
                     matched_term=fname_lower,
-                    confidence=1.0,
+                    confidence=1.0 + format_boost,
                 )
             )
             seen_ids.add(doc.id)
@@ -228,13 +320,19 @@ def resolve_target_documents(
         best_conf = 0.0
 
         for alias in aliases:
-            # Word boundary search in normalized query
             alias_padded = f" {alias} "
-            if alias_padded in q_norm or f"in {alias}" in q_norm or f"of {alias}" in q_norm or f"from {alias}" in q_norm:
-                conf = 0.95 if len(alias.split()) > 1 else 0.85
-                if conf > best_conf:
-                    best_match = alias
-                    best_conf = conf
+            for q_norm in q_norms:
+                if (
+                    alias_padded in q_norm
+                    or f"in {alias}" in q_norm
+                    or f"of {alias}" in q_norm
+                    or f"from {alias}" in q_norm
+                ):
+                    base_conf = 0.95 if len(alias.split()) > 1 else 0.85
+                    conf = base_conf + format_boost
+                    if conf > best_conf:
+                        best_match = alias
+                        best_conf = conf
 
         if best_match and best_conf > 0.0:
             matches.append(
@@ -316,9 +414,29 @@ def understand_query(
         re.search(r"\b(?:both\s+documents|across\s+all\s+documents|compare\s+documents|between\s+documents)\b", clean_q, re.IGNORECASE)
     )
 
+    is_full_coverage = bool(
+        FULL_COVERAGE_PATTERN.search(clean_q)
+        or (
+            constraint is not None
+            and constraint.end >= 999999
+            and bool(re.search(r"\b(?:all|every|each|whole|entire|inventory|walk|list|explain|summar|topic|title)\b", clean_q, re.IGNORECASE))
+        )
+        or (
+            DOCUMENT_OVERVIEW_PATTERN.search(clean_q)
+            and (
+                constraint is None
+                or (constraint.start == 1 and constraint.end >= 50)
+                or constraint.end >= 999999
+            )
+        )
+    )
+
     if COMPARISON_PATTERN.search(clean_q) or (is_multi_doc and re.search(r"\b(?:and|vs|versus|difference)\b", clean_q, re.IGNORECASE)):
         task = "COMPARISON"
         guidance = "Provide a structured, balanced comparison highlighting key similarities and differences between the referenced sources based solely on the evidence."
+    elif is_full_coverage:
+        task = "DOCUMENT_OVERVIEW"
+        guidance = "Provide a comprehensive, sequential walkthrough of the document covering all pages/slides in order from beginning to end based solely on the evidence. Clearly state each page or slide number and its topics."
     elif DOCUMENT_OVERVIEW_PATTERN.search(clean_q):
         task = "DOCUMENT_OVERVIEW"
         guidance = "Provide a high-level comprehensive overview and outline of the main themes in the document based solely on the evidence."
@@ -372,5 +490,6 @@ def understand_query(
         is_overview=is_overview,
         is_follow_up=is_follow_up,
         topic_subject=search_q,
+        is_full_coverage=is_full_coverage,
         task_guidance=guidance,
     )

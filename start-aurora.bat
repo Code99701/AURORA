@@ -74,10 +74,14 @@ goto launch_failed
 :database_ready
 echo [2/7] PostgreSQL is healthy.
 
-echo [3/7] Checking local Ollama AI engine...
-call :port_open 11434
+echo [3/7] Checking local Ollama AI engine and model 'qwen3:8b'...
+call :ollama_model_ready qwen3:8b
 if errorlevel 1 (
-    echo [WAIT] Ollama is not running. Starting local Ollama server...
+    echo [WAIT] Model 'qwen3:8b' is not active on Ollama.
+    echo        Stopping any active Ollama instances to apply OLLAMA_MODELS=D:\AI\Models\Ollama...
+    call :kill_ollama
+    ping -n 3 127.0.0.1 >nul
+
     set "OLLAMA_EXE="
     if exist "%LOCALAPPDATA%\Programs\Ollama\ollama.exe" set "OLLAMA_EXE=%LOCALAPPDATA%\Programs\Ollama\ollama.exe"
     if not defined OLLAMA_EXE (
@@ -85,22 +89,24 @@ if errorlevel 1 (
         if not errorlevel 1 set "OLLAMA_EXE=ollama.exe"
     )
     if defined OLLAMA_EXE (
-        set "OLLAMA_MODELS=D:\AI\Models\Ollama"
-        start "Ollama Engine" /min cmd.exe /c "set OLLAMA_MODELS=D:\AI\Models\Ollama&& "!OLLAMA_EXE!" serve"
-        for /L %%I in (1,1,20) do (
-            call :port_open 11434
+        start "Ollama Engine" /min cmd.exe /c "set \"OLLAMA_MODELS=D:\AI\Models\Ollama\" && \"!OLLAMA_EXE!\" serve"
+        for /L %%I in (1,1,30) do (
+            call :ollama_model_ready qwen3:8b
             if not errorlevel 1 goto ollama_ready
             ping -n 2 127.0.0.1 >nul
         )
-        echo [WARNING] Ollama server took longer than expected to start.
+        echo [ERROR] Ollama started but model 'qwen3:8b' was not found in D:\AI\Models\Ollama.
+        echo         Make sure D:\AI\Models\Ollama contains the model or run 'ollama pull qwen3:8b'.
+        goto launch_failed
     ) else (
-        echo [WARNING] Ollama executable not found. Ensure Ollama is running for AI generation.
+        echo [ERROR] Ollama executable was not found. Install Ollama from https://ollama.com
+        goto launch_failed
     )
 ) else (
-    echo [INFO] Ollama server is already active on port 11434.
+    echo [INFO] Ollama server is active and model 'qwen3:8b' is ready.
 )
 :ollama_ready
-echo [3/7] Ollama AI engine is ready.
+echo [3/7] Ollama AI engine is ready with model 'qwen3:8b'.
 
 if not exist "%PYTHON_EXE%" (
     echo [4/7] Creating the backend Python environment...
@@ -240,12 +246,21 @@ if not errorlevel 1 (
 popd
 exit /b 1
 
+:kill_ollama
+taskkill /F /IM "ollama.exe" /IM "ollama app.exe" >nul 2>&1
+powershell.exe -NoLogo -NoProfile -NonInteractive -Command "Stop-Process -Name 'ollama', 'ollama app' -Force -ErrorAction SilentlyContinue" >nul 2>&1
+exit /b 0
+
 :kill_port
 powershell.exe -NoLogo -NoProfile -NonInteractive -Command "$p = (Get-NetTCPConnection -LocalPort %~1 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique); foreach ($id in $p) { if ($id -and $id -gt 4) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue } }" >nul 2>&1
 exit /b 0
 
 :port_open
 powershell.exe -NoLogo -NoProfile -NonInteractive -Command "$client = [Net.Sockets.TcpClient]::new(); try { $client.Connect('127.0.0.1', %~1); exit 0 } catch { exit 1 } finally { $client.Dispose() }" >nul 2>&1
+exit /b %errorlevel%
+
+:ollama_model_ready
+powershell.exe -NoLogo -NoProfile -NonInteractive -Command "try { $m = (Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/tags' -TimeoutSec 2).models.name; if ($m -like '*%~1*') { exit 0 } else { exit 1 } } catch { exit 2 }" >nul 2>&1
 exit /b %errorlevel%
 
 :run_backend

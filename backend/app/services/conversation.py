@@ -278,6 +278,29 @@ async def stream_message(
             model = None
             # This is deterministic application output, not simulated model tokens.
             yield ConversationStreamEvent(event_type="text_delta", text=answer)
+        elif preparation.coverage_plan and getattr(preparation.coverage_plan, "is_multi_batch", False):
+            yield ConversationStreamEvent(event_type="state", phase="processing_batches")
+            try:
+                from app.services.coverage import execute_multi_batch_coverage
+                answer = execute_multi_batch_coverage(
+                    plan=preparation.coverage_plan,
+                    llm_provider=llm_provider,
+                    query=content,
+                    answer_language=answer_language,
+                )
+            except LLMQuotaExhaustedError as exc:
+                raise rag_service.RAGError("LLM_QUOTA_EXHAUSTED", str(exc), 429) from exc
+            except LLMRateLimitError as exc:
+                raise rag_service.RAGError("LLM_RATE_LIMIT_ERROR", "Generation service is temporarily rate limited", 503) from exc
+            except LLMProviderError as exc:
+                raise rag_service.RAGError("LLM_PROVIDER_ERROR", "Grounded answer generation failed", 503) from exc
+            model = llm_provider.model_name
+            yield ConversationStreamEvent(event_type="state", phase="streaming")
+            chunk_size = 64
+            for i in range(0, len(answer), chunk_size):
+                yield ConversationStreamEvent(
+                    event_type="text_delta", text=answer[i : i + chunk_size]
+                )
         else:
             assert preparation.prompt is not None
             answer_parts: list[str] = []

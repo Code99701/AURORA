@@ -85,3 +85,18 @@ playwright-report/
 output/
 .agents/
 
+
+# ==============================
+# Local Scratch & Analysis Dumps
+# ==============================
+*_extracted.txt
+sdms_extracted.txt
+docx_text.txt
+report_pages_*.txt
+references_extracted.txt
+part1_drafts.json
+test_drafts.py
+validate_all_sdms.py
+extracted_images/
+Unit I.pdf
+Unit I.pptx

@@ -23,6 +23,12 @@ from app.rag.prompt import build_grounded_prompt
 from app.rag.prompt import GroundedPrompt
 from app.rag.rewriter import rewrite_query_for_retrieval
 from app.rag.understanding import understand_query
+from app.services.coverage import (
+    DocumentCoveragePlan,
+    build_coverage_prompt,
+    execute_multi_batch_coverage,
+    plan_document_coverage,
+)
 from app.services.retrieval import RetrievedChunk
 from app.services import retrieval as retrieval_service
 
@@ -73,6 +79,7 @@ class RAGPreparation:
     evidence: tuple[RetrievedChunk, ...]
     prompt: GroundedPrompt | None
     search_query: str | None = None
+    coverage_plan: DocumentCoveragePlan | None = None
 
     @property
     def insufficient_evidence(self) -> bool:
@@ -230,6 +237,39 @@ def prepare_question(
     if intent.target_language and not effective_language:
         effective_language = intent.target_language
 
+    # Check for targeted document coverage request
+    target_docs = [
+        d for d in indexed_docs
+        if any(m.document_id == d.id for m in intent.target_documents)
+    ]
+    target_doc = target_docs[0] if target_docs else (indexed_docs[0] if len(indexed_docs) == 1 and getattr(intent, "is_full_coverage", False) else None)
+
+    if (getattr(intent, "is_full_coverage", False) or intent.task == "DOCUMENT_OVERVIEW") and target_doc is not None:
+        s_page = intent.page_slide_constraint.start if intent.page_slide_constraint else 1
+        e_page = intent.page_slide_constraint.end if intent.page_slide_constraint else None
+        coverage_plan = plan_document_coverage(
+            db=db,
+            workspace=workspace,
+            document=target_doc,
+            start_page=s_page,
+            end_page=e_page,
+        )
+        if coverage_plan.all_chunks:
+            prompt = build_coverage_prompt(
+                coverage_plan,
+                query=query,
+                answer_language=effective_language,
+            )
+            return RAGPreparation(
+                query=query,
+                answer_language=effective_language,
+                top_k=len(coverage_plan.all_chunks),
+                evidence=coverage_plan.all_chunks,
+                prompt=prompt,
+                search_query=search_query,
+                coverage_plan=coverage_plan,
+            )
+
     try:
         import inspect
         sig = inspect.signature(retrieval_service.search_workspace)
@@ -379,6 +419,29 @@ def answer_question(
             preparation,
             INSUFFICIENT_EVIDENCE_ANSWER,
             None,
+            persist_commit,
+        )
+    if preparation.coverage_plan and getattr(preparation.coverage_plan, "is_multi_batch", False):
+        try:
+            answer_text = execute_multi_batch_coverage(
+                plan=preparation.coverage_plan,
+                llm_provider=llm_provider,
+                query=query,
+                answer_language=answer_language,
+            )
+        except LLMQuotaExhaustedError as exc:
+            raise RAGError("LLM_QUOTA_EXHAUSTED", str(exc), 429) from exc
+        except LLMRateLimitError as exc:
+            raise RAGError("LLM_RATE_LIMIT_ERROR", "Generation service is temporarily rate limited", 503) from exc
+        except LLMProviderError as exc:
+            raise RAGError("LLM_PROVIDER_ERROR", "Grounded answer generation failed", 503) from exc
+        return persist_prepared_answer(
+            db,
+            workspace,
+            requested_by,
+            preparation,
+            answer_text,
+            llm_provider.model_name,
             persist_commit,
         )
     assert preparation.prompt is not None
