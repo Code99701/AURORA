@@ -7,6 +7,14 @@ set "FRONTEND_DIR=%PROJECT_ROOT%frontend"
 set "PYTHON_EXE=%BACKEND_DIR%\aurora-env\Scripts\python.exe"
 set "NEXT_EXE=%FRONTEND_DIR%\node_modules\.bin\next.cmd"
 
+set "OLLAMA_EXE="
+if exist "%LOCALAPPDATA%\Programs\Ollama\ollama.exe" set "OLLAMA_EXE=%LOCALAPPDATA%\Programs\Ollama\ollama.exe"
+if not defined OLLAMA_EXE (
+    where ollama.exe >nul 2>&1
+    if not errorlevel 1 set "OLLAMA_EXE=ollama.exe"
+)
+
+if /I "%~1"=="__ollama" goto run_ollama
 if /I "%~1"=="__backend" goto run_backend
 if /I "%~1"=="__frontend" goto run_frontend
 if /I "%~1"=="--help" goto show_help
@@ -55,7 +63,7 @@ if errorlevel 1 (
 )
 
 :docker_ready
-echo [1/6] Starting PostgreSQL...
+echo [1/7] Starting PostgreSQL...
 docker compose up -d db
 if errorlevel 1 (
     echo [ERROR] PostgreSQL could not be started.
@@ -89,7 +97,7 @@ if errorlevel 1 (
         if not errorlevel 1 set "OLLAMA_EXE=ollama.exe"
     )
     if defined OLLAMA_EXE (
-        start "Ollama Engine" /min cmd.exe /c "set \"OLLAMA_MODELS=D:\AI\Models\Ollama\" && \"!OLLAMA_EXE!\" serve"
+        start "Ollama Engine" /min "%ComSpec%" /c call "%~f0" __ollama
         for /L %%I in (1,1,30) do (
             call :ollama_model_ready qwen3:8b
             if not errorlevel 1 goto ollama_ready
@@ -261,6 +269,18 @@ exit /b %errorlevel%
 
 :ollama_model_ready
 powershell.exe -NoLogo -NoProfile -NonInteractive -Command "try { $m = (Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/tags' -TimeoutSec 2).models.name; if ($m -like '*%~1*') { exit 0 } else { exit 1 } } catch { exit 2 }" >nul 2>&1
+exit /b %errorlevel%
+
+:run_ollama
+title Ollama Engine - qwen3:8b
+set "OLLAMA_MODELS=D:\AI\Models\Ollama"
+if defined OLLAMA_EXE (
+    if exist "%OLLAMA_EXE%" (
+        "%OLLAMA_EXE%" serve
+        exit /b !errorlevel!
+    )
+)
+ollama serve
 exit /b %errorlevel%
 
 :run_backend
